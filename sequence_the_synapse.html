@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Neurotransmission Sequence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c1322;
+    --surface: #141e35;
+    --surface2: #1a2845;
+    --border: #253556;
+    --accent: #4ecdc4;
+    --accent-dim: rgba(78,205,196,0.15);
+    --accent-glow: rgba(78,205,196,0.3);
+    --correct: #4ecdc4;
+    --incorrect: #ff6b6b;
+    --text: #e4eaf4;
+    --text-muted: #7b89a8;
+    --card-bg: #1c2d4a;
+    --card-border: #2c4166;
+    --slot-bg: rgba(78,205,196,0.04);
+    --slot-border: rgba(78,205,196,0.25);
+    --ca-color: #58d68d;
+    --nt-color: #f9c74f;
+    --ap-color: #ff7eb3;
+    --receptor-color: #a78bfa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 24px 36px;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.7rem;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  header p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+
+  /* ── Main Layout: diagram top, cards bottom for iPad portrait/landscape ── */
+  .main-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ── Synapse Diagram ── */
+  .diagram-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .diagram-panel svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 280px;
+  }
+
+  /* Step indicator overlays on diagram */
+  .step-status-bar {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  .step-pip {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.5s ease;
+  }
+  .step-pip.lit {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  /* ── Cards Area ── */
+  .cards-panel {
+    display: flex;
+    gap: 16px;
+  }
+
+  /* Scrambled card bank */
+  .card-bank {
+    flex: 1;
+    min-width: 0;
+  }
+  .card-bank h3 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .bank-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 280px;
+  }
+
+  /* Sequence slots */
+  .sequence-slots {
+    flex: 1;
+    min-width: 0;
+  }
+  .sequence-slots h3 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .slots-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* ── Cards ── */
+  .seq-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--card-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .seq-card:active, .seq-card.dragging {
+    cursor: grabbing;
+    opacity: 0.4;
+    transform: scale(0.97);
+  }
+  .seq-card .card-title {
+    font-weight: 700;
+    font-size: 0.88rem;
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+  .seq-card .card-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .seq-card .card-icon {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 1.1rem;
+    opacity: 0.5;
+  }
+  .seq-card.placed-in-bank { }
+  .seq-card.placed-in-slot { border-color: var(--accent); border-style: solid; }
+  .seq-card.correct-card {
+    border-color: var(--correct);
+    background: rgba(78,205,196,0.08);
+  }
+  .seq-card.incorrect-card {
+    border-color: var(--incorrect);
+    background: rgba(255,107,107,0.06);
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}
+  }
+
+  /* ── Slots ── */
+  .seq-slot {
+    background: var(--slot-bg);
+    border: 1.5px dashed var(--slot-border);
+    border-radius: 10px;
+    min-height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .seq-slot .slot-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .seq-slot.hover {
+    border-color: var(--accent);
+    background: rgba(78,205,196,0.1);
+    box-shadow: 0 0 12px rgba(78,205,196,0.15);
+  }
+  .seq-slot.has-card {
+    border-style: solid;
+    border-color: var(--accent);
+    background: transparent;
+    padding: 0;
+  }
+  .seq-slot.has-card .slot-label { display: none; }
+  .seq-slot.correct-slot { border-color: var(--correct); }
+  .seq-slot.incorrect-slot { border-color: var(--incorrect); }
+
+  /* Card inside slot */
+  .seq-slot .seq-card {
+    margin: 0;
+    width: 100%;
+    border: none;
+    background: var(--card-bg);
+    border-radius: 8px;
+  }
+
+  /* ── Controls ── */
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  button {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  button:hover, button:active { border-color: var(--accent); background: var(--surface2); }
+  button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  button.primary:hover { background: #3dbdb5; }
+  button:disabled { opacity: 0.35; pointer-events: none; }
+  button.hint-btn { border-color: #f9c74f; color: #f9c74f; }
+  button.hint-btn:hover { background: rgba(249,199,79,0.08); }
+
+  .feedback {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    min-height: 22px;
+    color: var(--text-muted);
+  }
+  .feedback.success { color: var(--correct); font-weight: 600; }
+  .feedback.error { color: var(--incorrect); }
+  .feedback .hint-text { color: #f9c74f; }
+
+  /* ── Drag ghost ── */
+  .drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 10px 16px;
+    border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Animation classes for SVG ── */
+  .anim-fade-in { animation: fadeIn 0.6s ease forwards; }
+  @keyframes fadeIn { from{opacity:0}to{opacity:1} }
+  .anim-pulse { animation: pulse 1.2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:0.7}50%{opacity:1} }
+  .anim-glow { animation: glowPulse 1s ease forwards; }
+  @keyframes glowPulse { 0%{filter:brightness(1)}50%{filter:brightness(1.8)}100%{filter:brightness(1.2)} }
+
+  /* Playing state — disable interactions */
+  .app.playing .seq-card { pointer-events: none; cursor: default; }
+  .app.playing button:not(#resetBtn) { pointer-events: none; opacity: 0.3; }
+
+  @media (min-width: 700px) {
+    .cards-panel { gap: 20px; }
+  }
+  @media (max-width: 500px) {
+    .app { padding: 14px 12px 28px; }
+    header h1 { font-size: 1.35rem; }
+    .seq-card .card-title { font-size: 0.82rem; }
+    .seq-card .card-desc { font-size: 0.73rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <header>
+    <h1>Sequence the Synapse</h1>
+    <p>Arrange the four steps of neurotransmission in the correct order.<br>When you get it right, watch the synapse come to life.</p>
+  </header>
+
+  <div class="main-layout">
+
+    <!-- ── Synapse Diagram ── -->
+    <div class="diagram-panel">
+      <svg id="synapseSvg" viewBox="0 0 800 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="preGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#3a5a80"/><stop offset="100%" stop-color="#2a4565"/>
+          </linearGradient>
+          <linearGradient id="postGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2a4565"/><stop offset="100%" stop-color="#1e3450"/>
+          </linearGradient>
+          <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(78,205,196,0.4)"/><stop offset="100%" stop-color="rgba(78,205,196,0)"/>
+          </radialGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="glow2"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+
+        <!-- Background structure labels -->
+        <text x="160" y="22" text-anchor="middle" fill="var(--text-muted)" font-size="11" font-family="DM Sans" opacity="0.5">Pre-synaptic Neuron</text>
+        <text x="640" y="22" text-anchor="middle" fill="var(--text-muted)" font-size="11" font-family="DM Sans" opacity="0.5">Post-synaptic Neuron</text>
+
+        <!-- Axon approaching from left -->
+        <line x1="0" y1="130" x2="80" y2="130" stroke="#2a4565" stroke-width="8" stroke-linecap="round"/>
+
+        <!-- Pre-synaptic terminal (large bulb) -->
+        <g id="preTerminal">
+          <ellipse cx="160" cy="130" rx="95" ry="100" fill="url(#preGrad)" stroke="#4a6a8a" stroke-width="1.5"/>
+          <!-- Membrane -->
+          <path d="M 250 60 Q 260 130 250 200" stroke="#5b8ab0" stroke-width="2" fill="none" opacity="0.5"/>
+        </g>
+
+        <!-- AP glow (hidden initially) -->
+        <g id="apGlow" opacity="0">
+          <ellipse cx="160" cy="130" rx="100" ry="105" fill="none" stroke="var(--ap-color)" stroke-width="3" filter="url(#glow)"/>
+          <ellipse cx="160" cy="130" rx="85" ry="90" fill="none" stroke="var(--ap-color)" stroke-width="1.5" opacity="0.5"/>
+        </g>
+
+        <!-- Ca2+ channels (in membrane, right side of terminal) -->
+        <g id="caChannels" opacity="0.3">
+          <rect x="243" y="75" width="14" height="22" rx="3" fill="none" stroke="var(--ca-color)" stroke-width="1.5"/>
+          <rect x="243" y="115" width="14" height="22" rx="3" fill="none" stroke="var(--ca-color)" stroke-width="1.5"/>
+          <rect x="243" y="155" width="14" height="22" rx="3" fill="none" stroke="var(--ca-color)" stroke-width="1.5"/>
+        </g>
+
+        <!-- Ca2+ ions (hidden initially) -->
+        <g id="caIons" opacity="0">
+          <text x="278" y="90" fill="var(--ca-color)" font-size="9" font-family="DM Sans" font-weight="700">Ca²⁺</text>
+          <text x="275" y="130" fill="var(--ca-color)" font-size="9" font-family="DM Sans" font-weight="700">Ca²⁺</text>
+          <text x="280" y="170" fill="var(--ca-color)" font-size="9" font-family="DM Sans" font-weight="700">Ca²⁺</text>
+          <!-- Arrows pointing in -->
+          <path d="M 275 85 L 260 85" stroke="var(--ca-color)" stroke-width="1.5" marker-end="none"/>
+          <polygon points="260,82 254,85 260,88" fill="var(--ca-color)"/>
+          <path d="M 272 125 L 260 125" stroke="var(--ca-color)" stroke-width="1.5"/>
+          <polygon points="260,122 254,125 260,128" fill="var(--ca-color)"/>
+          <path d="M 277 165 L 260 165" stroke="var(--ca-color)" stroke-width="1.5"/>
+          <polygon points="260,162 254,165 260,168" fill="var(--ca-color)"/>
+        </g>
+
+        <!-- Synaptic vesicles (inside terminal) -->
+        <g id="vesicles">
+          <circle cx="130" cy="85" r="14" fill="rgba(249,199,79,0.15)" stroke="var(--nt-color)" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="175" cy="75" r="12" fill="rgba(249,199,79,0.15)" stroke="var(--nt-color)" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="145" cy="130" r="13" fill="rgba(249,199,79,0.15)" stroke="var(--nt-color)" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="120" cy="170" r="12" fill="rgba(249,199,79,0.15)" stroke="var(--nt-color)" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="170" cy="178" r="14" fill="rgba(249,199,79,0.15)" stroke="var(--nt-color)" stroke-width="1.2" opacity="0.6"/>
+          <!-- Small dots inside vesicles -->
+          <circle cx="126" cy="82" r="2.5" fill="var(--nt-color)" opacity="0.5"/>
+          <circle cx="134" cy="88" r="2.5" fill="var(--nt-color)" opacity="0.5"/>
+          <circle cx="172" cy="72" r="2.5" fill="var(--nt-color)" opacity="0.5"/>
+          <circle cx="178" cy="78" r="2.5" fill="var(--nt-color)" opacity="0.5"/>
+          <circle cx="142" cy="127" r="2.5" fill="var(--nt-color)" opacity="0.5"/>
+          <circle cx="148" cy="133" r="2.5" fill="var(--nt-color)" opacity="0.5"/>
+          <circle cx="117" cy="167" r="2.5" fill="var(--nt-color)" opacity="0.5"/>
+          <circle cx="123" cy="173" r="2.5" fill="var(--nt-color)" opacity="0.5"/>
+          <circle cx="167" cy="175" r="2.5" fill="var(--nt-color)" opacity="0.5"/>
+          <circle cx="173" cy="181" r="2.5" fill="var(--nt-color)" opacity="0.5"/>
+        </g>
+
+        <!-- Vesicles fusing + releasing (hidden initially) -->
+        <g id="vesicleRelease" opacity="0">
+          <!-- Vesicles moved to membrane -->
+          <circle cx="235" cy="85" r="13" fill="rgba(249,199,79,0.2)" stroke="var(--nt-color)" stroke-width="1.2" stroke-dasharray="3,2"/>
+          <circle cx="235" cy="130" r="13" fill="rgba(249,199,79,0.2)" stroke="var(--nt-color)" stroke-width="1.2" stroke-dasharray="3,2"/>
+          <circle cx="235" cy="175" r="13" fill="rgba(249,199,79,0.2)" stroke="var(--nt-color)" stroke-width="1.2" stroke-dasharray="3,2"/>
+        </g>
+
+        <!-- Synaptic cleft -->
+        <g id="cleft">
+          <text x="370" y="248" text-anchor="middle" fill="var(--text-muted)" font-size="9" font-family="DM Sans" opacity="0.4">synaptic cleft</text>
+          <!-- Cleft boundaries -->
+          <line x1="265" y1="30" x2="265" y2="230" stroke="#3a5570" stroke-width="1" stroke-dasharray="3,4" opacity="0.3"/>
+          <line x1="475" y1="30" x2="475" y2="230" stroke="#3a5570" stroke-width="1" stroke-dasharray="3,4" opacity="0.3"/>
+        </g>
+
+        <!-- Neurotransmitter particles crossing cleft (hidden initially) -->
+        <g id="ntCrossing" opacity="0">
+          <circle class="nt-particle" cx="300" cy="80" r="4" fill="var(--nt-color)"/>
+          <circle class="nt-particle" cx="320" cy="95" r="3.5" fill="var(--nt-color)"/>
+          <circle class="nt-particle" cx="310" cy="125" r="4" fill="var(--nt-color)"/>
+          <circle class="nt-particle" cx="330" cy="140" r="3.5" fill="var(--nt-color)"/>
+          <circle class="nt-particle" cx="305" cy="170" r="4" fill="var(--nt-color)"/>
+          <circle class="nt-particle" cx="325" cy="180" r="3.5" fill="var(--nt-color)"/>
+        </g>
+
+        <!-- NT particles arrived at receptors (hidden initially) -->
+        <g id="ntBound" opacity="0">
+          <circle cx="485" cy="80" r="4.5" fill="var(--nt-color)" filter="url(#glow)"/>
+          <circle cx="485" cy="125" r="4.5" fill="var(--nt-color)" filter="url(#glow)"/>
+          <circle cx="485" cy="170" r="4.5" fill="var(--nt-color)" filter="url(#glow)"/>
+        </g>
+
+        <!-- Post-synaptic neuron -->
+        <g id="postNeuron">
+          <ellipse cx="600" cy="130" rx="95" ry="100" fill="url(#postGrad)" stroke="#3a5a7a" stroke-width="1.5"/>
+          <!-- Membrane facing cleft -->
+          <path d="M 490 60 Q 480 130 490 200" stroke="#4a6a8a" stroke-width="2" fill="none" opacity="0.5"/>
+          <!-- Receptors -->
+          <g id="receptors" opacity="0.4">
+            <path d="M 483 70 L 495 70 L 495 90 L 483 90 Z" fill="none" stroke="var(--receptor-color)" stroke-width="1.5" rx="2"/>
+            <path d="M 480 72 L 476 80 L 480 88" stroke="var(--receptor-color)" stroke-width="1.2" fill="none"/>
+            <path d="M 483 115 L 495 115 L 495 135 L 483 135 Z" fill="none" stroke="var(--receptor-color)" stroke-width="1.5"/>
+            <path d="M 480 117 L 476 125 L 480 133" stroke="var(--receptor-color)" stroke-width="1.2" fill="none"/>
+            <path d="M 483 160 L 495 160 L 495 180 L 483 180 Z" fill="none" stroke="var(--receptor-color)" stroke-width="1.5"/>
+            <path d="M 480 162 L 476 170 L 480 178" stroke="var(--receptor-color)" stroke-width="1.2" fill="none"/>
+          </g>
+        </g>
+
+        <!-- Post-synaptic activation glow (hidden initially) -->
+        <g id="postGlow" opacity="0">
+          <ellipse cx="600" cy="130" rx="100" ry="105" fill="none" stroke="var(--receptor-color)" stroke-width="3" filter="url(#glow2)"/>
+        </g>
+
+        <!-- Dendrite going right -->
+        <line x1="690" y1="130" x2="800" y2="130" stroke="#1e3450" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+
+      <div class="step-status-bar">
+        <div class="step-pip" id="pip0"></div>
+        <div class="step-pip" id="pip1"></div>
+        <div class="step-pip" id="pip2"></div>
+        <div class="step-pip" id="pip3"></div>
+      </div>
+    </div>
+
+    <!-- ── Card Sorting Area ── -->
+    <div class="cards-panel">
+      <div class="card-bank">
+        <h3>Steps (drag to sequence →)</h3>
+        <div class="bank-cards" id="bankCards"></div>
+      </div>
+      <div class="sequence-slots">
+        <h3>Sequence (Step 1 → Step 4)</h3>
+        <div class="slots-list" id="slotsList">
+          <div class="seq-slot" data-slot="0"><span class="slot-label">Step 1</span></div>
+          <div class="seq-slot" data-slot="1"><span class="slot-label">Step 2</span></div>
+          <div class="seq-slot" data-slot="2"><span class="slot-label">Step 3</span></div>
+          <div class="seq-slot" data-slot="3"><span class="slot-label">Step 4</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="checkBtn">Check Sequence</button>
+    <button class="hint-btn" id="hintBtn">💡 Hint</button>
+    <button id="resetBtn">Reset</button>
+  </div>
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<script>
+// ── Step Data ──
+const STEPS = [
+  {
+    id: 0,
+    title: "Action potential arrives at the axon terminal",
+    desc: "An electrical impulse (action potential) travels down the axon and reaches the pre-synaptic axon terminal, depolarizing the terminal membrane.",
+    icon: "⚡"
+  },
+  {
+    id: 1,
+    title: "Voltage-gated Ca²⁺ channels open",
+    desc: "The depolarization causes voltage-gated calcium channels in the terminal membrane to open. Ca²⁺ ions rush into the pre-synaptic axon terminal from the extracellular space.",
+    icon: "🔓"
+  },
+  {
+    id: 2,
+    title: "Synaptic vesicles release neurotransmitters",
+    desc: "The influx of Ca²⁺ triggers synaptic vesicles to fuse with the pre-synaptic membrane and release neurotransmitter molecules into the synaptic cleft.",
+    icon: "💧"
+  },
+  {
+    id: 3,
+    title: "Neurotransmitters bind to postsynaptic receptors",
+    desc: "Neurotransmitters diffuse across the synaptic cleft and bind to specific receptors on the postsynaptic neuron, causing depolarization that may trigger a new action potential.",
+    icon: "🔗"
+  }
+];
+
+// ── State ──
+let slotContents = [null, null, null, null]; // which step id is in each slot
+let hintsUsed = 0;
+let isAnimating = false;
+let draggedCardId = null;
+let ghost = null;
+let slotListenersInitialized = false;
+let animationRunId = 0;
+
+const bankCards = document.getElementById('bankCards');
+const slotsList = document.getElementById('slotsList');
+const checkBtn = document.getElementById('checkBtn');
+const hintBtn = document.getElementById('hintBtn');
+const resetBtn = document.getElementById('resetBtn');
+const feedback = document.getElementById('feedback');
+const app = document.getElementById('app');
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function createCardElement(step) {
+  const el = document.createElement('div');
+  el.className = 'seq-card';
+  el.dataset.stepId = step.id;
+  el.setAttribute('draggable', 'true');
+  el.innerHTML = `
+    <span class="card-icon">${step.icon}</span>
+    <div class="card-title">${step.title}</div>
+    <div class="card-desc">${step.desc}</div>
+  `;
+
+  el.addEventListener('dragstart', onDragStart);
+  el.addEventListener('dragend', onDragEnd);
+  el.addEventListener('touchstart', onTouchStart, { passive: false });
+  el.addEventListener('touchmove', onTouchMove, { passive: false });
+  el.addEventListener('touchend', onTouchEnd);
+
+  return el;
+}
+
+function init() {
+  animationRunId++;
+  slotContents = [null, null, null, null];
+  isAnimating = false;
+  hintsUsed = 0;
+  app.classList.remove('playing');
+  feedback.textContent = '';
+  feedback.className = 'feedback';
+
+  // Reset pips
+  for (let i = 0; i < 4; i++) document.getElementById('pip' + i).classList.remove('lit');
+
+  // Reset SVG
+  resetSvgAnimations();
+
+  // Reset slots
+  document.querySelectorAll('.seq-slot').forEach(slot => {
+    slot.innerHTML = '<span class="slot-label">Step ' + (parseInt(slot.dataset.slot) + 1) + '</span>';
+    slot.classList.remove('has-card', 'correct-slot', 'incorrect-slot');
+  });
+
+  // Build shuffled cards in bank
+  bankCards.innerHTML = '';
+  shuffle(STEPS).forEach(step => {
+    bankCards.appendChild(createCardElement(step));
+  });
+
+  checkBtn.disabled = false;
+  hintBtn.disabled = false;
+  setupSlotListeners();
+}
+
+function setupSlotListeners() {
+  if (slotListenersInitialized) return;
+  slotListenersInitialized = true;
+
+  document.querySelectorAll('.seq-slot').forEach(slot => {
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('hover'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('hover'));
+    slot.addEventListener('drop', e => {
+      e.preventDefault();
+      slot.classList.remove('hover');
+      const stepId = parseInt(e.dataTransfer.getData('text/plain'));
+      placeCard(slot, stepId);
+    });
+  });
+}
+
+// ── Drag (mouse) ──
+function onDragStart(e) {
+  if (isAnimating) return;
+  const id = parseInt(e.target.closest('.seq-card').dataset.stepId);
+  draggedCardId = id;
+  e.target.closest('.seq-card').classList.add('dragging');
+  e.dataTransfer.setData('text/plain', id);
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragEnd(e) {
+  e.target.closest('.seq-card').classList.remove('dragging');
+  draggedCardId = null;
+}
+
+// ── Touch drag ──
+function onTouchStart(e) {
+  if (isAnimating) return;
+  e.preventDefault();
+  const card = e.target.closest('.seq-card');
+  draggedCardId = parseInt(card.dataset.stepId);
+  card.classList.add('dragging');
+
+  ghost = document.createElement('div');
+  ghost.className = 'drag-ghost';
+  ghost.textContent = STEPS[draggedCardId].title;
+  document.body.appendChild(ghost);
+  const t = e.touches[0];
+  ghost.style.left = t.clientX + 'px';
+  ghost.style.top = t.clientY + 'px';
+}
+function onTouchMove(e) {
+  e.preventDefault();
+  if (!ghost) return;
+  const t = e.touches[0];
+  ghost.style.left = t.clientX + 'px';
+  ghost.style.top = t.clientY + 'px';
+
+  document.querySelectorAll('.seq-slot').forEach(slot => {
+    const r = slot.getBoundingClientRect();
+    slot.classList.toggle('hover',
+      t.clientX >= r.left && t.clientX <= r.right &&
+      t.clientY >= r.top && t.clientY <= r.bottom);
+  });
+
+  // Also detect bank area for returning cards
+  const br = bankCards.getBoundingClientRect();
+  bankCards.classList.toggle('hover-return',
+    t.clientX >= br.left && t.clientX <= br.right &&
+    t.clientY >= br.top && t.clientY <= br.bottom);
+}
+function onTouchEnd(e) {
+  if (draggedCardId === null) return;
+  const card = document.querySelector(`.seq-card[data-step-id="${draggedCardId}"]`);
+  if (card) card.classList.remove('dragging');
+
+  if (ghost) {
+    const t = e.changedTouches[0];
+
+    // Check if dropped on a slot
+    let placed = false;
+    document.querySelectorAll('.seq-slot').forEach(slot => {
+      const r = slot.getBoundingClientRect();
+      if (t.clientX >= r.left && t.clientX <= r.right &&
+          t.clientY >= r.top && t.clientY <= r.bottom) {
+        placeCard(slot, draggedCardId);
+        placed = true;
+      }
+      slot.classList.remove('hover');
+    });
+
+    // Check if dropped back on bank
+    if (!placed) {
+      const br = bankCards.getBoundingClientRect();
+      if (t.clientX >= br.left && t.clientX <= br.right &&
+          t.clientY >= br.top && t.clientY <= br.bottom) {
+        returnCardToBank(draggedCardId);
+      }
+    }
+
+    bankCards.classList.remove('hover-return');
+    ghost.remove();
+    ghost = null;
+  }
+  draggedCardId = null;
+}
+
+// ── Place / return cards ──
+function placeCard(slot, stepId) {
+  const slotIdx = parseInt(slot.dataset.slot);
+
+  // If slot already has a card, return it
+  if (slotContents[slotIdx] !== null) {
+    returnCardToBank(slotContents[slotIdx]);
+  }
+
+  // If this card was in another slot, clear that slot
+  const prevSlotIdx = slotContents.indexOf(stepId);
+  if (prevSlotIdx !== -1) {
+    slotContents[prevSlotIdx] = null;
+    const prevSlot = document.querySelector(`.seq-slot[data-slot="${prevSlotIdx}"]`);
+    prevSlot.innerHTML = '<span class="slot-label">Step ' + (prevSlotIdx + 1) + '</span>';
+    prevSlot.classList.remove('has-card', 'correct-slot', 'incorrect-slot');
+  }
+
+  // Remove card from bank if it's there
+  const bankCard = bankCards.querySelector(`.seq-card[data-step-id="${stepId}"]`);
+  if (bankCard) bankCard.remove();
+
+  // Place in slot
+  slotContents[slotIdx] = stepId;
+  slot.innerHTML = '';
+  slot.classList.add('has-card');
+  slot.classList.remove('correct-slot', 'incorrect-slot');
+  const cardEl = createCardElement(STEPS[stepId]);
+  cardEl.classList.add('placed-in-slot');
+
+  // Click to return
+  cardEl.addEventListener('click', () => {
+    if (isAnimating) return;
+    returnCardFromSlot(slotIdx);
+  });
+
+  slot.appendChild(cardEl);
+  clearFeedback();
+}
+
+function returnCardToBank(stepId) {
+  const slotIdx = slotContents.indexOf(stepId);
+  if (slotIdx !== -1) {
+    returnCardFromSlot(slotIdx);
+  }
+}
+
+function returnCardFromSlot(slotIdx) {
+  const stepId = slotContents[slotIdx];
+  if (stepId === null) return;
+
+  slotContents[slotIdx] = null;
+  const slot = document.querySelector(`.seq-slot[data-slot="${slotIdx}"]`);
+  slot.innerHTML = '<span class="slot-label">Step ' + (slotIdx + 1) + '</span>';
+  slot.classList.remove('has-card', 'correct-slot', 'incorrect-slot');
+
+  // Add back to bank
+  bankCards.appendChild(createCardElement(STEPS[stepId]));
+  clearFeedback();
+}
+
+function clearFeedback() {
+  feedback.textContent = '';
+  feedback.className = 'feedback';
+  document.querySelectorAll('.seq-slot').forEach(s => s.classList.remove('correct-slot', 'incorrect-slot'));
+  document.querySelectorAll('.seq-card').forEach(c => c.classList.remove('correct-card', 'incorrect-card'));
+}
+
+// ── Check ──
+checkBtn.addEventListener('click', () => {
+  if (isAnimating) return;
+
+  // All slots filled?
+  if (slotContents.includes(null)) {
+    feedback.textContent = 'Place all four steps before checking.';
+    feedback.className = 'feedback error';
+    return;
+  }
+
+  let allCorrect = true;
+  slotContents.forEach((stepId, idx) => {
+    const slot = document.querySelector(`.seq-slot[data-slot="${idx}"]`);
+    const card = slot.querySelector('.seq-card');
+    if (stepId === idx) {
+      slot.classList.add('correct-slot');
+      if (card) card.classList.add('correct-card');
+    } else {
+      slot.classList.add('incorrect-slot');
+      if (card) card.classList.add('incorrect-card');
+      allCorrect = false;
+    }
+  });
+
+  if (allCorrect) {
+    feedback.innerHTML = '✓ Correct! Watch the process unfold…';
+    feedback.className = 'feedback success';
+    checkBtn.disabled = true;
+    hintBtn.disabled = true;
+    playAnimation();
+  } else {
+    const correctCount = slotContents.filter((s, i) => s === i).length;
+    feedback.innerHTML = correctCount + ' of 4 in the right position. Tap a card to return it and try again.';
+    feedback.className = 'feedback error';
+  }
+});
+
+// ── Hint ──
+hintBtn.addEventListener('click', () => {
+  if (isAnimating) return;
+
+  // Find the first slot that's either empty or has the wrong card
+  for (let i = 0; i < 4; i++) {
+    if (slotContents[i] !== i) {
+      const step = STEPS[i];
+      const ordinal = ['first', 'second', 'third', 'fourth'][i];
+      feedback.innerHTML = '<span class="hint-text">💡 Hint: The ' + ordinal + ' step involves: ' + step.title.toLowerCase() + '</span>';
+      feedback.className = 'feedback';
+      hintsUsed++;
+      return;
+    }
+  }
+  feedback.innerHTML = '<span class="hint-text">All steps look correct — try checking!</span>';
+  feedback.className = 'feedback';
+});
+
+// ── Reset ──
+resetBtn.addEventListener('click', init);
+
+// ══════════════════════════════════════
+// ── SVG Animation ──
+// ══════════════════════════════════════
+
+function resetSvgAnimations() {
+  // Reset all animated elements
+  document.getElementById('apGlow').style.opacity = '0';
+  document.getElementById('caChannels').style.opacity = '0.3';
+  document.getElementById('caIons').style.opacity = '0';
+  document.getElementById('vesicleRelease').style.opacity = '0';
+  document.getElementById('ntCrossing').style.opacity = '0';
+  document.getElementById('ntBound').style.opacity = '0';
+  document.getElementById('postGlow').style.opacity = '0';
+  document.getElementById('receptors').style.opacity = '0.4';
+  document.getElementById('vesicles').style.opacity = '1';
+
+  // Reset particle positions
+  const particles = document.querySelectorAll('.nt-particle');
+  particles.forEach(p => {
+    p.style.transition = 'none';
+    p.style.transform = '';
+  });
+}
+
+function animateElement(id, targetOpacity, duration) {
+  return new Promise(resolve => {
+    const el = document.getElementById(id);
+    el.style.transition = `opacity ${duration}ms ease`;
+    el.style.opacity = targetOpacity;
+    setTimeout(resolve, duration);
+  });
+}
+
+function isAnimationCurrent(runId) {
+  return runId === animationRunId;
+}
+
+async function playAnimation() {
+  const runId = animationRunId;
+  isAnimating = true;
+  app.classList.add('playing');
+
+  // Step 1: AP arrives — terminal glows
+  document.getElementById('pip0').classList.add('lit');
+  await animateElement('apGlow', '1', 800);
+  if (!isAnimationCurrent(runId)) return;
+  await delay(600);
+  if (!isAnimationCurrent(runId)) return;
+
+  // Step 2: Ca2+ channels open — channels brighten, ions appear
+  document.getElementById('pip1').classList.add('lit');
+  await animateElement('caChannels', '1', 400);
+  if (!isAnimationCurrent(runId)) return;
+  await delay(200);
+  if (!isAnimationCurrent(runId)) return;
+  await animateElement('caIons', '1', 600);
+  if (!isAnimationCurrent(runId)) return;
+  await delay(600);
+  if (!isAnimationCurrent(runId)) return;
+
+  // Step 3: Vesicles release — vesicles move to membrane, particles appear in cleft
+  document.getElementById('pip2').classList.add('lit');
+  // Fade original vesicles
+  await animateElement('vesicles', '0.2', 500);
+  if (!isAnimationCurrent(runId)) return;
+  await animateElement('vesicleRelease', '1', 600);
+  if (!isAnimationCurrent(runId)) return;
+  await delay(300);
+  if (!isAnimationCurrent(runId)) return;
+  // Show NT particles and animate them across
+  const ntGroup = document.getElementById('ntCrossing');
+  ntGroup.style.transition = 'opacity 0.4s ease';
+  ntGroup.style.opacity = '1';
+  await delay(200);
+  if (!isAnimationCurrent(runId)) return;
+
+  // Animate particles moving right
+  const particles = document.querySelectorAll('.nt-particle');
+  particles.forEach((p, i) => {
+    p.style.transition = `transform 1.2s ease ${i * 100}ms`;
+    p.style.transform = 'translateX(160px)';
+  });
+  await delay(1600);
+  if (!isAnimationCurrent(runId)) return;
+
+  // Step 4: Binding — particles disappear, bound dots glow, post neuron activates
+  document.getElementById('pip3').classList.add('lit');
+  await animateElement('ntCrossing', '0', 300);
+  if (!isAnimationCurrent(runId)) return;
+  await animateElement('ntBound', '1', 500);
+  if (!isAnimationCurrent(runId)) return;
+  await animateElement('receptors', '1', 400);
+  if (!isAnimationCurrent(runId)) return;
+  await delay(200);
+  if (!isAnimationCurrent(runId)) return;
+  await animateElement('postGlow', '0.8', 800);
+  if (!isAnimationCurrent(runId)) return;
+
+  await delay(500);
+  if (!isAnimationCurrent(runId)) return;
+  isAnimating = false;
+  feedback.innerHTML = '🎉 Neurotransmission complete! The signal has crossed the synapse.';
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Init ──
+init();
+</script>
+</body>
+</html>
