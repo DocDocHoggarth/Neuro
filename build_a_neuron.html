@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build a Neuron — Label Activity</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1729;
+    --surface: #1a2540;
+    --surface-hover: #223058;
+    --border: #2a3a5c;
+    --accent: #4ecdc4;
+    --accent-glow: rgba(78, 205, 196, 0.25);
+    --correct: #4ecdc4;
+    --incorrect: #ff6b6b;
+    --text: #e8edf5;
+    --text-muted: #8892a8;
+    --label-bg: #243052;
+    --drop-zone-bg: rgba(78, 205, 196, 0.06);
+    --drop-zone-border: rgba(78, 205, 196, 0.3);
+    --leader: rgba(78, 205, 196, 0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+  }
+
+  header { text-align: center; margin-bottom: 24px; }
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 2rem;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  header p {
+    color: var(--text-muted);
+    font-size: 0.93rem;
+    line-height: 1.5;
+  }
+
+  .label-bank {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+  }
+  .label-bank h2 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .labels-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .draggable-label {
+    background: var(--label-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+    cursor: grab;
+    user-select: none;
+    transition: all 0.2s ease;
+    touch-action: none;
+  }
+  .draggable-label:hover {
+    border-color: var(--accent);
+    background: var(--surface-hover);
+    box-shadow: 0 0 12px var(--accent-glow);
+    transform: translateY(-1px);
+  }
+  .draggable-label:active, .draggable-label.dragging { cursor: grabbing; opacity: 0.5; }
+  .draggable-label.placed { opacity: 0.3; pointer-events: none; border-style: dashed; }
+
+  .diagram-area {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .diagram-canvas { position: relative; width: 100%; }
+  .diagram-canvas svg { width: 100%; height: auto; display: block; }
+
+  .drop-zone {
+    background: var(--drop-zone-bg);
+    border: 1.5px dashed var(--drop-zone-border);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    cursor: default;
+    white-space: nowrap;
+    width: 100%;
+    height: 100%;
+  }
+  .drop-zone.hover {
+    border-color: var(--accent);
+    background: rgba(78, 205, 196, 0.12);
+    box-shadow: 0 0 14px var(--accent-glow);
+  }
+  .drop-zone.filled {
+    border-style: solid;
+    background: var(--label-bg);
+    color: var(--text);
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .drop-zone.correct { border-color: var(--correct); background: rgba(78, 205, 196, 0.15); color: var(--correct); }
+  .drop-zone.incorrect {
+    border-color: var(--incorrect);
+    background: rgba(255, 107, 107, 0.12);
+    color: var(--incorrect);
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+  }
+  .drop-zone .hint-num { font-size: 9px; opacity: 0.5; }
+
+  .controls { display: flex; gap: 10px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+  button {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 9px 20px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  button:hover { border-color: var(--accent); background: var(--surface-hover); }
+  button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  button.primary:hover { background: #3dbdb5; box-shadow: 0 0 20px var(--accent-glow); }
+
+  .score-display { text-align: center; margin-top: 14px; font-size: 0.93rem; color: var(--text-muted); min-height: 22px; }
+  .score-display.visible { color: var(--text); }
+  .score-display span { color: var(--accent); font-weight: 700; }
+
+  .drag-ghost {
+    position: fixed; pointer-events: none; z-index: 1000;
+    background: var(--accent); color: var(--bg);
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem;
+    padding: 7px 13px; border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 14px 10px 28px; }
+    header h1 { font-size: 1.4rem; }
+    .draggable-label { font-size: 0.78rem; padding: 5px 9px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Build a Neuron</h1>
+    <p>Drag each label from the bank and drop it onto the correct numbered box.<br>Dashed lines connect each box to the structure it identifies.</p>
+  </header>
+
+  <div class="label-bank">
+    <h2>Label Bank</h2>
+    <div class="labels-grid" id="labelBank"></div>
+  </div>
+
+  <div class="diagram-area">
+    <div class="diagram-canvas" id="diagramCanvas">
+      <svg id="neuronSvg" viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#5b7fa8"/><stop offset="100%" stop-color="#3a5a80"/>
+          </linearGradient>
+          <linearGradient id="axonGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#3a5a80"/><stop offset="100%" stop-color="#2a4060"/>
+          </linearGradient>
+          <linearGradient id="myelinGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffe66d"/><stop offset="100%" stop-color="#d4b840"/>
+          </linearGradient>
+          <linearGradient id="dendriteGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#6b9ac4"/><stop offset="100%" stop-color="#4a7a9e"/>
+          </linearGradient>
+          <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7">
+            <circle cx="5" cy="5" r="4" fill="rgba(78,205,196,0.8)" stroke="rgba(78,205,196,0.3)" stroke-width="1"/>
+          </marker>
+        </defs>
+
+        <!-- ═══════ NEURON (centered around y=290) ═══════ -->
+
+        <!-- Dendrites -->
+        <g opacity="0.9">
+          <path d="M 205 270 Q 150 210 90 170" stroke="url(#dendriteGrad)" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M 90 170 Q 70 150 50 135" stroke="url(#dendriteGrad)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M 90 170 Q 65 175 45 165" stroke="url(#dendriteGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+          <path d="M 205 265 Q 140 240 85 225" stroke="url(#dendriteGrad)" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M 85 225 Q 60 215 40 210" stroke="url(#dendriteGrad)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M 85 225 Q 65 238 45 245" stroke="url(#dendriteGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+          <path d="M 210 295 Q 160 325 100 345" stroke="url(#dendriteGrad)" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M 100 345 Q 75 355 55 370" stroke="url(#dendriteGrad)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M 100 345 Q 80 335 55 325" stroke="url(#dendriteGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+          <path d="M 215 305 Q 170 370 120 410" stroke="url(#dendriteGrad)" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M 120 410 Q 100 425 80 435" stroke="url(#dendriteGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+          <circle cx="70" cy="158" r="2.5" fill="#6b9ac4" opacity="0.7"/>
+          <circle cx="58" cy="218" r="2.5" fill="#6b9ac4" opacity="0.7"/>
+          <circle cx="75" cy="340" r="2.5" fill="#6b9ac4" opacity="0.7"/>
+          <circle cx="105" cy="405" r="2" fill="#6b9ac4" opacity="0.7"/>
+        </g>
+
+        <!-- Cell Body (Soma) -->
+        <ellipse cx="250" cy="285" rx="55" ry="50" fill="url(#bodyGrad)" stroke="#7eaad4" stroke-width="1.5"/>
+        <!-- Nucleus -->
+        <ellipse cx="250" cy="285" rx="22" ry="20" fill="#2a4060" stroke="#5b7fa8" stroke-width="1" opacity="0.8"/>
+        <ellipse cx="250" cy="285" rx="8" ry="7" fill="#1a2540" opacity="0.6"/>
+
+        <!-- Axon Hillock -->
+        <path d="M 300 275 Q 325 275 345 280 Q 325 290 300 295" fill="url(#bodyGrad)" stroke="#7eaad4" stroke-width="1"/>
+
+        <!-- Axon -->
+        <line x1="345" y1="285" x2="760" y2="285" stroke="url(#axonGrad)" stroke-width="6" stroke-linecap="round"/>
+
+        <!-- Myelin Sheaths -->
+        <g>
+          <rect x="370" y="271" width="52" height="28" rx="14" fill="url(#myelinGrad)" opacity="0.85"/>
+          <rect x="452" y="271" width="52" height="28" rx="14" fill="url(#myelinGrad)" opacity="0.85"/>
+          <rect x="534" y="271" width="52" height="28" rx="14" fill="url(#myelinGrad)" opacity="0.85"/>
+          <rect x="616" y="271" width="52" height="28" rx="14" fill="url(#myelinGrad)" opacity="0.85"/>
+          <rect x="698" y="271" width="52" height="28" rx="14" fill="url(#myelinGrad)" opacity="0.85"/>
+        </g>
+
+        <!-- Nodes of Ranvier -->
+        <g opacity="0.6">
+          <line x1="435" y1="275" x2="435" y2="295" stroke="#4ecdc4" stroke-width="1.5"/>
+          <line x1="517" y1="275" x2="517" y2="295" stroke="#4ecdc4" stroke-width="1.5"/>
+          <line x1="599" y1="275" x2="599" y2="295" stroke="#4ecdc4" stroke-width="1.5"/>
+          <line x1="681" y1="275" x2="681" y2="295" stroke="#4ecdc4" stroke-width="1.5"/>
+        </g>
+
+        <!-- Axon Terminals -->
+        <g>
+          <path d="M 760 285 Q 780 270 795 255" stroke="#3a5a80" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <circle cx="800" cy="250" r="8" fill="#5b7fa8" stroke="#7eaad4" stroke-width="1"/>
+          <path d="M 760 285 Q 785 285 805 285" stroke="#3a5a80" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <circle cx="810" cy="285" r="8" fill="#5b7fa8" stroke="#7eaad4" stroke-width="1"/>
+          <path d="M 760 285 Q 780 300 795 315" stroke="#3a5a80" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <circle cx="800" cy="320" r="8" fill="#5b7fa8" stroke="#7eaad4" stroke-width="1"/>
+        </g>
+
+        <!-- Post-synaptic fragments -->
+        <g opacity="0.4">
+          <path d="M 825 240 Q 845 245 850 255 Q 845 265 825 260" fill="#4a6a8a" stroke="#6b9ac4" stroke-width="1"/>
+          <path d="M 825 275 Q 845 280 850 290 Q 845 300 825 295" fill="#4a6a8a" stroke="#6b9ac4" stroke-width="1"/>
+          <path d="M 825 310 Q 845 315 850 325 Q 845 335 825 330" fill="#4a6a8a" stroke="#6b9ac4" stroke-width="1"/>
+        </g>
+
+        <!-- Vesicle dots -->
+        <g opacity="0.5">
+          <circle cx="798" cy="247" r="2" fill="#ffe66d"/><circle cx="803" cy="253" r="2" fill="#ffe66d"/>
+          <circle cx="808" cy="282" r="2" fill="#ffe66d"/><circle cx="813" cy="288" r="2" fill="#ffe66d"/>
+          <circle cx="798" cy="317" r="2" fill="#ffe66d"/><circle cx="803" cy="323" r="2" fill="#ffe66d"/>
+        </g>
+
+        <!-- Direction arrow -->
+        <g opacity="0.25">
+          <line x1="340" y1="328" x2="750" y2="328" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4,4"/>
+          <polygon points="750,324 760,328 750,332" fill="var(--accent)"/>
+          <text x="545" y="344" text-anchor="middle" fill="var(--accent)" font-size="10" font-family="DM Sans, sans-serif">direction of signal</text>
+        </g>
+
+        <!-- ═══════ LEADER LINES (label edge → structure) ═══════ -->
+        <!-- Top row labels: Dendrites, Nucleus, Myelin, Node of Ranvier, Synapse -->
+        <!-- Bottom row labels: Cell Body, Axon Hillock, Axon, Axon Terminal -->
+
+        <!-- 1. Dendrites (top-left label → dendrite branch) -->
+        <line x1="65" y1="55" x2="75" y2="155" stroke="var(--leader)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#dot)"/>
+
+        <!-- 2. Nucleus (top label → nucleus center) -->
+        <line x1="230" y1="55" x2="245" y2="262" stroke="var(--leader)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#dot)"/>
+
+        <!-- 3. Myelin Sheath (top label → myelin segment) -->
+        <line x1="460" y1="55" x2="478" y2="268" stroke="var(--leader)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#dot)"/>
+
+        <!-- 4. Node of Ranvier (top label → node gap) -->
+        <line x1="670" y1="55" x2="599" y2="270" stroke="var(--leader)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#dot)"/>
+
+        <!-- 5. Synapse (top-right label → whole synaptic cleft region, fan bracket) -->
+        <line x1="885" y1="55" x2="855" y2="230" stroke="var(--leader)" stroke-width="1.2" stroke-dasharray="5,4"/>
+        <path d="M 855 230 Q 840 285 855 340" stroke="var(--leader)" stroke-width="1.8" stroke-dasharray="5,4" fill="none"/>
+        <circle cx="855" cy="230" r="3.5" fill="rgba(78,205,196,0.7)"/>
+        <circle cx="855" cy="340" r="3.5" fill="rgba(78,205,196,0.7)"/>
+        <!-- Shaded region highlight -->
+        <rect x="815" y="235" width="40" height="105" rx="6" fill="rgba(78,205,196,0.06)" stroke="rgba(78,205,196,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- 6. Cell Body (bottom-left label → soma edge) -->
+        <line x1="100" y1="505" x2="215" y2="330" stroke="var(--leader)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#dot)"/>
+
+        <!-- 7. Axon Hillock (bottom label → hillock) -->
+        <line x1="330" y1="505" x2="320" y2="295" stroke="var(--leader)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#dot)"/>
+
+        <!-- 8. Axon (bottom-center label → full axon length, bracket) -->
+        <line x1="545" y1="505" x2="545" y2="365" stroke="var(--leader)" stroke-width="1.2" stroke-dasharray="5,4"/>
+        <line x1="355" y1="365" x2="755" y2="365" stroke="var(--leader)" stroke-width="1.8" stroke-dasharray="5,4"/>
+        <circle cx="355" cy="365" r="3.5" fill="rgba(78,205,196,0.7)"/>
+        <circle cx="755" cy="365" r="3.5" fill="rgba(78,205,196,0.7)"/>
+        <!-- Subtle highlight along axon -->
+        <rect x="345" y="270" width="420" height="30" rx="15" fill="rgba(78,205,196,0.04)" stroke="rgba(78,205,196,0.15)" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- 9. Axon Terminal (bottom-right label → terminal bulb) -->
+        <line x1="810" y1="505" x2="805" y2="328" stroke="var(--leader)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#dot)"/>
+
+
+        <!-- ═══════ DROP ZONES (foreignObject in SVG) ═══════ -->
+
+        <!-- TOP ROW — evenly spaced, y=25 -->
+        <!-- 1. Dendrites -->
+        <foreignObject x="5" y="25" width="120" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="drop-zone" id="dz-dendrites" data-answer="Dendrites">
+            <span class="hint-num">1</span>
+          </div>
+        </foreignObject>
+
+        <!-- 2. Nucleus -->
+        <foreignObject x="170" y="25" width="120" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="drop-zone" id="dz-nucleus" data-answer="Nucleus">
+            <span class="hint-num">2</span>
+          </div>
+        </foreignObject>
+
+        <!-- 3. Myelin Sheath -->
+        <foreignObject x="380" y="25" width="155" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="drop-zone" id="dz-myelin" data-answer="Myelin Sheath">
+            <span class="hint-num">3</span>
+          </div>
+        </foreignObject>
+
+        <!-- 4. Node of Ranvier -->
+        <foreignObject x="590" y="25" width="160" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="drop-zone" id="dz-ranvier" data-answer="Node of Ranvier">
+            <span class="hint-num">4</span>
+          </div>
+        </foreignObject>
+
+        <!-- 5. Synapse -->
+        <foreignObject x="810" y="25" width="140" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="drop-zone" id="dz-synapse" data-answer="Synapse">
+            <span class="hint-num">5</span>
+          </div>
+        </foreignObject>
+
+        <!-- BOTTOM ROW — evenly spaced, y=500 -->
+        <!-- 6. Cell Body -->
+        <foreignObject x="15" y="495" width="170" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="drop-zone" id="dz-soma" data-answer="Cell Body (Soma)">
+            <span class="hint-num">6</span>
+          </div>
+        </foreignObject>
+
+        <!-- 7. Axon Hillock -->
+        <foreignObject x="255" y="495" width="150" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="drop-zone" id="dz-axon-hillock" data-answer="Axon Hillock">
+            <span class="hint-num">7</span>
+          </div>
+        </foreignObject>
+
+        <!-- 8. Axon -->
+        <foreignObject x="500" y="495" width="90" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="drop-zone" id="dz-axon" data-answer="Axon">
+            <span class="hint-num">8</span>
+          </div>
+        </foreignObject>
+
+        <!-- 9. Axon Terminal -->
+        <foreignObject x="720" y="495" width="160" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="drop-zone" id="dz-terminal" data-answer="Axon Terminal">
+            <span class="hint-num">9</span>
+          </div>
+        </foreignObject>
+
+      </svg>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="checkBtn">Check Answers</button>
+    <button id="resetBtn">Reset</button>
+    <button id="revealBtn">Reveal Answers</button>
+  </div>
+
+  <div class="score-display" id="scoreDisplay"></div>
+</div>
+
+<script>
+const LABELS = [
+  "Dendrites", "Cell Body (Soma)", "Nucleus", "Axon Hillock",
+  "Axon", "Myelin Sheath", "Node of Ranvier", "Axon Terminal", "Synapse"
+];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const labelBank = document.getElementById('labelBank');
+const checkBtn = document.getElementById('checkBtn');
+const resetBtn = document.getElementById('resetBtn');
+const revealBtn = document.getElementById('revealBtn');
+const scoreDisplay = document.getElementById('scoreDisplay');
+
+let draggedLabel = null;
+let ghost = null;
+
+function getDropZones() { return document.querySelectorAll('.drop-zone'); }
+
+function buildLabels() {
+  labelBank.innerHTML = '';
+  shuffle(LABELS).forEach(label => {
+    const el = document.createElement('div');
+    el.className = 'draggable-label';
+    el.textContent = label;
+    el.dataset.label = label;
+    el.setAttribute('draggable', 'true');
+    el.addEventListener('dragstart', onDragStart);
+    el.addEventListener('dragend', onDragEnd);
+    el.addEventListener('touchstart', onTouchStart, { passive: false });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd);
+    labelBank.appendChild(el);
+  });
+}
+
+function onDragStart(e) {
+  draggedLabel = e.target;
+  e.target.classList.add('dragging');
+  e.dataTransfer.setData('text/plain', e.target.dataset.label);
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragEnd(e) { e.target.classList.remove('dragging'); draggedLabel = null; }
+
+function setupDropZones() {
+  getDropZones().forEach(dz => {
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('hover'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('hover'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault(); dz.classList.remove('hover');
+      placeLabel(dz, e.dataTransfer.getData('text/plain'));
+    });
+  });
+}
+
+function onTouchStart(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  draggedLabel = e.target;
+  draggedLabel.classList.add('dragging');
+  ghost = document.createElement('div');
+  ghost.className = 'drag-ghost';
+  ghost.textContent = draggedLabel.dataset.label;
+  document.body.appendChild(ghost);
+  moveGhost(touch.clientX, touch.clientY);
+}
+function onTouchMove(e) {
+  e.preventDefault();
+  if (!ghost) return;
+  const touch = e.touches[0];
+  moveGhost(touch.clientX, touch.clientY);
+  getDropZones().forEach(dz => {
+    const r = dz.getBoundingClientRect();
+    dz.classList.toggle('hover',
+      touch.clientX >= r.left && touch.clientX <= r.right &&
+      touch.clientY >= r.top && touch.clientY <= r.bottom);
+  });
+}
+function onTouchEnd(e) {
+  if (!draggedLabel) return;
+  draggedLabel.classList.remove('dragging');
+  if (ghost) {
+    const touch = e.changedTouches[0];
+    getDropZones().forEach(dz => {
+      const r = dz.getBoundingClientRect();
+      if (touch.clientX >= r.left && touch.clientX <= r.right &&
+          touch.clientY >= r.top && touch.clientY <= r.bottom) {
+        placeLabel(dz, draggedLabel.dataset.label);
+      }
+      dz.classList.remove('hover');
+    });
+    ghost.remove(); ghost = null;
+  }
+  draggedLabel = null;
+}
+function moveGhost(x, y) { if (ghost) { ghost.style.left = x + 'px'; ghost.style.top = y + 'px'; } }
+
+function placeLabel(dz, labelText) {
+  if (dz.dataset.placed) returnToBank(dz.dataset.placed);
+  dz.textContent = labelText;
+  dz.dataset.placed = labelText;
+  dz.classList.add('filled');
+  dz.classList.remove('correct', 'incorrect');
+
+  const bankLabel = [...labelBank.querySelectorAll('.draggable-label')]
+    .find(el => el.dataset.label === labelText && !el.classList.contains('placed'));
+  if (bankLabel) bankLabel.classList.add('placed');
+
+  dz.onclick = () => {
+    returnToBank(labelText);
+    delete dz.dataset.placed;
+    dz.classList.remove('filled', 'correct', 'incorrect');
+    const idx = [...getDropZones()].indexOf(dz);
+    dz.innerHTML = '<span class="hint-num">' + (idx + 1) + '</span>';
+    dz.onclick = null;
+    clearFeedback();
+  };
+  clearFeedback();
+}
+
+function returnToBank(labelText) {
+  const el = [...labelBank.querySelectorAll('.draggable-label')]
+    .find(el => el.dataset.label === labelText && el.classList.contains('placed'));
+  if (el) el.classList.remove('placed');
+}
+
+function clearFeedback() {
+  scoreDisplay.textContent = '';
+  scoreDisplay.classList.remove('visible');
+  getDropZones().forEach(dz => dz.classList.remove('correct', 'incorrect'));
+}
+
+checkBtn.addEventListener('click', () => {
+  let correct = 0;
+  const dzs = getDropZones();
+  dzs.forEach(dz => {
+    dz.classList.remove('correct', 'incorrect');
+    if (dz.dataset.placed) {
+      if (dz.dataset.placed === dz.dataset.answer) { dz.classList.add('correct'); correct++; }
+      else { dz.classList.add('incorrect'); }
+    }
+  });
+  scoreDisplay.innerHTML = correct === dzs.length
+    ? '&#127881; <span>Perfect!</span> All ' + dzs.length + ' labels correct.'
+    : '<span>' + correct + '</span> / ' + dzs.length + ' correct — click a red label to remove it and try again.';
+  scoreDisplay.classList.add('visible');
+});
+
+resetBtn.addEventListener('click', () => {
+  getDropZones().forEach((dz, idx) => {
+    dz.classList.remove('filled', 'correct', 'incorrect');
+    delete dz.dataset.placed;
+    dz.onclick = null;
+    dz.innerHTML = '<span class="hint-num">' + (idx + 1) + '</span>';
+  });
+  clearFeedback();
+  buildLabels();
+});
+
+revealBtn.addEventListener('click', () => {
+  getDropZones().forEach(dz => {
+    dz.textContent = dz.dataset.answer;
+    dz.dataset.placed = dz.dataset.answer;
+    dz.classList.add('filled', 'correct');
+    dz.classList.remove('incorrect');
+    dz.onclick = null;
+  });
+  labelBank.querySelectorAll('.draggable-label').forEach(el => el.classList.add('placed'));
+  scoreDisplay.innerHTML = 'All answers revealed. <span>9</span> / 9';
+  scoreDisplay.classList.add('visible');
+});
+
+buildLabels();
+setupDropZones();
+</script>
+</body>
+</html>
