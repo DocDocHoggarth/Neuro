@@ -1,0 +1,2927 @@
+<!DOCTYPE html>
+<!--
+  Intro Neuro browser game
+  File organization:
+  1. HTML app shell
+  2. CSS theme, layout, and accessibility styles
+  3. JavaScript CONTENT DATA for instructor-editable educational material
+  4. JavaScript state, rendering, utilities, and event handling
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foundational Movement Science I: Neuro Systems Lab</title>
+  <style>
+    :root {
+      --bg: #f8f3f1;
+      --bg-deep: #ead7d9;
+      --surface: rgba(255, 255, 255, 0.92);
+      --surface-strong: #fffdfc;
+      --ink: #141414;
+      --muted: #565d61;
+      --border: rgba(20, 20, 20, 0.12);
+      --accent: #ba0c2f;
+      --accent-strong: #9d2235;
+      --accent-soft: rgba(186, 12, 47, 0.11);
+      --warm: #ffc03b;
+      --warm-soft: rgba(255, 192, 59, 0.16);
+      --correct: #0071a9;
+      --incorrect: #ba0c2f;
+      --incorrect-soft: rgba(186, 12, 47, 0.1);
+      --shadow: 0 18px 48px rgba(20, 20, 20, 0.08);
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(186, 12, 47, 0.12), transparent 28rem),
+        radial-gradient(circle at bottom right, rgba(255, 192, 59, 0.16), transparent 30rem),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: inherit;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    :focus-visible {
+      outline: 3px solid #1d4ed8;
+      outline-offset: 3px;
+    }
+
+    .app-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 18px 40px;
+    }
+
+    .screen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .screen::before,
+    .level-card::before,
+    .mode-card::before,
+    .instructions-card::before,
+    .results-card::before,
+    .summary-card::before,
+    .feedback-panel::before,
+    .hint-panel::before,
+    .target-card::before,
+    .bank-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, rgba(186, 12, 47, 0.94), rgba(255, 192, 59, 0.86));
+    }
+
+    .screen::before {
+      height: 7px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      padding: 34px;
+      align-items: start;
+    }
+
+    .hero-copy h1 {
+      margin: 0 0 12px;
+      font-family: var(--serif);
+      font-size: clamp(2.2rem, 4vw, 4rem);
+      line-height: 0.96;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-copy p {
+      font-size: 1.06rem;
+      line-height: 1.7;
+      color: var(--muted);
+      margin: 0 0 18px;
+      max-width: 62ch;
+    }
+
+    .hero-badges,
+    .objective-list,
+    .stats-grid,
+    .screen-actions,
+    .hud-grid,
+    .level-summary-grid,
+    .review-list,
+    .results-grid,
+    .results-levels,
+    .token-bank,
+    .choice-grid,
+    .mini-grid,
+    .bin-grid,
+    .assignment-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .hero-badges {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin: 20px 0 24px;
+    }
+
+    .badge-card,
+    .stat-card,
+    .info-card,
+    .results-card,
+    .summary-card,
+    .feedback-panel,
+    .hint-panel,
+    .target-card,
+    .bank-card,
+    .mode-card,
+    .instructions-card {
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+
+    .badge-card,
+    .stat-card,
+    .target-card,
+    .bank-card,
+    .mode-card,
+    .instructions-card,
+    .results-card,
+    .summary-card,
+    .feedback-panel,
+    .hint-panel {
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .badge-eyebrow,
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+      font-weight: 700;
+    }
+
+    .badge-card strong,
+    .stat-card strong {
+      display: block;
+      font-size: 1.15rem;
+      margin-top: 8px;
+    }
+
+    .hero-panel {
+      background: linear-gradient(180deg, rgba(186, 12, 47, 0.08), rgba(255, 255, 255, 0.96));
+      border: 1px solid rgba(186, 12, 47, 0.18);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+    }
+
+    .hero-panel h2,
+    .game-title,
+    .instructions-title,
+    .results-title,
+    .level-title {
+      margin: 0 0 10px;
+      font-family: var(--serif);
+      font-size: clamp(1.6rem, 2.3vw, 2.4rem);
+      letter-spacing: -0.02em;
+    }
+
+    .hero-panel p,
+    .hero-panel li,
+    .instructions-card li,
+    .results-card li,
+    .summary-card li,
+    .feedback-panel p,
+    .hint-panel p,
+    .target-card p,
+    .stat-card p,
+    .mode-card p,
+    .review-item p,
+    .info-card p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .objective-list {
+      padding-left: 18px;
+      margin: 12px 0 0;
+    }
+
+    .objective-list li {
+      margin-bottom: 10px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .screen-actions {
+      grid-template-columns: repeat(auto-fit, minmax(180px, max-content));
+      margin-top: 22px;
+      align-items: start;
+    }
+
+    .primary-btn,
+    .secondary-btn,
+    .ghost-btn,
+    .choice-btn,
+    .token-btn,
+    .slot-btn,
+    .target-btn,
+    .bin-btn,
+    .case-btn {
+      min-height: 48px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .primary-btn,
+    .secondary-btn,
+    .ghost-btn {
+      padding: 12px 18px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .primary-btn {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 12px 24px rgba(15, 118, 110, 0.2);
+    }
+
+    .primary-btn:hover,
+    .primary-btn:focus-visible {
+      transform: translateY(-1px);
+      background: var(--accent-strong);
+    }
+
+    .secondary-btn {
+      background: rgba(26, 39, 64, 0.92);
+      color: #ffffff;
+      box-shadow: 0 12px 24px rgba(26, 39, 64, 0.18);
+    }
+
+    .secondary-btn:hover,
+    .secondary-btn:focus-visible {
+      transform: translateY(-1px);
+      background: #111f36;
+    }
+
+    .ghost-btn {
+      background: transparent;
+      border-color: rgba(26, 39, 64, 0.2);
+      color: var(--ink);
+    }
+
+    .ghost-btn:hover,
+    .ghost-btn:focus-visible {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      background: rgba(15, 118, 110, 0.06);
+    }
+
+    .instructions-layout,
+    .results-layout {
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .instructions-grid,
+    .results-grid {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .mode-grid {
+      padding: 28px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .mode-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 100%;
+    }
+
+    .mode-card h3,
+    .results-card h3,
+    .summary-card h3,
+    .target-card h3,
+    .bank-card h3 {
+      margin: 0;
+      font-size: 1.12rem;
+    }
+
+    .mode-card ul,
+    .instructions-card ul,
+    .results-card ul,
+    .summary-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .game-screen {
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .game-header {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .game-title-wrap p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      max-width: 72ch;
+      line-height: 1.6;
+    }
+
+    .hud-grid {
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+
+    .stat-card strong {
+      font-size: 1.35rem;
+      margin-bottom: 4px;
+    }
+
+    .progress-shell {
+      width: 100%;
+      height: 14px;
+      background: rgba(26, 39, 64, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #ef3340);
+      border-radius: inherit;
+      transition: width 0.24s ease;
+    }
+
+    .timer-value.is-warning {
+      color: var(--warm);
+    }
+
+    .timer-value.is-danger {
+      color: var(--incorrect);
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.95fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .play-area,
+    .side-panel {
+      display: grid;
+      gap: 16px;
+    }
+
+    .level-card {
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .level-subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .level-metadata {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+    }
+
+    .pill.warm {
+      background: var(--warm-soft);
+      color: #8a470d;
+    }
+
+    .mini-grid {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
+    .info-card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(251, 244, 238, 0.95));
+    }
+
+    .token-bank {
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    }
+
+    .token-btn,
+    .slot-btn,
+    .target-btn,
+    .bin-btn,
+    .choice-btn,
+    .case-btn {
+      width: 100%;
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 700;
+      background: #ffffff;
+      border: 1px solid rgba(26, 39, 64, 0.16);
+      color: var(--ink);
+    }
+
+    .token-btn:hover,
+    .token-btn:focus-visible,
+    .slot-btn:hover,
+    .slot-btn:focus-visible,
+    .target-btn:hover,
+    .target-btn:focus-visible,
+    .bin-btn:hover,
+    .bin-btn:focus-visible,
+    .choice-btn:hover,
+    .choice-btn:focus-visible,
+    .case-btn:hover,
+    .case-btn:focus-visible {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 18px rgba(186, 12, 47, 0.1);
+    }
+
+    .token-btn.is-selected,
+    .slot-btn.is-selected,
+    .target-btn.is-selected,
+    .bin-btn.is-selected {
+      border-color: var(--accent-strong);
+      background: rgba(186, 12, 47, 0.08);
+    }
+
+    .token-btn.is-used {
+      opacity: 0.45;
+      text-decoration: line-through;
+      pointer-events: none;
+    }
+
+    .slot-stack,
+    .sequence-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .slot-row,
+    .sequence-row {
+      display: grid;
+      grid-template-columns: minmax(170px, 240px) 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .slot-label,
+    .sequence-label {
+      font-weight: 700;
+    }
+
+    .slot-label small,
+    .sequence-label small {
+      display: block;
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .slot-btn.is-correct,
+    .target-btn.is-correct,
+    .bin-card.is-complete,
+    .sequence-slot.is-correct {
+      border-color: rgba(11, 143, 104, 0.3);
+      background: rgba(0, 113, 169, 0.08);
+      color: #0f5275;
+    }
+
+    .slot-btn.is-error,
+    .target-btn.is-error,
+    .bin-btn.is-error,
+    .choice-btn.is-error,
+    .case-btn.is-error,
+    .sequence-slot.is-error {
+      border-color: rgba(185, 28, 28, 0.35);
+      background: var(--incorrect-soft);
+      color: #7f1414;
+    }
+
+    .slot-btn.is-empty,
+    .sequence-slot.is-empty {
+      border-style: dashed;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .sequence-slot {
+      min-height: 54px;
+      border-radius: 16px;
+      border: 1px dashed rgba(26, 39, 64, 0.2);
+      background: #ffffff;
+      padding: 14px 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .sequence-index {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(26, 39, 64, 0.08);
+      font-size: 0.88rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .sequence-index.active {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .assignment-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .target-grid,
+    .bin-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .target-card,
+    .bin-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      background: #ffffff;
+      display: grid;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .target-card header,
+    .bin-card header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+    }
+
+    .target-answer,
+    .bin-answers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 40px;
+    }
+
+    .answer-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255, 192, 59, 0.2);
+      color: #8a5b00;
+      font-weight: 700;
+      font-size: 0.94rem;
+    }
+
+    .bin-card .bin-btn {
+      border-radius: 16px;
+      min-height: 66px;
+      text-align: left;
+    }
+
+    .choice-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .case-card,
+    .prompt-card {
+      padding: 18px;
+      background: linear-gradient(180deg, rgba(186, 12, 47, 0.05), rgba(255, 255, 255, 0.98));
+      border: 1px solid rgba(186, 12, 47, 0.16);
+      border-radius: var(--radius-md);
+      display: grid;
+      gap: 14px;
+    }
+
+    .prompt-card h3,
+    .case-card h3 {
+      margin: 0;
+      font-size: 1.12rem;
+    }
+
+    .prompt-card p,
+    .case-card p {
+      margin: 0;
+      line-height: 1.65;
+      color: var(--muted);
+    }
+
+    .feedback-panel {
+      min-height: 140px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .feedback-panel[data-state="correct"] {
+      border-color: rgba(0, 113, 169, 0.25);
+      background: linear-gradient(180deg, rgba(0, 113, 169, 0.08), #ffffff);
+    }
+
+    .feedback-panel[data-state="incorrect"] {
+      border-color: rgba(185, 28, 28, 0.25);
+      background: linear-gradient(180deg, rgba(185, 28, 28, 0.08), #ffffff);
+    }
+
+    .feedback-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .feedback-pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      background: rgba(26, 39, 64, 0.1);
+    }
+
+    .feedback-pill.correct {
+      background: rgba(0, 113, 169, 0.12);
+      color: #0f5275;
+    }
+
+    .feedback-pill.incorrect {
+      background: rgba(185, 28, 28, 0.12);
+      color: #7f1414;
+    }
+
+    .feedback-panel ul,
+    .hint-panel ul,
+    .results-card ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .feedback-panel li,
+    .hint-panel li,
+    .results-card li {
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 6px;
+    }
+
+    .review-list {
+      margin-top: 6px;
+    }
+
+    .review-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      padding: 14px 16px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .review-item strong {
+      font-size: 1rem;
+    }
+
+    .results-levels {
+      margin-top: 8px;
+    }
+
+    .result-level-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      background: #ffffff;
+      display: grid;
+      gap: 8px;
+    }
+
+    .result-level-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    .result-metric {
+      font-weight: 700;
+      color: var(--accent-strong);
+    }
+
+    .level-summary-grid {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
+    .summary-card strong {
+      display: block;
+      font-size: 1.25rem;
+      margin-bottom: 4px;
+    }
+
+    .completion-panel {
+      border: 1px solid rgba(0, 113, 169, 0.18);
+      border-radius: var(--radius-md);
+      background: linear-gradient(180deg, rgba(0, 113, 169, 0.08), #ffffff);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .completion-panel h3 {
+      margin: 0;
+      font-size: 1.16rem;
+    }
+
+    .completion-panel p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .screen-footer {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .screen-footer .screen-actions {
+      margin-top: 0;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .game-grid,
+      .assignment-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .slot-row,
+      .sequence-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app-shell {
+        padding: 14px 12px 24px;
+      }
+
+      .hero,
+      .instructions-layout,
+      .mode-grid,
+      .game-screen,
+      .results-layout {
+        padding: 18px;
+      }
+
+      .choice-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .screen-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <main id="app" aria-live="polite"></main>
+  </div>
+
+  <script>
+    // =========================================================
+    // CONTENT DATA
+    // Instructor-editable educational content is grouped here.
+    // Edit level titles, prompts, answers, distractors, feedback,
+    // explanations, hints, and review tags in this section.
+    // =========================================================
+    const CONTENT_DATA = {
+      title: "Foundational Movement Science I: Neuro Systems Lab",
+      subtitle: "A six-level review activity for Foundational Movement Science I focused on introductory neuroanatomy and nervous system organization",
+      estimatedTime: "15-20 minutes",
+      reviewTagLabels: {
+        "meninges-order": { label: "Order of the meninges and related spaces", objective: 1 },
+        "meninges-csf": { label: "Where CSF sits around the CNS", objective: 1 },
+        "meninges-function": { label: "Protective functions of the meninges", objective: 1 },
+        "ventricles-structures": { label: "Names and locations of ventricles", objective: 2 },
+        "csf-flow": { label: "Sequence of CSF circulation", objective: 2 },
+        "choroid-plexus": { label: "Role of the choroid plexus", objective: 2 },
+        "cns-components": { label: "Components of the central nervous system", objective: 3 },
+        "brain-functions": { label: "General functions of the brain", objective: 3 },
+        "spinal-cord-functions": { label: "General functions of the spinal cord", objective: 3 },
+        "pns-definition": { label: "Definition and job of the PNS", objective: 4 },
+        "sensory-vs-motor": { label: "Direction of sensory versus motor information", objective: 4 },
+        "pns-subtypes": { label: "Examples of sensory and motor nerve types", objective: 4 },
+        "ans-branches": { label: "Sympathetic versus parasympathetic branches", objective: 5 },
+        "ans-effects": { label: "Opposing autonomic effects on body functions", objective: 5 },
+        "ens-functions": { label: "Digestive functions of the ENS", objective: 6 },
+        "ens-sensory": { label: "ENS sensory detection of the gut environment", objective: 6 },
+        "ens-integration": { label: "ENS interneurons and local processing", objective: 6 }
+      },
+      objectives: [
+        "Identify the three layers of the meninges and their functions in protecting the brain and spinal cord.",
+        "Explain the structure and function of the ventricular system in the brain, including the production and circulation of cerebrospinal fluid.",
+        "Describe the components of the central nervous system, including the brain and spinal cord, and their general roles in processing and integrating information.",
+        "Define the peripheral nervous system and its two main types of nerves, sensory and motor, and how they transmit information to and from the central nervous system.",
+        "Identify the two branches of the autonomic nervous system, the sympathetic and parasympathetic nervous systems, and their opposing effects on involuntary bodily functions.",
+        "Explain the structure and function of the enteric nervous system, including its role in digestion and its network of neurons and interneurons."
+      ],
+      levels: [
+        {
+          id: "meninges_shield_stack",
+          title: "Level 1: Meninges Shield Stack",
+          objectiveId: 1,
+          mechanic: "diagramDrop",
+          challengeSeconds: 80,
+          intro: "Build the meninges from superficial to deep and place the related spaces and CSF where the handout says they belong.",
+          studyTip: "Work from outside to inside. The subarachnoid space lies between arachnoid mater and pia mater, and that is where CSF is found around the brain and spinal cord.",
+          sourceNote: "Handout sections used: Terminology Related to Components of the Nervous System, Meninges.",
+          slots: [
+            {
+              id: "men_slot_1",
+              prompt: "Outermost and toughest protective layer",
+              detail: "First layer students should place",
+              answer: "Dura mater",
+              explanation: "Correct. The handout identifies the dura mater as the outermost and toughest layer of the meninges.",
+              incorrect: "Not quite. The outermost and toughest layer is the dura mater.",
+              tags: ["meninges-order", "meninges-function"]
+            },
+            {
+              id: "men_slot_2",
+              prompt: "Space between the dura mater and the arachnoid mater",
+              detail: "Named in the handout terminology list",
+              answer: "Subdural space",
+              explanation: "Correct. The subdural space lies between the dura mater and arachnoid mater.",
+              incorrect: "Try again. The space between dura and arachnoid is the subdural space.",
+              tags: ["meninges-order"]
+            },
+            {
+              id: "men_slot_3",
+              prompt: "Delicate layer beneath the dura mater",
+              detail: "Named for its spiderweb-like appearance",
+              answer: "Arachnoid mater",
+              explanation: "Correct. The arachnoid mater lies beneath the dura mater and has a delicate, spiderweb-like appearance.",
+              incorrect: "Not yet. The layer beneath the dura is the arachnoid mater.",
+              tags: ["meninges-order"]
+            },
+            {
+              id: "men_slot_4",
+              prompt: "Space that contains CSF",
+              detail: "Between arachnoid mater and pia mater",
+              answer: "Subarachnoid space",
+              explanation: "Correct. The handout states that the subarachnoid space lies between the arachnoid mater and pia mater and contains CSF.",
+              incorrect: "Look for the space between arachnoid and pia. That is the subarachnoid space.",
+              tags: ["meninges-csf", "meninges-order"]
+            },
+            {
+              id: "men_slot_5",
+              prompt: "Fluid that cushions and nourishes the CNS",
+              detail: "Clear and colorless according to the handout",
+              answer: "Cerebrospinal fluid (CSF)",
+              explanation: "Correct. CSF surrounds the brain and spinal cord and provides cushioning and nourishment to the CNS.",
+              incorrect: "The handout names cerebrospinal fluid, or CSF, as the fluid that cushions and nourishes the CNS.",
+              tags: ["meninges-csf", "meninges-function"]
+            },
+            {
+              id: "men_slot_6",
+              prompt: "Thin, delicate layer that adheres to the CNS surface",
+              detail: "Closest to the brain and spinal cord",
+              answer: "Pia mater",
+              explanation: "Correct. The pia mater adheres directly to the surface of the brain and spinal cord.",
+              incorrect: "Try again. The layer that adheres to the CNS surface is the pia mater.",
+              tags: ["meninges-order", "meninges-function"]
+            }
+          ]
+        },
+        {
+          id: "csf_flow_route",
+          title: "Level 2: CSF Flow Route",
+          objectiveId: 2,
+          mechanic: "sequence",
+          challengeSeconds: 95,
+          intro: "Assemble the CSF pathway in the order described in the handout, from production to return to the bloodstream.",
+          studyTip: "Start with where CSF is produced, then move ventricle by ventricle before leaving the ventricular system for the subarachnoid space.",
+          sourceNote: "Handout sections used: Terminology Related to Components of the Nervous System, Ventricles.",
+          steps: [
+            {
+              id: "csf_1",
+              label: "Production begins here",
+              answer: "Choroid plexus",
+              explanation: "Correct. The choroid plexus is the structure in the ventricles responsible for producing CSF.",
+              incorrect: "Start where CSF is produced. The handout identifies the choroid plexus as the producer of CSF.",
+              tags: ["choroid-plexus", "csf-flow"]
+            },
+            {
+              id: "csf_2",
+              label: "First major ventricle location",
+              answer: "Lateral ventricles",
+              explanation: "Correct. The ventricular system includes two lateral ventricles, one in each cerebral hemisphere.",
+              incorrect: "After production, begin in the largest ventricles: the lateral ventricles.",
+              tags: ["ventricles-structures", "csf-flow"]
+            },
+            {
+              id: "csf_3",
+              label: "Passageway into the third ventricle",
+              answer: "Interventricular foramina",
+              explanation: "Correct. The interventricular foramina connect the lateral ventricles to the third ventricle.",
+              incorrect: "The next step is the passageway from the lateral ventricles to the third ventricle: the interventricular foramina.",
+              tags: ["ventricles-structures", "csf-flow"]
+            },
+            {
+              id: "csf_4",
+              label: "Narrow midline cavity between the two thalami",
+              answer: "Third ventricle",
+              explanation: "Correct. The third ventricle is a narrow midline cavity located between the two thalami.",
+              incorrect: "The structure between the two thalami is the third ventricle.",
+              tags: ["ventricles-structures", "csf-flow"]
+            },
+            {
+              id: "csf_5",
+              label: "Narrow channel through the midbrain",
+              answer: "Cerebral aqueduct",
+              explanation: "Correct. The cerebral aqueduct connects the third ventricle to the fourth ventricle.",
+              incorrect: "The next connector is the cerebral aqueduct, the channel through the midbrain.",
+              tags: ["ventricles-structures", "csf-flow"]
+            },
+            {
+              id: "csf_6",
+              label: "Pyramid-shaped cavity between brainstem and cerebellum",
+              answer: "Fourth ventricle",
+              explanation: "Correct. The fourth ventricle lies between the brainstem and cerebellum.",
+              incorrect: "After the cerebral aqueduct, CSF enters the fourth ventricle.",
+              tags: ["ventricles-structures", "csf-flow"]
+            },
+            {
+              id: "csf_7",
+              label: "Space around brain and spinal cord after leaving the ventricular system",
+              answer: "Subarachnoid space",
+              explanation: "Correct. The handout states that CSF enters the subarachnoid space surrounding the brain and spinal cord.",
+              incorrect: "CSF next enters the subarachnoid space around the brain and spinal cord.",
+              tags: ["csf-flow", "meninges-csf"]
+            },
+            {
+              id: "csf_8",
+              label: "Site of absorption back toward the bloodstream",
+              answer: "Arachnoid granulations",
+              explanation: "Correct. CSF is absorbed into the bloodstream via arachnoid granulations.",
+              incorrect: "Before re-entering blood, CSF is absorbed via arachnoid granulations.",
+              tags: ["csf-flow"]
+            },
+            {
+              id: "csf_9",
+              label: "Final destination after absorption",
+              answer: "Bloodstream",
+              explanation: "Correct. After absorption through arachnoid granulations, CSF returns to the bloodstream.",
+              incorrect: "The final step in this simplified pathway is return to the bloodstream.",
+              tags: ["csf-flow"]
+            }
+          ]
+        },
+        {
+          id: "cns_control_map",
+          title: "Level 3: CNS Control Map",
+          objectiveId: 3,
+          mechanic: "assign",
+          challengeSeconds: 85,
+          intro: "Match each statement to the CNS structure or system-level role it best describes in the handout.",
+          studyTip: "Use the broadest match that fits. If the statement describes the entire system processing and integrating information, place it under CNS overall rather than under a single structure.",
+          sourceNote: "Handout sections used: Central Nervous System, Components of the Nervous System Summary List.",
+          targets: [
+            {
+              id: "cns_whole",
+              label: "CNS overall",
+              subtitle: "System-wide job",
+              description: "Processing and integrating information from the PNS and generating responses."
+            },
+            {
+              id: "cns_brain",
+              label: "Brain",
+              subtitle: "Broad functions",
+              description: "Cognition, emotion, movement, sensation, and region-specific processing."
+            },
+            {
+              id: "cns_brainstem",
+              label: "Brainstem",
+              subtitle: "Named component",
+              description: "Listed by the handout as a component of the CNS."
+            },
+            {
+              id: "cns_spinal",
+              label: "Spinal cord",
+              subtitle: "Transmission and reflex functions",
+              description: "Sends information between brain and body and helps coordinate reflexes and simple movements."
+            }
+          ],
+          cards: [
+            {
+              id: "cns_card_1",
+              text: "Processes and integrates information from the peripheral nervous system and generates appropriate responses.",
+              answer: "cns_whole",
+              explanation: "Correct. The handout uses this as the broad role of the central nervous system.",
+              incorrect: "This statement describes the overall job of the CNS rather than one single part.",
+              tags: ["cns-components"]
+            },
+            {
+              id: "cns_card_2",
+              text: "Responsible for cognition, emotion, movement, and sensation.",
+              answer: "cns_brain",
+              explanation: "Correct. The handout describes the brain as responsible for cognition, emotion, movement, and sensation.",
+              incorrect: "These broad functions are assigned to the brain in the handout.",
+              tags: ["brain-functions", "cns-components"]
+            },
+            {
+              id: "cns_card_3",
+              text: "Frontal lobes support executive function, planning, and decision-making.",
+              answer: "cns_brain",
+              explanation: "Correct. The frontal lobes are given as a brain example tied to executive function, planning, and decision-making.",
+              incorrect: "This example belongs with the brain because the handout describes frontal lobe function there.",
+              tags: ["brain-functions"]
+            },
+            {
+              id: "cns_card_4",
+              text: "Occipital lobes process visual information.",
+              answer: "cns_brain",
+              explanation: "Correct. The handout uses the occipital lobes as an example of visual information processing in the brain.",
+              incorrect: "Visual processing in this section is linked to the occipital lobes of the brain.",
+              tags: ["brain-functions"]
+            },
+            {
+              id: "cns_card_5",
+              text: "Transmits information between the brain and the rest of the body.",
+              answer: "cns_spinal",
+              explanation: "Correct. The spinal cord carries information between the brain and the rest of the body.",
+              incorrect: "The handout gives this transmission role to the spinal cord.",
+              tags: ["spinal-cord-functions", "cns-components"]
+            },
+            {
+              id: "cns_card_6",
+              text: "Generates reflexes.",
+              answer: "cns_spinal",
+              explanation: "Correct. The spinal cord is identified as a structure that generates reflexes.",
+              incorrect: "Reflex generation is attributed to the spinal cord in the handout.",
+              tags: ["spinal-cord-functions"]
+            },
+            {
+              id: "cns_card_7",
+              text: "Coordinates simple movements such as walking and running.",
+              answer: "cns_spinal",
+              explanation: "Correct. The handout states that the spinal cord coordinates simple movements such as walking and running.",
+              incorrect: "This movement coordination example belongs with the spinal cord.",
+              tags: ["spinal-cord-functions"]
+            },
+            {
+              id: "cns_card_8",
+              text: "Named in the handout as one of the components of the central nervous system.",
+              answer: "cns_brainstem",
+              explanation: "Correct. The handout lists the brainstem as part of the CNS, along with the brain and spinal cord.",
+              incorrect: "This card is testing component identification. The brainstem is listed as part of the CNS.",
+              tags: ["cns-components"]
+            }
+          ]
+        },
+        {
+          id: "pns_signal_sort",
+          title: "Level 4: PNS Signal Sort",
+          objectiveId: 4,
+          mechanic: "sort",
+          challengeSeconds: 85,
+          intro: "Sort each signal example by direction. Sensory nerves carry information toward the CNS, and motor nerves carry information from the CNS to target tissues.",
+          studyTip: "Ask one question for every card: Is information traveling toward the CNS or away from the CNS? Toward the CNS means sensory. Away from the CNS to a target tissue means motor.",
+          sourceNote: "Handout sections used: Neurons, Peripheral Nervous System, Components of the Nervous System Summary List.",
+          bins: [
+            {
+              id: "pns_sensory",
+              label: "Sensory nerves",
+              subtitle: "Body to CNS",
+              description: "Transmit information from the body to the central nervous system."
+            },
+            {
+              id: "pns_motor",
+              label: "Motor nerves",
+              subtitle: "CNS to target tissue",
+              description: "Transmit information from the central nervous system to muscles and other target tissues."
+            }
+          ],
+          cards: [
+            {
+              id: "pns_card_1",
+              text: "Touch from the skin traveling to the central nervous system",
+              answer: "pns_sensory",
+              explanation: "Correct. The handout places touch-related information traveling to the CNS under sensory nerves, specifically somatic sensory.",
+              incorrect: "Think direction first. Touch information traveling from skin to CNS is sensory.",
+              tags: ["sensory-vs-motor", "pns-subtypes"]
+            },
+            {
+              id: "pns_card_2",
+              text: "Pressure information from muscles traveling to the central nervous system",
+              answer: "pns_sensory",
+              explanation: "Correct. Pressure information from the body to the CNS is sensory input.",
+              incorrect: "This information travels toward the CNS, so it belongs with sensory nerves.",
+              tags: ["sensory-vs-motor", "pns-subtypes"]
+            },
+            {
+              id: "pns_card_3",
+              text: "Hunger and thirst information from internal organs traveling to the CNS",
+              answer: "pns_sensory",
+              explanation: "Correct. The handout lists hunger and thirst as examples of visceral sensory information.",
+              incorrect: "Hunger and thirst travel from organs toward the CNS, making them sensory examples.",
+              tags: ["sensory-vs-motor", "pns-subtypes"]
+            },
+            {
+              id: "pns_card_4",
+              text: "A command from the CNS to skeletal muscle",
+              answer: "pns_motor",
+              explanation: "Correct. A signal going from the CNS to skeletal muscle is motor output, specifically somatic motor.",
+              incorrect: "Signals traveling from the CNS to skeletal muscle are motor, not sensory.",
+              tags: ["sensory-vs-motor", "pns-subtypes"]
+            },
+            {
+              id: "pns_card_5",
+              text: "A command from the CNS to smooth muscle",
+              answer: "pns_motor",
+              explanation: "Correct. The handout identifies autonomic motor nerves as controlling smooth muscle, cardiac muscle, and glands.",
+              incorrect: "This signal goes from the CNS to a target tissue, so it is motor.",
+              tags: ["sensory-vs-motor", "pns-subtypes"]
+            },
+            {
+              id: "pns_card_6",
+              text: "A command from the CNS to cardiac muscle",
+              answer: "pns_motor",
+              explanation: "Correct. Signals to cardiac muscle are motor and fall under autonomic motor function in the handout.",
+              incorrect: "Cardiac muscle control from the CNS is motor output.",
+              tags: ["sensory-vs-motor", "pns-subtypes"]
+            },
+            {
+              id: "pns_card_7",
+              text: "A command from the CNS to glands",
+              answer: "pns_motor",
+              explanation: "Correct. Motor nerves can target glands, especially through autonomic motor pathways.",
+              incorrect: "This travels from the CNS to a target tissue, so it belongs with motor nerves.",
+              tags: ["sensory-vs-motor", "pns-subtypes"]
+            },
+            {
+              id: "pns_card_8",
+              text: "Nociceptive information from the skin traveling to the central nervous system",
+              answer: "pns_sensory",
+              explanation: "Correct. The handout includes nociceptive signals among examples of somatic sensory information traveling from the body toward the CNS.",
+              incorrect: "This signal still travels from the body to the CNS, so it belongs with sensory nerves.",
+              tags: ["sensory-vs-motor", "pns-subtypes"]
+            }
+          ]
+        },
+        {
+          id: "autonomic_balance_board",
+          title: "Level 5: Autonomic Balance Board",
+          objectiveId: 5,
+          mechanic: "choice",
+          challengeSeconds: 70,
+          intro: "Decide whether each body response reflects sympathetic or parasympathetic activity. The handout presents these branches as having opposing effects on involuntary body functions.",
+          studyTip: "Sympathetic means fight or flight. Parasympathetic means rest and digest. Use that contrast first, then connect it to heart rate, blood pressure, respiration, and digestion.",
+          sourceNote: "Handout sections used: Autonomic Nervous System, Components of the Nervous System Summary List.",
+          prompts: [
+            {
+              id: "ans_1",
+              stem: "A patient suddenly perceives danger and heart rate rises.",
+              question: "Which autonomic branch best fits this response?",
+              options: ["Sympathetic nervous system", "Parasympathetic nervous system"],
+              answer: "Sympathetic nervous system",
+              explanation: "Correct. The handout states that the sympathetic nervous system supports the fight or flight response and increases heart rate.",
+              incorrect: "Not this time. Increased heart rate during danger fits the sympathetic branch.",
+              tags: ["ans-branches", "ans-effects"]
+            },
+            {
+              id: "ans_2",
+              stem: "A student is resting after a meal and digestive activity increases.",
+              question: "Which autonomic branch best fits this response?",
+              options: ["Sympathetic nervous system", "Parasympathetic nervous system"],
+              answer: "Parasympathetic nervous system",
+              explanation: "Correct. The parasympathetic system is linked to the rest and digest response and supports digestion.",
+              incorrect: "Try again. Increased digestion during rest is a parasympathetic effect.",
+              tags: ["ans-branches", "ans-effects"]
+            },
+            {
+              id: "ans_3",
+              stem: "Respiration increases during a stress response.",
+              question: "Which autonomic branch best fits this response?",
+              options: ["Sympathetic nervous system", "Parasympathetic nervous system"],
+              answer: "Sympathetic nervous system",
+              explanation: "Correct. The sympathetic branch prepares the body for stress and increases respiration.",
+              incorrect: "Increased respiration with stress belongs to the sympathetic nervous system.",
+              tags: ["ans-branches", "ans-effects"]
+            },
+            {
+              id: "ans_4",
+              stem: "Blood pressure decreases during a relaxed recovery period.",
+              question: "Which autonomic branch best fits this response?",
+              options: ["Sympathetic nervous system", "Parasympathetic nervous system"],
+              answer: "Parasympathetic nervous system",
+              explanation: "Correct. The parasympathetic branch is associated with lower heart rate, lower blood pressure, and relaxation.",
+              incorrect: "Lower blood pressure during a recovery state fits the parasympathetic branch.",
+              tags: ["ans-branches", "ans-effects"]
+            },
+            {
+              id: "ans_5",
+              stem: "The body is being prepared for physical activity.",
+              question: "Which autonomic branch best fits this response?",
+              options: ["Sympathetic nervous system", "Parasympathetic nervous system"],
+              answer: "Sympathetic nervous system",
+              explanation: "Correct. The handout directly links the sympathetic nervous system to preparation for physical activity or stress.",
+              incorrect: "Preparation for activity or stress is a sympathetic role.",
+              tags: ["ans-branches"]
+            },
+            {
+              id: "ans_6",
+              stem: "The body is in a rest-and-digest state.",
+              question: "Which autonomic branch best fits this response?",
+              options: ["Sympathetic nervous system", "Parasympathetic nervous system"],
+              answer: "Parasympathetic nervous system",
+              explanation: "Correct. Rest and digest is the classic parasympathetic description in the handout.",
+              incorrect: "Rest and digest corresponds to the parasympathetic branch.",
+              tags: ["ans-branches"]
+            }
+          ]
+        },
+        {
+          id: "enteric_gut_network",
+          title: "Level 6: Enteric Gut Network",
+          objectiveId: 6,
+          mechanic: "cases",
+          challengeSeconds: 85,
+          intro: "Use brief gut scenarios to identify what the handout says about ENS sensing, local processing, and digestive control.",
+          studyTip: "Look for three recurring ideas from the handout: digestive jobs of the ENS, sensory detection of the gut environment, and local processing through interneurons that allows some independence from the CNS.",
+          sourceNote: "Handout sections used: Enteric Nervous System, Components of the Nervous System Summary List.",
+          cases: [
+            {
+              id: "ens_1",
+              stem: "Food enters the gut and local neurons detect that it is present.",
+              question: "Which explanation is best supported by the handout?",
+              options: [
+                "ENS sensory neurons can detect the presence of food in the gut environment.",
+                "Only the CNS can detect food in the gut.",
+                "This event is explained only by skeletal muscle motor nerves."
+              ],
+              answer: "ENS sensory neurons can detect the presence of food in the gut environment.",
+              explanation: "Correct. The handout states that ENS sensory neurons detect changes in the gut environment, including the presence of food.",
+              incorrect: "The handout directly says ENS sensory neurons can detect the presence of food in the gut environment.",
+              tags: ["ens-sensory"]
+            },
+            {
+              id: "ens_2",
+              stem: "The wall of the gut stretches as material moves through it.",
+              question: "Which explanation is best supported by the handout?",
+              options: [
+                "ENS sensory neurons can detect stretch in the gut environment.",
+                "Only the sympathetic nervous system detects stretch.",
+                "Stretch means the meninges are involved."
+              ],
+              answer: "ENS sensory neurons can detect stretch in the gut environment.",
+              explanation: "Correct. Stretch is listed in the handout as one of the gut changes detected by ENS sensory neurons.",
+              incorrect: "Try again. The handout specifically includes stretch as a signal detected by ENS sensory neurons.",
+              tags: ["ens-sensory"]
+            },
+            {
+              id: "ens_3",
+              stem: "Chemical conditions in the gut change and a local response needs to begin.",
+              question: "Which explanation is best supported by the handout?",
+              options: [
+                "ENS sensory neurons can detect chemicals in the gut environment.",
+                "Chemicals in the gut are handled only by the ventricular system.",
+                "Chemical detection in the gut is a role of pia mater."
+              ],
+              answer: "ENS sensory neurons can detect chemicals in the gut environment.",
+              explanation: "Correct. The handout notes that ENS sensory neurons detect chemicals in the gut environment.",
+              incorrect: "The relevant idea here is chemical sensing by ENS sensory neurons.",
+              tags: ["ens-sensory"]
+            },
+            {
+              id: "ens_4",
+              stem: "Digestion needs a quick local adjustment before waiting for input from the CNS.",
+              question: "Which explanation best matches the handout?",
+              options: [
+                "The ENS can function independently because its interneuron network allows local processing and integration.",
+                "The ENS cannot act until the CNS gives every command.",
+                "Only motor neurons in skeletal muscle can coordinate digestive adjustments."
+              ],
+              answer: "The ENS can function independently because its interneuron network allows local processing and integration.",
+              explanation: "Correct. The handout states that the ENS can function independently of the CNS because of its extensive network of interneurons that support local processing and integration.",
+              incorrect: "The handout explains ENS independence by its interneuron network and local processing.",
+              tags: ["ens-integration"]
+            },
+            {
+              id: "ens_5",
+              stem: "A learner asks what major digestive tasks the ENS helps control.",
+              question: "Which option best matches the handout summary list?",
+              options: [
+                "Gastrointestinal motility, secretion, and absorption",
+                "Only visual processing and executive function",
+                "Only blood pressure and respiration"
+              ],
+              answer: "Gastrointestinal motility, secretion, and absorption",
+              explanation: "Correct. The summary list states that the ENS controls gastrointestinal motility, secretion, and absorption.",
+              incorrect: "The handout summary specifically names motility, secretion, and absorption as ENS functions.",
+              tags: ["ens-functions"]
+            },
+            {
+              id: "ens_6",
+              stem: "Signals from the gut are sent to the CNS, which then changes enteric activity.",
+              question: "Which explanation best matches the handout?",
+              options: [
+                "ENS sensory neurons can send signals to the CNS, which can modulate ENS activity in response.",
+                "The ENS and CNS never interact with one another.",
+                "Only the parasympathetic system can sense the gut environment directly."
+              ],
+              answer: "ENS sensory neurons can send signals to the CNS, which can modulate ENS activity in response.",
+              explanation: "Correct. The handout explains that ENS sensory neurons send signals to the CNS and that the CNS can modulate ENS activity.",
+              incorrect: "The handout supports communication from ENS sensory neurons to the CNS and modulation back to the ENS.",
+              tags: ["ens-integration", "ens-sensory"]
+            }
+          ]
+        }
+      ]
+    };
+
+    // =========================================================
+    // STATE AND MODE CONFIGURATION
+    // =========================================================
+    const MODE_CONFIG = {
+      study: {
+        label: "Study Mode",
+        description: "Richer explanations, hints, and guided feedback.",
+        lives: null
+      },
+      challenge: {
+        label: "Challenge Mode",
+        description: "Faster pacing with a timer and 3 lives total.",
+        lives: 3
+      }
+    };
+
+    const app = document.getElementById("app");
+
+    function createInitialState() {
+      return {
+        screen: "title",
+        returnScreen: null,
+        mode: null,
+        levelIndex: 0,
+        score: 0,
+        mistakes: 0,
+        lives: null,
+        timerSeconds: 0,
+        timerId: null,
+        levelState: null,
+        levelResults: [],
+        missedTags: {},
+        sessionSeed: Date.now()
+      };
+    }
+
+    const gameState = createInitialState();
+
+    // =========================================================
+    // UTILITIES
+    // =========================================================
+    function shuffle(list) {
+      const copy = [...list];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function withShuffledOptions(item) {
+      return item.options ? { ...item, options: shuffle(item.options) } : { ...item };
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function getLevel() {
+      return CONTENT_DATA.levels[gameState.levelIndex];
+    }
+
+    function getCurrentObjective() {
+      const level = getLevel();
+      return CONTENT_DATA.objectives[level.objectiveId - 1];
+    }
+
+    function countMissedTags() {
+      return Object.keys(gameState.missedTags).length;
+    }
+
+    function addMissedTags(tags) {
+      tags.forEach(tag => {
+        gameState.missedTags[tag] = (gameState.missedTags[tag] || 0) + 1;
+      });
+    }
+
+    function getPointsForAttempts(attemptsBeforeCorrect) {
+      const studyScale = [10, 7, 5, 4];
+      const challengeScale = [14, 10, 7, 5];
+      const scale = gameState.mode === "challenge" ? challengeScale : studyScale;
+      return scale[Math.min(attemptsBeforeCorrect, scale.length - 1)];
+    }
+
+    function clearTimer() {
+      if (gameState.timerId) {
+        clearInterval(gameState.timerId);
+        gameState.timerId = null;
+      }
+    }
+
+    function startTimer(seconds) {
+      clearTimer();
+      gameState.timerSeconds = seconds;
+      if (gameState.mode !== "challenge") {
+        return;
+      }
+      gameState.timerId = setInterval(() => {
+        gameState.timerSeconds -= 1;
+        updateTimerDisplay();
+        if (gameState.timerSeconds <= 0) {
+          clearTimer();
+          handleTimeExpired();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const timerEl = document.querySelector("[data-role='timer']");
+      if (!timerEl) {
+        return;
+      }
+      timerEl.textContent = `${gameState.timerSeconds}s`;
+      timerEl.classList.toggle("is-warning", gameState.timerSeconds <= 20 && gameState.timerSeconds > 10);
+      timerEl.classList.toggle("is-danger", gameState.timerSeconds <= 10);
+    }
+
+    function resetStateForReplay(mode) {
+      clearTimer();
+      const fresh = createInitialState();
+      Object.keys(gameState).forEach(key => delete gameState[key]);
+      Object.assign(gameState, fresh);
+      gameState.mode = mode;
+      gameState.screen = "game";
+      gameState.lives = MODE_CONFIG[mode].lives;
+      gameState.sessionSeed = Date.now();
+      initializeLevel(0);
+    }
+
+    function registerWrongAttempt(itemId, tags) {
+      const levelState = gameState.levelState;
+      levelState.itemAttempts[itemId] = (levelState.itemAttempts[itemId] || 0) + 1;
+      gameState.mistakes += 1;
+      addMissedTags(tags);
+    }
+
+    function registerCorrectAttempt(itemId, tags) {
+      const levelState = gameState.levelState;
+      const attemptsBeforeCorrect = levelState.itemAttempts[itemId] || 0;
+      const points = getPointsForAttempts(attemptsBeforeCorrect);
+      if (!levelState.correctItems.includes(itemId)) {
+        levelState.correctItems.push(itemId);
+        levelState.scoreEarned += points;
+        gameState.score += points;
+      }
+      return points;
+    }
+
+    function setFeedback(kind, title, message, explanation, tags) {
+      gameState.levelState.feedback = {
+        kind,
+        title,
+        message,
+        explanation,
+        tags
+      };
+      renderApp();
+    }
+
+    function getFeedbackExplanation(explanation) {
+      if (gameState.mode === "challenge") {
+        return "";
+      }
+      return explanation;
+    }
+
+    function showHint() {
+      gameState.levelState.hintVisible = true;
+      renderApp();
+    }
+
+    function summarizeLevelResult(levelState) {
+      return {
+        levelId: getLevel().id,
+        title: getLevel().title,
+        objectiveId: getLevel().objectiveId,
+        scoreEarned: levelState.scoreEarned,
+        totalItems: levelState.totalItems,
+        correctItems: levelState.correctItems.length,
+        attempts: Object.values(levelState.itemAttempts).reduce((sum, count) => sum + count, 0),
+        completed: levelState.completed
+      };
+    }
+
+    function storeLevelResult() {
+      gameState.levelResults[gameState.levelIndex] = summarizeLevelResult(gameState.levelState);
+    }
+
+    function completeLevel() {
+      const levelState = gameState.levelState;
+      levelState.completed = true;
+      storeLevelResult();
+      clearTimer();
+      renderApp();
+    }
+
+    function goToNextLevel() {
+      if (gameState.levelIndex < CONTENT_DATA.levels.length - 1) {
+        initializeLevel(gameState.levelIndex + 1);
+      } else {
+        finishGame();
+      }
+    }
+
+    function finishGame() {
+      clearTimer();
+      storeLevelResult();
+      gameState.screen = "results";
+      renderApp();
+    }
+
+    function handleTimeExpired() {
+      const level = getLevel();
+      if (gameState.mode === "challenge") {
+        gameState.lives -= 1;
+      }
+      gameState.levelState.feedback = {
+        kind: "incorrect",
+        title: "Time expired",
+        message: `The timer ran out on ${level.title}.`,
+        explanation: gameState.mode === "challenge" ? "Challenge Mode restarts the level when time runs out." : "",
+        tags: []
+      };
+      if (gameState.mode === "challenge" && gameState.lives <= 0) {
+        gameState.levelState.completed = true;
+        storeLevelResult();
+        finishGame();
+        return;
+      }
+      gameState.levelState.timedOut = true;
+      renderApp();
+    }
+
+    // =========================================================
+    // LEVEL INITIALIZATION
+    // =========================================================
+    function initializeLevel(nextIndex) {
+      clearTimer();
+      gameState.levelIndex = nextIndex;
+      const level = getLevel();
+      const baseState = {
+        feedback: null,
+        hintVisible: false,
+        itemAttempts: {},
+        correctItems: [],
+        scoreEarned: 0,
+        completed: false,
+        timedOut: false,
+        totalItems: 0
+      };
+
+      if (level.mechanic === "diagramDrop") {
+        gameState.levelState = {
+          ...baseState,
+          selectedToken: null,
+          tokens: shuffle(level.slots.map(slot => slot.answer)),
+          placements: {},
+          totalItems: level.slots.length
+        };
+      }
+
+      if (level.mechanic === "sequence") {
+        gameState.levelState = {
+          ...baseState,
+          selectedToken: null,
+          tokens: shuffle(level.steps.map(step => step.answer)),
+          placements: Array(level.steps.length).fill(""),
+          totalItems: level.steps.length
+        };
+      }
+
+      if (level.mechanic === "assign") {
+        gameState.levelState = {
+          ...baseState,
+          selectedCard: null,
+          cards: shuffle(level.cards.map(card => ({ ...card }))),
+          assignments: {},
+          totalItems: level.cards.length
+        };
+      }
+
+      if (level.mechanic === "sort") {
+        gameState.levelState = {
+          ...baseState,
+          selectedCard: null,
+          cards: shuffle(level.cards.map(card => ({ ...card }))),
+          bins: {},
+          totalItems: level.cards.length
+        };
+      }
+
+      if (level.mechanic === "choice") {
+        gameState.levelState = {
+          ...baseState,
+          rounds: shuffle(level.prompts.map(withShuffledOptions)),
+          currentRound: 0,
+          totalItems: level.prompts.length
+        };
+      }
+
+      if (level.mechanic === "cases") {
+        gameState.levelState = {
+          ...baseState,
+          rounds: shuffle(level.cases.map(withShuffledOptions)),
+          currentRound: 0,
+          totalItems: level.cases.length
+        };
+      }
+
+      gameState.screen = "game";
+      startTimer(level.challengeSeconds);
+      renderApp();
+    }
+
+    // =========================================================
+    // LEVEL ACTIONS
+    // =========================================================
+    function handleDiagramTokenSelect(token) {
+      if (gameState.levelState.completed || gameState.levelState.timedOut) {
+        return;
+      }
+      gameState.levelState.selectedToken = token;
+      renderApp();
+    }
+
+    function handleDiagramDrop(slotId, droppedToken) {
+      const level = getLevel();
+      const levelState = gameState.levelState;
+      if (levelState.completed || levelState.timedOut) {
+        return;
+      }
+      const slot = level.slots.find(item => item.id === slotId);
+      if (!slot || levelState.placements[slotId]) {
+        return;
+      }
+      if (droppedToken === slot.answer) {
+        levelState.placements[slotId] = droppedToken;
+        levelState.selectedToken = null;
+        const points = registerCorrectAttempt(slot.id, slot.tags);
+        const explanation = `${slot.explanation} ${points} points earned.`;
+        setFeedback("correct", "Correct placement", slot.explanation, getFeedbackExplanation(explanation), slot.tags);
+        if (Object.keys(levelState.placements).length === level.slots.length) {
+          completeLevel();
+        }
+        return;
+      }
+      registerWrongAttempt(slot.id, slot.tags);
+      levelState.selectedToken = null;
+      setFeedback("incorrect", "Try again", slot.incorrect, getFeedbackExplanation(slot.explanation), slot.tags);
+    }
+
+    function handleSequenceTokenSelect(token) {
+      if (gameState.levelState.completed || gameState.levelState.timedOut) {
+        return;
+      }
+      gameState.levelState.selectedToken = token;
+      renderApp();
+    }
+
+    function handleSequencePlace(stepIndex, token) {
+      const level = getLevel();
+      const levelState = gameState.levelState;
+      if (levelState.completed || levelState.timedOut) {
+        return;
+      }
+      const firstEmptyIndex = levelState.placements.findIndex(value => value === "");
+      if (stepIndex !== firstEmptyIndex) {
+        return;
+      }
+      const step = level.steps[stepIndex];
+      if (token === step.answer) {
+        levelState.placements[stepIndex] = token;
+        levelState.selectedToken = null;
+        const points = registerCorrectAttempt(step.id, step.tags);
+        const explanation = `${step.explanation} ${points} points earned.`;
+        setFeedback("correct", "Sequence advanced", step.explanation, getFeedbackExplanation(explanation), step.tags);
+        if (levelState.placements.every(Boolean)) {
+          completeLevel();
+        }
+        return;
+      }
+      registerWrongAttempt(step.id, step.tags);
+      levelState.selectedToken = null;
+      setFeedback("incorrect", "Sequence check", step.incorrect, getFeedbackExplanation(step.explanation), step.tags);
+    }
+
+    function handleAssignCardSelect(cardId) {
+      if (gameState.levelState.completed || gameState.levelState.timedOut) {
+        return;
+      }
+      gameState.levelState.selectedCard = cardId;
+      renderApp();
+    }
+
+    function handleAssignTarget(targetId, cardId) {
+      const level = getLevel();
+      const levelState = gameState.levelState;
+      if (levelState.completed || levelState.timedOut) {
+        return;
+      }
+      const card = level.cards.find(item => item.id === cardId);
+      if (!card || levelState.assignments[card.id]) {
+        return;
+      }
+      if (card.answer === targetId) {
+        levelState.assignments[card.id] = targetId;
+        levelState.selectedCard = null;
+        const points = registerCorrectAttempt(card.id, card.tags);
+        const explanation = `${card.explanation} ${points} points earned.`;
+        setFeedback("correct", "Match placed", card.explanation, getFeedbackExplanation(explanation), card.tags);
+        if (Object.keys(levelState.assignments).length === level.cards.length) {
+          completeLevel();
+        }
+        return;
+      }
+      registerWrongAttempt(card.id, card.tags);
+      levelState.selectedCard = null;
+      setFeedback("incorrect", "Better fit needed", card.incorrect, getFeedbackExplanation(card.explanation), card.tags);
+    }
+
+    function handleSortCardSelect(cardId) {
+      if (gameState.levelState.completed || gameState.levelState.timedOut) {
+        return;
+      }
+      gameState.levelState.selectedCard = cardId;
+      renderApp();
+    }
+
+    function handleSortBin(binId, cardId) {
+      const level = getLevel();
+      const levelState = gameState.levelState;
+      if (levelState.completed || levelState.timedOut) {
+        return;
+      }
+      const card = level.cards.find(item => item.id === cardId);
+      if (!card || levelState.bins[card.id]) {
+        return;
+      }
+      if (card.answer === binId) {
+        levelState.bins[card.id] = binId;
+        levelState.selectedCard = null;
+        const points = registerCorrectAttempt(card.id, card.tags);
+        const explanation = `${card.explanation} ${points} points earned.`;
+        setFeedback("correct", "Correct sort", card.explanation, getFeedbackExplanation(explanation), card.tags);
+        if (Object.keys(levelState.bins).length === level.cards.length) {
+          completeLevel();
+        }
+        return;
+      }
+      registerWrongAttempt(card.id, card.tags);
+      levelState.selectedCard = null;
+      setFeedback("incorrect", "Direction check", card.incorrect, getFeedbackExplanation(card.explanation), card.tags);
+    }
+
+    function handleChoiceAnswer(selected) {
+      const levelState = gameState.levelState;
+      if (levelState.completed || levelState.timedOut) {
+        return;
+      }
+      const round = levelState.rounds[levelState.currentRound];
+      if (selected === round.answer) {
+        const points = registerCorrectAttempt(round.id, round.tags);
+        levelState.currentRound += 1;
+        levelState.feedback = {
+          kind: "correct",
+          title: "Correct response",
+          message: round.explanation,
+          explanation: getFeedbackExplanation(`${round.explanation} ${points} points earned.`),
+          tags: round.tags
+        };
+        if (levelState.currentRound >= levelState.rounds.length) {
+          completeLevel();
+        } else {
+          renderApp();
+        }
+        return;
+      }
+      registerWrongAttempt(round.id, round.tags);
+      levelState.feedback = {
+        kind: "incorrect",
+        title: "Try again",
+        message: round.incorrect,
+        explanation: getFeedbackExplanation(round.explanation),
+        tags: round.tags
+      };
+      renderApp();
+    }
+
+    function handleCaseAnswer(selected) {
+      const levelState = gameState.levelState;
+      if (levelState.completed || levelState.timedOut) {
+        return;
+      }
+      const round = levelState.rounds[levelState.currentRound];
+      if (selected === round.answer) {
+        const points = registerCorrectAttempt(round.id, round.tags);
+        levelState.currentRound += 1;
+        levelState.feedback = {
+          kind: "correct",
+          title: "Case solved",
+          message: round.explanation,
+          explanation: getFeedbackExplanation(`${round.explanation} ${points} points earned.`),
+          tags: round.tags
+        };
+        if (levelState.currentRound >= levelState.rounds.length) {
+          completeLevel();
+        } else {
+          renderApp();
+        }
+        return;
+      }
+      registerWrongAttempt(round.id, round.tags);
+      levelState.feedback = {
+        kind: "incorrect",
+        title: "Re-check the handout logic",
+        message: round.incorrect,
+        explanation: getFeedbackExplanation(round.explanation),
+        tags: round.tags
+      };
+      renderApp();
+    }
+
+    // =========================================================
+    // RENDER HELPERS
+    // =========================================================
+    function renderFeedbackPanel() {
+      const feedback = gameState.levelState.feedback;
+      if (!feedback) {
+        return `
+          <section class="feedback-panel" data-state="neutral" aria-live="polite">
+            <div class="feedback-title">
+              <span class="feedback-pill">Feedback</span>
+              <span>Use each interaction to learn the concept, not just to finish the level.</span>
+            </div>
+            <p>Study Mode gives fuller explanations during play. Challenge Mode keeps feedback shorter and saves review emphasis for the end screen.</p>
+          </section>
+        `;
+      }
+      const explanationHtml = feedback.explanation
+        ? `<p>${escapeHtml(feedback.explanation)}</p>`
+        : "";
+      return `
+        <section class="feedback-panel" data-state="${escapeHtml(feedback.kind)}" aria-live="polite">
+          <div class="feedback-title">
+            <span class="feedback-pill ${escapeHtml(feedback.kind)}">${escapeHtml(feedback.kind === "correct" ? "Correct" : "Try again")}</span>
+            <span>${escapeHtml(feedback.title)}</span>
+          </div>
+          <p>${escapeHtml(feedback.message)}</p>
+          ${explanationHtml}
+        </section>
+      `;
+    }
+
+    function renderHintPanel(level) {
+      if (gameState.mode !== "study") {
+        return "";
+      }
+      if (!gameState.levelState.hintVisible) {
+        return `
+          <section class="hint-panel">
+            <div class="feedback-title">
+              <span class="feedback-pill">Support</span>
+              <span>Need a hand?</span>
+            </div>
+            <p>Study Mode can reveal one level-specific hint without leaving the activity.</p>
+            <div class="screen-actions">
+              <button class="ghost-btn" data-action="show-hint">Show hint</button>
+            </div>
+          </section>
+        `;
+      }
+      return `
+        <section class="hint-panel">
+          <div class="feedback-title">
+            <span class="feedback-pill">Hint</span>
+            <span>Instructor-aligned support</span>
+          </div>
+          <p>${escapeHtml(level.studyTip)}</p>
+        </section>
+      `;
+    }
+
+    function renderCompletionPanel(level) {
+      if (!gameState.levelState.completed) {
+        return "";
+      }
+      const lastLevel = gameState.levelIndex === CONTENT_DATA.levels.length - 1;
+      return `
+        <section class="completion-panel">
+          <h3>${escapeHtml(level.title)} complete</h3>
+          <p>You completed ${gameState.levelState.correctItems.length} of ${gameState.levelState.totalItems} interactions and earned ${gameState.levelState.scoreEarned} points in this level.</p>
+          <div class="screen-actions">
+            <button class="primary-btn" data-action="${lastLevel ? "view-results" : "next-level"}">${lastLevel ? "View final review" : "Next level"}</button>
+            <button class="ghost-btn" data-action="restart-level">Replay this level</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTimeoutPanel() {
+      if (!gameState.levelState.timedOut) {
+        return "";
+      }
+      return `
+        <section class="completion-panel">
+          <h3>Time expired</h3>
+          <p>The level timer ended before you completed the activity. In Challenge Mode, that costs one life and restarts the current level.</p>
+          <div class="screen-actions">
+            <button class="primary-btn" data-action="restart-level">Restart this level</button>
+            <button class="ghost-btn" data-action="view-results">End and review</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderLevelProgress() {
+      if (gameState.screen !== "game" || !gameState.levelState) {
+        return 0;
+      }
+      const withinLevel = gameState.levelState.totalItems
+        ? gameState.levelState.correctItems.length / gameState.levelState.totalItems
+        : 0;
+      const progress = ((gameState.levelIndex + withinLevel) / CONTENT_DATA.levels.length) * 100;
+      return clamp(progress, 0, 100);
+    }
+
+    function renderTokenBank(tokens, usedValues, actionPrefix) {
+      return `
+        <section class="bank-card">
+          <span class="eyebrow">Token bank</span>
+          <h3>Select a term, then place it</h3>
+          <div class="token-bank">
+            ${tokens.map(token => {
+              const isUsed = usedValues.includes(token);
+              const isSelected = gameState.levelState.selectedToken === token;
+              return `
+                <button
+                  class="token-btn${isSelected ? " is-selected" : ""}${isUsed ? " is-used" : ""}"
+                  data-action="${actionPrefix}"
+                  data-token="${escapeHtml(token)}"
+                  draggable="${isUsed ? "false" : "true"}"
+                >
+                  ${escapeHtml(token)}
+                </button>
+              `;
+            }).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDiagramDropLevel(level) {
+      const usedValues = Object.values(gameState.levelState.placements);
+      const rows = level.slots.map(slot => {
+        const placed = gameState.levelState.placements[slot.id];
+        return `
+          <div class="slot-row">
+            <div class="slot-label">
+              ${escapeHtml(slot.prompt)}
+              <small>${escapeHtml(slot.detail)}</small>
+            </div>
+            <button
+              class="slot-btn ${placed ? "is-correct" : "is-empty"}"
+              data-action="diagram-slot"
+              data-slot-id="${escapeHtml(slot.id)}"
+              data-drop-target="diagram"
+            >
+              ${placed ? escapeHtml(placed) : "Place label here"}
+            </button>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <section class="level-card">
+          <span class="eyebrow">Mechanic: Drag-and-drop labeling</span>
+          <h2 class="level-title">${escapeHtml(level.title)}</h2>
+          <p class="level-subtitle">${escapeHtml(level.intro)}</p>
+          <div class="mini-grid">
+            <article class="info-card">
+              <span class="eyebrow">Objective</span>
+              <p>${escapeHtml(getCurrentObjective())}</p>
+            </article>
+            <article class="info-card">
+              <span class="eyebrow">Source note</span>
+              <p>${escapeHtml(level.sourceNote)}</p>
+            </article>
+          </div>
+          <div class="slot-stack">${rows}</div>
+        </section>
+        ${renderTokenBank(gameState.levelState.tokens, usedValues, "select-diagram-token")}
+      `;
+    }
+
+    function renderSequenceLevel(level) {
+      const usedValues = gameState.levelState.placements.filter(Boolean);
+      const activeIndex = gameState.levelState.placements.findIndex(value => value === "");
+      const rows = level.steps.map((step, index) => {
+        const placed = gameState.levelState.placements[index];
+        return `
+          <div class="sequence-row">
+            <div class="sequence-label">
+              ${escapeHtml(step.label)}
+              <small>Fill this step in pathway order.</small>
+            </div>
+            <button
+              class="sequence-slot ${placed ? "is-correct" : "is-empty"}"
+              data-action="sequence-slot"
+              data-step-index="${index}"
+            >
+              <span class="sequence-index ${index === activeIndex ? "active" : ""}">${index + 1}</span>
+              <span>${placed ? escapeHtml(placed) : "Select the next structure or pathway step"}</span>
+            </button>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <section class="level-card">
+          <span class="eyebrow">Mechanic: Sequencing and pathway tracing</span>
+          <h2 class="level-title">${escapeHtml(level.title)}</h2>
+          <p class="level-subtitle">${escapeHtml(level.intro)}</p>
+          <div class="mini-grid">
+            <article class="info-card">
+              <span class="eyebrow">Objective</span>
+              <p>${escapeHtml(getCurrentObjective())}</p>
+            </article>
+            <article class="info-card">
+              <span class="eyebrow">Source note</span>
+              <p>${escapeHtml(level.sourceNote)}</p>
+            </article>
+          </div>
+          <div class="sequence-stack">${rows}</div>
+        </section>
+        ${renderTokenBank(gameState.levelState.tokens, usedValues, "select-sequence-token")}
+      `;
+    }
+
+    function renderAssignLevel(level) {
+      const unassignedCards = gameState.levelState.cards.filter(card => !gameState.levelState.assignments[card.id]);
+      const targetMarkup = level.targets.map(target => {
+        const assignedCards = level.cards.filter(card => gameState.levelState.assignments[card.id] === target.id);
+        return `
+          <article class="target-card">
+            <header>
+              <div>
+                <span class="eyebrow">${escapeHtml(target.subtitle)}</span>
+                <h3>${escapeHtml(target.label)}</h3>
+              </div>
+              <button class="target-btn" data-action="assign-target" data-target-id="${escapeHtml(target.id)}">
+                Place selected card
+              </button>
+            </header>
+            <p>${escapeHtml(target.description)}</p>
+            <div class="target-answer">
+              ${assignedCards.length ? assignedCards.map(card => `<span class="answer-chip">${escapeHtml(card.text)}</span>`).join("") : `<span class="eyebrow">No cards placed yet</span>`}
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      return `
+        <section class="level-card">
+          <span class="eyebrow">Mechanic: Matching map</span>
+          <h2 class="level-title">${escapeHtml(level.title)}</h2>
+          <p class="level-subtitle">${escapeHtml(level.intro)}</p>
+          <div class="mini-grid">
+            <article class="info-card">
+              <span class="eyebrow">Objective</span>
+              <p>${escapeHtml(getCurrentObjective())}</p>
+            </article>
+            <article class="info-card">
+              <span class="eyebrow">Source note</span>
+              <p>${escapeHtml(level.sourceNote)}</p>
+            </article>
+          </div>
+          <div class="assignment-grid">
+            <section class="bank-card">
+              <span class="eyebrow">Statement bank</span>
+              <h3>Select a statement</h3>
+              <div class="target-grid">
+                ${unassignedCards.map(card => `
+                  <button
+                    class="target-btn ${gameState.levelState.selectedCard === card.id ? "is-selected" : ""}"
+                    data-action="select-assign-card"
+                    data-card-id="${escapeHtml(card.id)}"
+                  >
+                    ${escapeHtml(card.text)}
+                  </button>
+                `).join("")}
+              </div>
+            </section>
+            <section class="target-grid">
+              ${targetMarkup}
+            </section>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderSortLevel(level) {
+      const remainingCards = gameState.levelState.cards.filter(card => !gameState.levelState.bins[card.id]);
+      const binMarkup = level.bins.map(bin => {
+        const assignedCards = level.cards.filter(card => gameState.levelState.bins[card.id] === bin.id);
+        return `
+          <article class="bin-card ${assignedCards.length ? "is-complete" : ""}">
+            <header>
+              <div>
+                <span class="eyebrow">${escapeHtml(bin.subtitle)}</span>
+                <h3>${escapeHtml(bin.label)}</h3>
+              </div>
+              <button class="bin-btn" data-action="sort-bin" data-bin-id="${escapeHtml(bin.id)}">
+                Place selected card
+              </button>
+            </header>
+            <p>${escapeHtml(bin.description)}</p>
+            <div class="bin-answers">
+              ${assignedCards.length ? assignedCards.map(card => `<span class="answer-chip">${escapeHtml(card.text)}</span>`).join("") : `<span class="eyebrow">Awaiting cards</span>`}
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      return `
+        <section class="level-card">
+          <span class="eyebrow">Mechanic: Sorting and classification</span>
+          <h2 class="level-title">${escapeHtml(level.title)}</h2>
+          <p class="level-subtitle">${escapeHtml(level.intro)}</p>
+          <div class="mini-grid">
+            <article class="info-card">
+              <span class="eyebrow">Objective</span>
+              <p>${escapeHtml(getCurrentObjective())}</p>
+            </article>
+            <article class="info-card">
+              <span class="eyebrow">Source note</span>
+              <p>${escapeHtml(level.sourceNote)}</p>
+            </article>
+          </div>
+          <div class="assignment-grid">
+            <section class="bank-card">
+              <span class="eyebrow">Signal examples</span>
+              <h3>Select a card</h3>
+              <div class="target-grid">
+                ${remainingCards.map(card => `
+                  <button
+                    class="target-btn ${gameState.levelState.selectedCard === card.id ? "is-selected" : ""}"
+                    data-action="select-sort-card"
+                    data-card-id="${escapeHtml(card.id)}"
+                  >
+                    ${escapeHtml(card.text)}
+                  </button>
+                `).join("")}
+              </div>
+            </section>
+            <section class="bin-grid">
+              ${binMarkup}
+            </section>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderChoiceLevel(level) {
+      const round = gameState.levelState.rounds[gameState.levelState.currentRound];
+      return `
+        <section class="level-card">
+          <span class="eyebrow">Mechanic: Comparison decisions</span>
+          <h2 class="level-title">${escapeHtml(level.title)}</h2>
+          <p class="level-subtitle">${escapeHtml(level.intro)}</p>
+          <div class="mini-grid">
+            <article class="info-card">
+              <span class="eyebrow">Objective</span>
+              <p>${escapeHtml(getCurrentObjective())}</p>
+            </article>
+            <article class="info-card">
+              <span class="eyebrow">Source note</span>
+              <p>${escapeHtml(level.sourceNote)}</p>
+            </article>
+          </div>
+          <div class="prompt-card">
+            <span class="eyebrow">Round ${gameState.levelState.currentRound + 1} of ${gameState.levelState.rounds.length}</span>
+            <h3>${escapeHtml(round.stem)}</h3>
+            <p>${escapeHtml(round.question)}</p>
+            <div class="choice-grid">
+              ${round.options.map(option => `
+                <button class="choice-btn" data-action="answer-choice" data-answer="${escapeHtml(option)}">
+                  ${escapeHtml(option)}
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderCaseLevel(level) {
+      const round = gameState.levelState.rounds[gameState.levelState.currentRound];
+      return `
+        <section class="level-card">
+          <span class="eyebrow">Mechanic: Case-based reasoning</span>
+          <h2 class="level-title">${escapeHtml(level.title)}</h2>
+          <p class="level-subtitle">${escapeHtml(level.intro)}</p>
+          <div class="mini-grid">
+            <article class="info-card">
+              <span class="eyebrow">Objective</span>
+              <p>${escapeHtml(getCurrentObjective())}</p>
+            </article>
+            <article class="info-card">
+              <span class="eyebrow">Source note</span>
+              <p>${escapeHtml(level.sourceNote)}</p>
+            </article>
+          </div>
+          <div class="case-card">
+            <span class="eyebrow">Case ${gameState.levelState.currentRound + 1} of ${gameState.levelState.rounds.length}</span>
+            <h3>${escapeHtml(round.stem)}</h3>
+            <p>${escapeHtml(round.question)}</p>
+            <div class="target-grid">
+              ${round.options.map(option => `
+                <button class="case-btn" data-action="answer-case" data-answer="${escapeHtml(option)}">
+                  ${escapeHtml(option)}
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderGameScreen() {
+      const level = getLevel();
+      const levelState = gameState.levelState;
+      const levelNumber = gameState.levelIndex + 1;
+      const interactionProgress = (levelState.correctItems.length / Math.max(levelState.totalItems, 1)) * 100;
+      let levelMarkup = "";
+
+      if (level.mechanic === "diagramDrop") {
+        levelMarkup = renderDiagramDropLevel(level);
+      }
+      if (level.mechanic === "sequence") {
+        levelMarkup = renderSequenceLevel(level);
+      }
+      if (level.mechanic === "assign") {
+        levelMarkup = renderAssignLevel(level);
+      }
+      if (level.mechanic === "sort") {
+        levelMarkup = renderSortLevel(level);
+      }
+      if (level.mechanic === "choice") {
+        levelMarkup = levelState.completed ? "" : renderChoiceLevel(level);
+      }
+      if (level.mechanic === "cases") {
+        levelMarkup = levelState.completed ? "" : renderCaseLevel(level);
+      }
+
+      return `
+        <section class="screen game-screen">
+          <header class="game-header">
+            <div class="game-title-wrap">
+              <span class="eyebrow">Foundational Movement Science I</span>
+              <h1 class="game-title">${escapeHtml(level.title)}</h1>
+              <p>${escapeHtml(getCurrentObjective())}</p>
+            </div>
+            <div class="screen-actions">
+              <button class="ghost-btn" data-action="open-instructions">Instructions</button>
+              <button class="ghost-btn" data-action="restart-level">Restart level</button>
+              <button class="ghost-btn" data-action="back-to-title">Exit to title</button>
+            </div>
+          </header>
+
+          <section class="hud-grid">
+            <article class="stat-card">
+              <span class="eyebrow">Progress</span>
+              <strong>Level ${levelNumber} of ${CONTENT_DATA.levels.length}</strong>
+              <p>${escapeHtml(level.title)}</p>
+              <div class="progress-shell" aria-hidden="true">
+                <div class="progress-fill" style="width: ${renderLevelProgress()}%"></div>
+              </div>
+            </article>
+            <article class="stat-card">
+              <span class="eyebrow">Score</span>
+              <strong>${gameState.score}</strong>
+              <p>Points earned across completed interactions</p>
+            </article>
+            <article class="stat-card">
+              <span class="eyebrow">Level mastery</span>
+              <strong>${levelState.correctItems.length} / ${levelState.totalItems}</strong>
+              <p>Correctly completed interactions in this level</p>
+              <div class="progress-shell" aria-hidden="true">
+                <div class="progress-fill" style="width: ${interactionProgress}%"></div>
+              </div>
+            </article>
+            <article class="stat-card">
+              <span class="eyebrow">Mode</span>
+              <strong>${escapeHtml(MODE_CONFIG[gameState.mode].label)}</strong>
+              <p>${escapeHtml(MODE_CONFIG[gameState.mode].description)}</p>
+            </article>
+            <article class="stat-card">
+              <span class="eyebrow">${gameState.mode === "challenge" ? "Lives" : "Learning log"}</span>
+              <strong>${gameState.mode === "challenge" ? `${gameState.lives}` : `${gameState.mistakes}`}</strong>
+              <p>${gameState.mode === "challenge" ? "Lives remaining in Challenge Mode" : "Total incorrect attempts so far"}</p>
+            </article>
+            <article class="stat-card">
+              <span class="eyebrow">${gameState.mode === "challenge" ? "Timer" : "Review tags"}</span>
+              <strong class="timer-value" data-role="timer">${gameState.mode === "challenge" ? `${gameState.timerSeconds}s` : countMissedTags()}</strong>
+              <p>${gameState.mode === "challenge" ? "Time remaining for this level" : "Concept areas flagged for review"}</p>
+            </article>
+          </section>
+
+          <div class="game-grid">
+            <div class="play-area">
+              ${levelMarkup}
+              ${renderCompletionPanel(level)}
+              ${renderTimeoutPanel()}
+            </div>
+            <aside class="side-panel">
+              ${renderFeedbackPanel()}
+              ${renderHintPanel(level)}
+              <section class="summary-card">
+                <span class="eyebrow">Why this level matters</span>
+                <h3>Objective focus</h3>
+                <p>${escapeHtml(getCurrentObjective())}</p>
+                <ul>
+                  <li>Immediate feedback is designed from the handout language rather than extra unsupported detail.</li>
+                  <li>Challenge Mode keeps pacing tighter; Study Mode slows down for explanation and hinting.</li>
+                  <li>Missed concepts appear again on the final review screen by topic.</li>
+                </ul>
+              </section>
+            </aside>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTitleScreen() {
+      return `
+        <section class="screen">
+          <div class="hero">
+            <section class="hero-copy">
+              <span class="eyebrow">Single-file classroom activity</span>
+              <h1>${escapeHtml(CONTENT_DATA.title)}</h1>
+              <p>${escapeHtml(CONTENT_DATA.subtitle)} This activity uses the uploaded neuroanatomy handout as its primary content source and keeps the tone instructional, accurate, and classroom-ready.</p>
+              <div class="hero-badges">
+                <article class="badge-card">
+                  <span class="badge-eyebrow">Format</span>
+                  <strong>6 levels, 1 activity</strong>
+                  <p>Runs locally by opening <code>index.html</code> in a browser.</p>
+                </article>
+                <article class="badge-card">
+                  <span class="badge-eyebrow">Audience</span>
+                  <strong>FMS I and first-year DPT</strong>
+                  <p>Also fits early health-science learners studying nervous system organization.</p>
+                </article>
+                <article class="badge-card">
+                  <span class="badge-eyebrow">Estimated time</span>
+                  <strong>${escapeHtml(CONTENT_DATA.estimatedTime)}</strong>
+                  <p>Designed for a focused in-class review or guided preparation.</p>
+                </article>
+              </div>
+              <div class="screen-actions">
+                <button class="primary-btn" data-action="open-mode">Start activity</button>
+                <button class="secondary-btn" data-action="open-instructions">View instructions</button>
+              </div>
+            </section>
+            <aside class="hero-panel">
+              <h2>Learning targets</h2>
+              <p>Each level maps to one Foundational Movement Science I learning objective drawn from the uploaded handout.</p>
+              <ol class="objective-list">
+                ${CONTENT_DATA.objectives.map(text => `<li>${escapeHtml(text)}</li>`).join("")}
+              </ol>
+            </aside>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderInstructionsScreen() {
+      return `
+        <section class="screen instructions-layout">
+          <header>
+            <span class="eyebrow">Instructions</span>
+            <h1 class="instructions-title">How to use the activity</h1>
+          </header>
+          <div class="instructions-grid">
+            <article class="instructions-card">
+              <h3>How play works</h3>
+              <ul>
+                <li>The activity includes 6 levels, each tied to one course learning objective.</li>
+                <li>Use mouse, trackpad, touch, or keyboard-friendly buttons to select answers.</li>
+                <li>For drag-and-drop style levels, you can also click a label first and then click its destination.</li>
+                <li>Immediate feedback appears after every interaction.</li>
+                <li>The final review screen summarizes your score, level performance, and concepts to revisit.</li>
+              </ul>
+            </article>
+            <article class="instructions-card">
+              <h3>Study Mode</h3>
+              <ul>
+                <li>Provides fuller explanatory feedback during play.</li>
+                <li>Includes one level-specific hint button.</li>
+                <li>Works best for guided study and course review.</li>
+              </ul>
+            </article>
+            <article class="instructions-card">
+              <h3>Challenge Mode</h3>
+              <ul>
+                <li>Uses a timer for each level.</li>
+                <li>Starts with 3 lives for the full run.</li>
+                <li>Keeps feedback shorter during play, then emphasizes review at the end.</li>
+              </ul>
+            </article>
+            <article class="instructions-card">
+              <h3>Source fidelity</h3>
+              <ul>
+                <li>Educational content is based on the uploaded handout sections on meninges, ventricles, CNS, PNS, autonomic nervous system, and enteric nervous system.</li>
+                <li>Where the handout is brief, the activity stays general rather than making unsupported claims.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="screen-footer">
+            <p class="level-subtitle">You can return here at any point during the game.</p>
+            <div class="screen-actions">
+              ${gameState.returnScreen === "game" ? `<button class="primary-btn" data-action="return-to-game">Return to current level</button>` : `<button class="primary-btn" data-action="open-mode">Choose a mode</button>`}
+              <button class="ghost-btn" data-action="back-to-title">Back to title</button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderModeScreen() {
+      return `
+        <section class="screen">
+          <div class="mode-grid">
+            <article class="mode-card">
+              <span class="eyebrow">Mode selection</span>
+              <h2>Study Mode</h2>
+              <p>Use this for guided learning, class walkthroughs, and self-checking with fuller explanatory feedback.</p>
+              <ul>
+                <li>Unlimited support pacing</li>
+                <li>Level hint available</li>
+                <li>Detailed feedback during play</li>
+              </ul>
+              <div class="screen-actions">
+                <button class="primary-btn" data-action="start-mode" data-mode="study">Start Study Mode</button>
+              </div>
+            </article>
+            <article class="mode-card">
+              <span class="eyebrow">Mode selection</span>
+              <h2>Challenge Mode</h2>
+              <p>Use this for quicker retrieval practice with a timer on each level and a shared pool of lives.</p>
+              <ul>
+                <li>3 lives total</li>
+                <li>Faster pacing</li>
+                <li>Shorter feedback while playing</li>
+              </ul>
+              <div class="screen-actions">
+                <button class="secondary-btn" data-action="start-mode" data-mode="challenge">Start Challenge Mode</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderResultsScreen() {
+      const totalPossibleStudy = CONTENT_DATA.levels.reduce((sum, level) => {
+        if (level.mechanic === "diagramDrop") return sum + level.slots.length * 10;
+        if (level.mechanic === "sequence") return sum + level.steps.length * 10;
+        if (level.mechanic === "assign") return sum + level.cards.length * 10;
+        if (level.mechanic === "sort") return sum + level.cards.length * 10;
+        if (level.mechanic === "choice") return sum + level.prompts.length * 10;
+        if (level.mechanic === "cases") return sum + level.cases.length * 10;
+        return sum;
+      }, 0);
+      const reviewItems = Object.entries(gameState.missedTags)
+        .sort((a, b) => b[1] - a[1])
+        .map(([tag, count]) => {
+          const meta = CONTENT_DATA.reviewTagLabels[tag] || { label: tag, objective: "?" };
+          return `
+            <article class="review-item">
+              <strong>Objective ${escapeHtml(meta.objective)}: ${escapeHtml(meta.label)}</strong>
+              <p>Flagged ${count} time${count === 1 ? "" : "s"} during play. Review this concept in the handout and replay the related level if needed.</p>
+            </article>
+          `;
+        }).join("");
+
+      const levelCards = CONTENT_DATA.levels.map((level, index) => {
+        const result = gameState.levelResults[index];
+        if (!result) {
+          return `
+            <article class="result-level-card">
+              <div class="result-level-top">
+                <strong>${escapeHtml(level.title)}</strong>
+                <span class="result-metric">Not completed</span>
+              </div>
+              <p>${escapeHtml(CONTENT_DATA.objectives[level.objectiveId - 1])}</p>
+            </article>
+          `;
+        }
+        return `
+          <article class="result-level-card">
+            <div class="result-level-top">
+              <strong>${escapeHtml(result.title)}</strong>
+              <span class="result-metric">${result.correctItems} / ${result.totalItems} interactions</span>
+            </div>
+            <p>${escapeHtml(CONTENT_DATA.objectives[result.objectiveId - 1])}</p>
+            <p>Score earned in level: ${result.scoreEarned}. Incorrect attempts during level: ${result.attempts}.</p>
+          </article>
+        `;
+      }).join("");
+
+      return `
+        <section class="screen results-layout">
+          <header>
+            <span class="eyebrow">Final review</span>
+            <h1 class="results-title">Session summary</h1>
+          </header>
+
+          <div class="level-summary-grid">
+            <article class="summary-card">
+              <span class="eyebrow">Total score</span>
+              <strong>${gameState.score}</strong>
+              <p>Study-mode reference maximum is ${totalPossibleStudy} points before challenge bonuses.</p>
+            </article>
+            <article class="summary-card">
+              <span class="eyebrow">Completed levels</span>
+              <strong>${gameState.levelResults.filter(Boolean).length} / ${CONTENT_DATA.levels.length}</strong>
+              <p>Each level maps to one required learning objective.</p>
+            </article>
+            <article class="summary-card">
+              <span class="eyebrow">${gameState.mode === "challenge" ? "Lives remaining" : "Incorrect attempts"}</span>
+              <strong>${gameState.mode === "challenge" ? gameState.lives : gameState.mistakes}</strong>
+              <p>${gameState.mode === "challenge" ? "How many lives were left at the end of the run." : "Every incorrect attempt is tracked for review, even if corrected later."}</p>
+            </article>
+            <article class="summary-card">
+              <span class="eyebrow">Review concepts</span>
+              <strong>${countMissedTags()}</strong>
+              <p>Unique concept tags flagged during play.</p>
+            </article>
+          </div>
+
+          <div class="results-grid">
+            <article class="results-card">
+              <h3>Level-by-level performance</h3>
+              <div class="results-levels">${levelCards}</div>
+            </article>
+            <article class="results-card">
+              <h3>Concepts to revisit</h3>
+              ${reviewItems ? `<div class="review-list">${reviewItems}</div>` : `<p>No concept tags were flagged. This run stayed accurate throughout.</p>`}
+            </article>
+          </div>
+
+          <div class="screen-footer">
+            <p class="level-subtitle">Replay will reshuffle item order where appropriate and reset score, progress, and review tags.</p>
+            <div class="screen-actions">
+              <button class="primary-btn" data-action="replay-mode" data-mode="study">Replay Study Mode</button>
+              <button class="secondary-btn" data-action="replay-mode" data-mode="challenge">Replay Challenge Mode</button>
+              <button class="ghost-btn" data-action="back-to-title">Back to title</button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderApp() {
+      if (gameState.screen === "title") {
+        app.innerHTML = renderTitleScreen();
+      }
+      if (gameState.screen === "instructions") {
+        app.innerHTML = renderInstructionsScreen();
+      }
+      if (gameState.screen === "mode") {
+        app.innerHTML = renderModeScreen();
+      }
+      if (gameState.screen === "game") {
+        app.innerHTML = renderGameScreen();
+      }
+      if (gameState.screen === "results") {
+        app.innerHTML = renderResultsScreen();
+      }
+      bindDragTargets();
+      updateTimerDisplay();
+    }
+
+    // =========================================================
+    // EVENT HANDLING
+    // =========================================================
+    app.addEventListener("click", event => {
+      const actionEl = event.target.closest("[data-action]");
+      if (!actionEl) {
+        return;
+      }
+      const { action } = actionEl.dataset;
+
+      if (action === "open-instructions") {
+        if (gameState.screen === "game") {
+          gameState.returnScreen = "game";
+          clearTimer();
+        }
+        gameState.screen = "instructions";
+        renderApp();
+        return;
+      }
+
+      if (action === "return-to-game") {
+        gameState.returnScreen = null;
+        gameState.screen = "game";
+        if (gameState.mode === "challenge" && gameState.levelState && !gameState.levelState.completed && !gameState.levelState.timedOut) {
+          startTimer(gameState.timerSeconds || getLevel().challengeSeconds);
+        }
+        renderApp();
+        return;
+      }
+
+      if (action === "open-mode") {
+        gameState.returnScreen = null;
+        gameState.screen = "mode";
+        renderApp();
+        return;
+      }
+
+      if (action === "back-to-title") {
+        clearTimer();
+        Object.assign(gameState, createInitialState());
+        renderApp();
+        return;
+      }
+
+      if (action === "start-mode" || action === "replay-mode") {
+        resetStateForReplay(actionEl.dataset.mode);
+        return;
+      }
+
+      if (action === "show-hint") {
+        showHint();
+        return;
+      }
+
+      if (action === "restart-level") {
+        initializeLevel(gameState.levelIndex);
+        return;
+      }
+
+      if (action === "next-level") {
+        goToNextLevel();
+        return;
+      }
+
+      if (action === "view-results") {
+        finishGame();
+        return;
+      }
+
+      if (gameState.screen !== "game") {
+        return;
+      }
+
+      if (action === "select-diagram-token") {
+        handleDiagramTokenSelect(actionEl.dataset.token);
+        return;
+      }
+
+      if (action === "diagram-slot") {
+        const selectedToken = gameState.levelState.selectedToken;
+        if (!selectedToken) {
+          setFeedback("incorrect", "Select a label first", "Choose a label from the token bank, then place it into a slot.", "", []);
+          return;
+        }
+        handleDiagramDrop(actionEl.dataset.slotId, selectedToken);
+        return;
+      }
+
+      if (action === "select-sequence-token") {
+        handleSequenceTokenSelect(actionEl.dataset.token);
+        return;
+      }
+
+      if (action === "sequence-slot") {
+        const selectedToken = gameState.levelState.selectedToken;
+        if (!selectedToken) {
+          setFeedback("incorrect", "Select the next step first", "Choose a token from the bank, then place it into the next open pathway step.", "", []);
+          return;
+        }
+        handleSequencePlace(Number(actionEl.dataset.stepIndex), selectedToken);
+        return;
+      }
+
+      if (action === "select-assign-card") {
+        handleAssignCardSelect(actionEl.dataset.cardId);
+        return;
+      }
+
+      if (action === "assign-target") {
+        const selectedCard = gameState.levelState.selectedCard;
+        if (!selectedCard) {
+          setFeedback("incorrect", "Select a statement first", "Choose a statement from the bank, then place it under the best target.", "", []);
+          return;
+        }
+        handleAssignTarget(actionEl.dataset.targetId, selectedCard);
+        return;
+      }
+
+      if (action === "select-sort-card") {
+        handleSortCardSelect(actionEl.dataset.cardId);
+        return;
+      }
+
+      if (action === "sort-bin") {
+        const selectedCard = gameState.levelState.selectedCard;
+        if (!selectedCard) {
+          setFeedback("incorrect", "Select a signal card first", "Choose a signal example, then place it into the correct sensory or motor bin.", "", []);
+          return;
+        }
+        handleSortBin(actionEl.dataset.binId, selectedCard);
+        return;
+      }
+
+      if (action === "answer-choice") {
+        handleChoiceAnswer(actionEl.dataset.answer);
+        return;
+      }
+
+      if (action === "answer-case") {
+        handleCaseAnswer(actionEl.dataset.answer);
+      }
+    });
+
+    function bindDragTargets() {
+      const level = getLevel();
+      const levelState = gameState.levelState;
+      if (!level || !levelState || gameState.screen !== "game") {
+        return;
+      }
+
+      if (level.mechanic === "diagramDrop") {
+        app.querySelectorAll("[data-action='select-diagram-token']").forEach(el => {
+          el.addEventListener("dragstart", event => {
+            if (el.classList.contains("is-used")) {
+              event.preventDefault();
+              return;
+            }
+            event.dataTransfer.setData("text/plain", el.dataset.token);
+          });
+        });
+        app.querySelectorAll("[data-drop-target='diagram']").forEach(el => {
+          el.addEventListener("dragover", event => {
+            event.preventDefault();
+          });
+          el.addEventListener("drop", event => {
+            event.preventDefault();
+            const token = event.dataTransfer.getData("text/plain");
+            if (token) {
+              handleDiagramDrop(el.dataset.slotId, token);
+            }
+          });
+        });
+      }
+    }
+
+    renderApp();
+  </script>
+</body>
+</html>
