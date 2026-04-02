@@ -675,6 +675,12 @@
       gap: 10px;
     }
 
+    .term-grid.drag-bank,
+    .term-cluster.drag-bin {
+      min-height: 76px;
+      align-content: flex-start;
+    }
+
     .bucket-button,
     .term-button,
     .choice-button,
@@ -714,6 +720,26 @@
     .sequence-target small,
     .term-bank small {
       color: var(--muted);
+    }
+
+    .drop-zone {
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+    }
+
+    .drop-zone.is-over {
+      border-color: rgba(40, 80, 167, 0.35);
+      background: rgba(40, 80, 167, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(40, 80, 167, 0.12);
+    }
+
+    .drag-card {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .drag-card.is-dragging {
+      opacity: 0.55;
+      cursor: grabbing;
     }
 
     .feedback-panel {
@@ -1390,21 +1416,11 @@
                   <rect width="116" height="30" rx="15" fill="#fff0f1" stroke="#ef3e42"></rect>
                   <text x="58" y="20" text-anchor="middle" fill="#b2222a" font-size="14" font-weight="700">Ventral root</text>
                 </g>
-                <g transform="translate(284 98)">
+                <path d="M354 106 L354 132" fill="none" stroke="#232a33" stroke-width="3" stroke-linecap="round"></path>
+                <polygon points="354,138 348,128 360,128" fill="#232a33"></polygon>
+                <g transform="translate(284 74)">
                   <rect width="138" height="32" rx="16" fill="#ffffff" stroke="#c8d1dc"></rect>
                   <text x="69" y="21" text-anchor="middle" fill="#232a33" font-size="14" font-weight="700">Mixed spinal nerve</text>
-                </g>
-                <g transform="translate(386 42)">
-                  <rect width="92" height="30" rx="15" fill="#eef3ff" stroke="#2850a7"></rect>
-                  <text x="46" y="20" text-anchor="middle" fill="#2850a7" font-size="13" font-weight="700">Cervical</text>
-                </g>
-                <g transform="translate(386 150)">
-                  <rect width="92" height="30" rx="15" fill="#eef3ff" stroke="#2850a7"></rect>
-                  <text x="46" y="20" text-anchor="middle" fill="#2850a7" font-size="13" font-weight="700">Brachial</text>
-                </g>
-                <g transform="translate(376 268)">
-                  <rect width="116" height="30" rx="15" fill="#eef3ff" stroke="#2850a7"></rect>
-                  <text x="58" y="20" text-anchor="middle" fill="#2850a7" font-size="13" font-weight="700">Lumbar / Sacral</text>
                 </g>
               </svg>
               <p class="diagram-caption">Follow the path from root entry and exit, through the brief mixed spinal nerve segment, into plexus redistribution and named peripheral nerves.</p>
@@ -1636,8 +1652,8 @@
                     </g>
                   </svg>
                   <button class="hotspot-button" style="top: 28%; left: 56%;" data-structure="drg" type="button" aria-label="Hotspot 1"></button>
-                  <button class="hotspot-button" style="top: 28%; left: 43%;" data-structure="dorsal-root" type="button" aria-label="Hotspot 2"></button>
-                  <button class="hotspot-button" style="top: 58%; left: 47%;" data-structure="ventral-root" type="button" aria-label="Hotspot 3"></button>
+                  <button class="hotspot-button" style="top: 28%; left: 40%;" data-structure="dorsal-root" type="button" aria-label="Hotspot 2"></button>
+                  <button class="hotspot-button" style="top: 58%; left: 43%;" data-structure="ventral-root" type="button" aria-label="Hotspot 3"></button>
                 </div>
                 <fieldset style="margin-top: 16px;">
                   <legend>Which statement best explains why the DRG matters clinically?</legend>
@@ -1703,24 +1719,22 @@
             <div class="two-column" style="margin-top: 18px;">
               <div class="quiz-block">
                 <h3>Checkpoint: Sort the clinical examples</h3>
-                <p>Use the same click-to-place workflow. These cases are about the pattern, not perfect detail memorization.</p>
-                <div class="bucket-toggle" role="group" aria-label="Select active sorting bucket for station 3">
-                  <button class="bucket-button is-active" id="m3BucketRoot" data-bucket="root" type="button">Place into root-level pattern</button>
-                  <button class="bucket-button" id="m3BucketPeripheral" data-bucket="peripheral" type="button">Place into peripheral nerve pattern</button>
-                </div>
+                <p>Drag each case card into the best pattern bin. If you need to change an answer, drag it again or click a placed card to return it to the bank.</p>
                 <div class="sort-zone-grid" style="margin-top: 14px;">
                   <div class="term-bank">
                     <h4>Clinical examples</h4>
-                    <small>Unassigned cards</small>
-                    <div class="term-grid" id="m3Bank"></div>
+                    <small>Drag from this bank into the correct pattern bin</small>
+                    <div class="term-grid drag-bank drop-zone" id="m3Bank"></div>
                   </div>
                   <div class="sort-bin dorsal">
                     <h4>Root-level pattern</h4>
-                    <div class="term-cluster" id="m3RootBin"></div>
+                    <small>Drop cases that fit a single spinal level or root pattern</small>
+                    <div class="term-cluster drag-bin drop-zone" id="m3RootBin"></div>
                   </div>
                   <div class="sort-bin ventral">
                     <h4>Peripheral nerve pattern</h4>
-                    <div class="term-cluster" id="m3PeripheralBin"></div>
+                    <small>Drop cases that fit one named peripheral nerve territory</small>
+                    <div class="term-cluster drag-bin drop-zone" id="m3PeripheralBin"></div>
                   </div>
                 </div>
                 <div class="button-row" style="margin-top: 16px;">
@@ -2094,6 +2108,83 @@
           </div>
         </section>
 
+        <section class="mission-card" id="bonus-localization-guide">
+          <div class="section-inner">
+            <h2 class="mission-title">How to Localize</h2>
+            <p>Use this decision guide after you finish the stations. It turns the full lab into one clinical reasoning sequence you can reuse when you see sensory change, weakness, or mixed limb findings.</p>
+
+            <div class="summary-grid">
+              <div class="summary-card">
+                <h3>Step 1: Identify the type of finding</h3>
+                <p>Start by asking what kind of deficit you are seeing.</p>
+                <ul class="summary-list">
+                  <li>If the finding is primarily sensory, think about dorsal root input and whether a dermatomal pattern is present.</li>
+                  <li>If the finding is primarily motor, think about ventral root output and whether a characteristic movement is weak.</li>
+                  <li>If sensory and motor findings are both present, keep both the root and named peripheral nerve possibilities open.</li>
+                </ul>
+                <div class="button-row" style="margin-top: 14px;">
+                  <button class="button-ghost" type="button" data-target="mission-1">Review Station 1</button>
+                  <button class="button-ghost" type="button" data-target="mission-2">Review Station 2</button>
+                </div>
+              </div>
+
+              <div class="summary-card">
+                <h3>Step 2: Decide whether the pattern is root-level or named-nerve</h3>
+                <p>Then ask whether the findings fit one spinal level or the territory of one named peripheral nerve.</p>
+                <ul class="summary-list">
+                  <li>A dermatome or myotome pattern points you toward a spinal root or segmental problem.</li>
+                  <li>A named sensory or motor territory points you toward a peripheral nerve lesion.</li>
+                  <li>If the pattern crosses more than one named nerve but still looks segmental, a root lesion becomes more likely.</li>
+                </ul>
+                <div class="button-row" style="margin-top: 14px;">
+                  <button class="button-ghost" type="button" data-target="mission-3">Review Station 3</button>
+                  <button class="button-ghost" type="button" data-target="mission-6">Review Station 6</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="summary-grid" style="margin-top: 18px;">
+              <div class="summary-card">
+                <h3>Step 3: Remember plexus mixing before you over-localize</h3>
+                <p>Do not assume one weak movement equals one single root or one single distal nerve without checking the pattern.</p>
+                <ul class="summary-list">
+                  <li>Fibers from multiple spinal levels mix in a plexus before they enter a named peripheral nerve.</li>
+                  <li>That means one root lesion may weaken a movement without eliminating it completely.</li>
+                  <li>It also means one named peripheral nerve can contain fibers from several spinal levels.</li>
+                </ul>
+                <div class="button-row" style="margin-top: 14px;">
+                  <button class="button-ghost" type="button" data-target="mission-4">Review Station 4</button>
+                  <button class="button-ghost" type="button" data-target="mission-5">Review Station 5</button>
+                </div>
+              </div>
+
+              <div class="summary-card">
+                <h3>Step 4: Use simple anchor examples</h3>
+                <p>Return to the anchor examples from the lab before jumping to a diagnosis.</p>
+                <ul class="summary-list">
+                  <li>Lateral forearm and thumb sensory change fits a C6-type dermatome pattern.</li>
+                  <li>Ankle dorsiflexion weakness fits an L4-L5-type myotome pattern.</li>
+                  <li>Symptoms isolated to a named nerve territory fit a peripheral nerve pattern more than a root-level pattern.</li>
+                </ul>
+                <div class="button-row" style="margin-top: 14px;">
+                  <button class="button-ghost" type="button" data-target="mission-6">Review Station 6</button>
+                  <button class="button-ghost" type="button" data-target="final-challenge">Practice in Final Challenge</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="callout blue" style="margin-top: 18px;">
+              <p class="callout-title">Quick Decision Path</p>
+              <p>1. Is the finding sensory, motor, or mixed? 2. Does it fit one spinal level or one named nerve territory? 3. Could plexus mixing explain why weakness is partial rather than complete? 4. Which dermatome or myotome anchor best fits the exam findings?</p>
+            </div>
+
+            <div class="callout cyan" style="margin-top: 14px;">
+              <p class="callout-title">How This Connects to the Lab</p>
+              <p>Stations 1 and 2 help you identify the direction of information flow and the clinical importance of the DRG. Station 3 teaches pattern recognition. Stations 4 and 5 explain why named peripheral nerves do not map neatly to one spinal level. Station 6 gives you the dermatome and myotome tools that make localization clinically useful.</p>
+            </div>
+          </div>
+        </section>
+
         <section class="mission-card" id="final-challenge" data-mission-key="final">
           <div class="section-inner">
             <div class="mission-heading">
@@ -2226,7 +2317,7 @@
                 <p>Use these controls for a study pass, instructor projection, or print-friendly review handout.</p>
                 <div class="button-row" style="margin-top: 14px;">
                   <button class="button-primary" id="restartLab" type="button">Restart lab</button>
-                  <button class="button-secondary" id="revealAnswersButton" type="button" aria-pressed="false">Reveal all correct answers</button>
+                  <button class="button-secondary" id="revealAnswersButton" type="button" aria-pressed="false" disabled>Reveal answers locked</button>
                   <button class="button-ghost" id="printButton" type="button">Print / save PDF</button>
                 </div>
                 <p class="print-note">Print styling hides most controls and reveals answer keys for a cleaner review handout.</p>
@@ -2368,7 +2459,6 @@
           reasonCorrect: false
         },
         m3: {
-          activeBucket: "root",
           assignments: {},
           reasonCorrect: false
         },
@@ -2546,10 +2636,87 @@
       renderClickSort(m1Terms, "m1", "m1Bank", "m1DorsalBin", "m1VentralBin", { a: "dorsal", b: "ventral" });
     }
 
+    function buildM3DragCard(term, placement) {
+      const button = document.createElement("button");
+      button.className = "term-button drag-card";
+      button.type = "button";
+      button.draggable = true;
+      button.textContent = term.label;
+      button.dataset.termId = term.id;
+      button.setAttribute("aria-label", `${term.label}. Drag to move, or click to return to the bank.`);
+
+      button.addEventListener("dragstart", (event) => {
+        button.classList.add("is-dragging");
+        event.dataTransfer.setData("text/plain", term.id);
+        event.dataTransfer.effectAllowed = "move";
+      });
+
+      button.addEventListener("dragend", () => {
+        button.classList.remove("is-dragging");
+        document.querySelectorAll("#m3Bank, #m3RootBin, #m3PeripheralBin").forEach((zone) => {
+          zone.classList.remove("is-over");
+        });
+      });
+
+      button.addEventListener("click", () => {
+        if (placement) {
+          delete state.activities.m3.assignments[term.id];
+          renderMission3();
+          clearFeedback("m3Feedback");
+        }
+      });
+
+      return button;
+    }
+
+    function setupM3DropZone(elementId, targetBucket) {
+      const zone = document.getElementById(elementId);
+      zone.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        zone.classList.add("is-over");
+      });
+      zone.addEventListener("dragenter", (event) => {
+        event.preventDefault();
+        zone.classList.add("is-over");
+      });
+      zone.addEventListener("dragleave", (event) => {
+        if (!zone.contains(event.relatedTarget)) {
+          zone.classList.remove("is-over");
+        }
+      });
+      zone.addEventListener("drop", (event) => {
+        event.preventDefault();
+        zone.classList.remove("is-over");
+        const termId = event.dataTransfer.getData("text/plain");
+        if (!termId) {
+          return;
+        }
+        if (targetBucket) {
+          state.activities.m3.assignments[termId] = targetBucket;
+        } else {
+          delete state.activities.m3.assignments[termId];
+        }
+        renderMission3();
+        clearFeedback("m3Feedback");
+      });
+    }
+
     function renderMission3() {
-      document.getElementById("m3BucketRoot").classList.toggle("is-active", state.activities.m3.activeBucket === "root");
-      document.getElementById("m3BucketPeripheral").classList.toggle("is-active", state.activities.m3.activeBucket === "peripheral");
-      renderClickSort(m3Terms, "m3", "m3Bank", "m3RootBin", "m3PeripheralBin", { a: "root", b: "peripheral" });
+      const bank = document.getElementById("m3Bank");
+      const rootBin = document.getElementById("m3RootBin");
+      const peripheralBin = document.getElementById("m3PeripheralBin");
+
+      bank.innerHTML = "";
+      rootBin.innerHTML = "";
+      peripheralBin.innerHTML = "";
+
+      const unassigned = m3Terms.filter((term) => !state.activities.m3.assignments[term.id]);
+      const assignedRoot = m3Terms.filter((term) => state.activities.m3.assignments[term.id] === "root");
+      const assignedPeripheral = m3Terms.filter((term) => state.activities.m3.assignments[term.id] === "peripheral");
+
+      unassigned.forEach((term) => bank.appendChild(buildM3DragCard(term, null)));
+      assignedRoot.forEach((term) => rootBin.appendChild(buildM3DragCard(term, "root")));
+      assignedPeripheral.forEach((term) => peripheralBin.appendChild(buildM3DragCard(term, "peripheral")));
     }
 
     function renderMission4() {
@@ -2608,8 +2775,15 @@
       }
 
       const revealAnswersButton = document.getElementById("revealAnswersButton");
-      revealAnswersButton.setAttribute("aria-pressed", String(state.revealAnswers));
-      revealAnswersButton.textContent = state.revealAnswers ? "Hide revealed answers" : "Reveal all correct answers";
+      if (state.completedMissions.final) {
+        revealAnswersButton.disabled = false;
+        revealAnswersButton.setAttribute("aria-pressed", String(state.revealAnswers));
+        revealAnswersButton.textContent = state.revealAnswers ? "Hide revealed answers" : "Reveal all correct answers";
+      } else {
+        revealAnswersButton.disabled = true;
+        revealAnswersButton.setAttribute("aria-pressed", "false");
+        revealAnswersButton.textContent = "Reveal answers locked";
+      }
     }
 
     function updateFinalChallengeUI() {
@@ -2700,8 +2874,10 @@
       });
 
       document.getElementById("revealAnswersButton").addEventListener("click", () => {
-        state.revealAnswers = !state.revealAnswers;
-        updateReviewModeUI();
+        if (state.completedMissions.final) {
+          state.revealAnswers = !state.revealAnswers;
+          updateReviewModeUI();
+        }
       });
 
       document.getElementById("printButton").addEventListener("click", () => window.print());
@@ -2773,14 +2949,9 @@
     }
 
     function initMission3() {
-      document.getElementById("m3BucketRoot").addEventListener("click", () => {
-        state.activities.m3.activeBucket = "root";
-        renderMission3();
-      });
-      document.getElementById("m3BucketPeripheral").addEventListener("click", () => {
-        state.activities.m3.activeBucket = "peripheral";
-        renderMission3();
-      });
+      setupM3DropZone("m3Bank", null);
+      setupM3DropZone("m3RootBin", "root");
+      setupM3DropZone("m3PeripheralBin", "peripheral");
       document.getElementById("m3Check").addEventListener("click", () => {
         const allAssigned = m3Terms.every((term) => state.activities.m3.assignments[term.id]);
         if (!allAssigned) {
