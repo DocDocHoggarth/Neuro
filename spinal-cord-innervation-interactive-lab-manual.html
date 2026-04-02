@@ -1,0 +1,2990 @@
+<!DOCTYPE html>
+<!--
+  Spinal Cord & Innervation Interactive Lab Manual
+  Single-file educational web app for first-year DPT learners
+  Organization:
+  1. HTML app shell and mission content
+  2. Embedded CSS design system and responsive layout
+  3. Embedded JavaScript content data, state, rendering, and interactions
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spinal Cord &amp; Innervation Interactive Lab Manual</title>
+  <style>
+    :root {
+      --ncc-primary: #a6192e;
+      --ncc-red-accent: #ef3e42;
+      --ncc-cyan-accent: #00b7c9;
+      --ncc-blue-accent: #2850a7;
+      --ncc-black: #0f1115;
+      --ncc-charcoal: #232a33;
+      --ncc-gray-100: #f5f7fa;
+      --ncc-gray-200: #e7ebf0;
+      --ncc-gray-300: #c8d1dc;
+      --ncc-white: #ffffff;
+      --surface: rgba(255, 255, 255, 0.94);
+      --surface-strong: #ffffff;
+      --surface-soft: #f8fafc;
+      --text: #17202a;
+      --muted: #586272;
+      --border: rgba(35, 42, 51, 0.12);
+      --shadow-lg: 0 22px 55px rgba(15, 17, 21, 0.12);
+      --shadow-md: 0 12px 30px rgba(15, 17, 21, 0.08);
+      --shadow-sm: 0 6px 18px rgba(15, 17, 21, 0.06);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --transition: 180ms ease;
+    }
+
+    body.dark-mode {
+      --surface: rgba(22, 28, 36, 0.96);
+      --surface-strong: #16202a;
+      --surface-soft: #1f2b37;
+      --text: #f7f9fb;
+      --muted: #b3becb;
+      --border: rgba(231, 235, 240, 0.13);
+      --shadow-lg: 0 22px 55px rgba(0, 0, 0, 0.33);
+      --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.25);
+      --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(166, 25, 46, 0.12), transparent 30rem),
+        radial-gradient(circle at bottom right, rgba(0, 183, 201, 0.1), transparent 24rem),
+        linear-gradient(180deg, #fbfcfe 0%, #eef2f6 100%);
+      min-height: 100vh;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    body.dark-mode {
+      background:
+        radial-gradient(circle at top left, rgba(166, 25, 46, 0.26), transparent 26rem),
+        radial-gradient(circle at bottom right, rgba(0, 183, 201, 0.18), transparent 23rem),
+        linear-gradient(180deg, #0e141a 0%, #151d27 100%);
+    }
+
+    img,
+    svg {
+      max-width: 100%;
+      display: block;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      color: inherit;
+      background: none;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--ncc-blue-accent);
+      outline-offset: 3px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .app-shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 18px 18px 48px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(14px);
+    }
+
+    body.dark-mode .topbar {
+      background: rgba(15, 19, 26, 0.88);
+    }
+
+    .topbar-title {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .kicker,
+    .eyebrow {
+      margin: 0 0 6px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    .kicker,
+    .eyebrow,
+    .progress-pill strong {
+      color: var(--ncc-primary);
+    }
+
+    .topbar h1,
+    .landing-copy h2,
+    .mission-title,
+    .panel-title,
+    .wrap-title,
+    .results-value {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    .topbar h1 {
+      font-size: clamp(1.7rem, 3vw, 2.7rem);
+      line-height: 0.97;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 68ch;
+      line-height: 1.55;
+    }
+
+    .topbar-tools {
+      min-width: min(430px, 100%);
+      display: grid;
+      gap: 14px;
+    }
+
+    .progress-panel,
+    .mission-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .progress-panel {
+      padding: 16px;
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+
+    .progress-row strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .progress-track {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(35, 42, 51, 0.1);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--ncc-primary), var(--ncc-red-accent), var(--ncc-cyan-accent));
+      border-radius: inherit;
+      transition: width 300ms ease;
+    }
+
+    .toolbar-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .layout-grid {
+      display: block;
+    }
+
+    .mission-heading h2,
+    .summary-grid h3,
+    .content-card h3,
+    .quiz-block h3,
+    .panel-card h3 {
+      margin-top: 0;
+    }
+
+    .summary-list,
+    .objective-list,
+    .review-list,
+    .case-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .main-column {
+      display: grid;
+      gap: 18px;
+    }
+
+    .mission-card {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .mission-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--ncc-primary), var(--ncc-red-accent), var(--ncc-cyan-accent));
+    }
+
+    .mission-card > .section-inner,
+    details.objective-panel > .details-inner {
+      padding: 28px;
+    }
+
+    .landing-grid,
+    .two-column,
+    .three-column,
+    .summary-grid,
+    .final-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .landing-grid {
+      grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.88fr);
+      align-items: center;
+    }
+
+    .landing-copy h2 {
+      font-size: clamp(2.1rem, 4vw, 3.8rem);
+      line-height: 0.95;
+      margin-bottom: 12px;
+    }
+
+    .landing-copy p {
+      margin: 0 0 16px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 64ch;
+    }
+
+    .chip-row,
+    .badge-row,
+    .button-row,
+    .bucket-toggle,
+    .option-row,
+    .hint-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .info-chip,
+    .badge-chip,
+    .progress-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-soft);
+      font-size: 0.9rem;
+    }
+
+    .button-primary,
+    .button-secondary,
+    .button-ghost,
+    .bucket-button,
+    .choice-button,
+    .mini-button,
+    .region-button,
+    .term-button,
+    .sequence-chip {
+      border-radius: 14px;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition), border-color var(--transition);
+    }
+
+    .button-primary,
+    .button-secondary,
+    .button-ghost,
+    .mini-button {
+      padding: 11px 16px;
+      border: 1px solid transparent;
+      font-weight: 700;
+    }
+
+    .button-primary {
+      background: var(--ncc-primary);
+      color: var(--ncc-white);
+      box-shadow: 0 10px 24px rgba(166, 25, 46, 0.22);
+    }
+
+    .button-primary:hover,
+    .button-secondary:hover,
+    .button-ghost:hover,
+    .bucket-button:hover,
+    .choice-button:hover,
+    .mini-button:hover,
+    .region-button:hover,
+    .term-button:hover,
+    .sequence-chip:hover {
+      transform: translateY(-1px);
+    }
+
+    .button-secondary {
+      background: var(--surface-soft);
+      border-color: rgba(40, 80, 167, 0.22);
+      color: var(--text);
+    }
+
+    .button-ghost {
+      border-color: var(--border);
+      background: transparent;
+    }
+
+    .button-ghost[aria-pressed="true"],
+    .button-secondary[aria-pressed="true"] {
+      border-color: rgba(0, 183, 201, 0.45);
+      background: rgba(0, 183, 201, 0.1);
+    }
+
+    .hero-panel,
+    .content-card,
+    .quiz-block,
+    .feedback-panel,
+    .callout,
+    .panel-card,
+    .summary-card,
+    .results-card {
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+
+    .hero-panel,
+    .content-card,
+    .quiz-block,
+    .feedback-panel,
+    .callout,
+    .panel-card,
+    .summary-card,
+    .results-card {
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-panel {
+      min-height: 100%;
+      background:
+        linear-gradient(180deg, rgba(166, 25, 46, 0.08), rgba(255, 255, 255, 0.96)),
+        var(--surface-strong);
+    }
+
+    body.dark-mode .hero-panel {
+      background:
+        linear-gradient(180deg, rgba(166, 25, 46, 0.18), rgba(22, 32, 42, 0.98)),
+        var(--surface-strong);
+    }
+
+    .mission-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+
+    .mission-title {
+      font-size: clamp(1.55rem, 2.7vw, 2.35rem);
+      margin-bottom: 8px;
+    }
+
+    .mission-heading p,
+    .content-card p,
+    .quiz-block p,
+    .callout p,
+    .panel-card p,
+    .feedback-panel p,
+    .summary-card p,
+    .results-card p,
+    .summary-card li,
+    .content-card li,
+    .callout li {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .learning-target {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(40, 80, 167, 0.18);
+      background: rgba(40, 80, 167, 0.08);
+    }
+
+    .two-column {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .three-column {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .callout-grid,
+    .objective-list,
+    .sort-zone-grid,
+    .sequence-layout,
+    .match-grid,
+    .classification-grid,
+    .case-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .callout {
+      border-left: 5px solid var(--ncc-primary);
+      background: linear-gradient(180deg, rgba(166, 25, 46, 0.06), rgba(255, 255, 255, 0.96));
+    }
+
+    .callout.cyan {
+      border-left-color: var(--ncc-cyan-accent);
+      background: linear-gradient(180deg, rgba(0, 183, 201, 0.09), rgba(255, 255, 255, 0.96));
+    }
+
+    .callout.blue {
+      border-left-color: var(--ncc-blue-accent);
+      background: linear-gradient(180deg, rgba(40, 80, 167, 0.09), rgba(255, 255, 255, 0.96));
+    }
+
+    body.dark-mode .callout,
+    body.dark-mode .callout.cyan,
+    body.dark-mode .callout.blue {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    }
+
+    .callout-title {
+      margin: 0 0 6px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .details-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 24px 28px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .objective-list {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .objective-item {
+      padding: 14px;
+      border-radius: 16px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .objective-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: inline-grid;
+      place-items: center;
+      font-weight: 800;
+      color: var(--ncc-white);
+      background: linear-gradient(180deg, var(--ncc-primary), var(--ncc-red-accent));
+    }
+
+    .objective-item.is-complete {
+      border-color: rgba(0, 183, 201, 0.34);
+      background: rgba(0, 183, 201, 0.08);
+    }
+
+    .objective-status {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--ncc-blue-accent);
+    }
+
+    .badge-chip.locked {
+      color: var(--muted);
+      border-style: dashed;
+    }
+
+    .badge-chip.unlocked {
+      background: rgba(166, 25, 46, 0.1);
+      border-color: rgba(166, 25, 46, 0.25);
+      color: var(--ncc-primary);
+      font-weight: 800;
+    }
+
+    .completion-banner {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(0, 183, 201, 0.1);
+      border: 1px solid rgba(0, 183, 201, 0.28);
+      color: var(--text);
+      display: none;
+      font-weight: 700;
+    }
+
+    .completion-banner.visible {
+      display: block;
+    }
+
+    .diagram-frame {
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(40, 80, 167, 0.05), rgba(255, 255, 255, 0.94)),
+        var(--surface-strong);
+      overflow: hidden;
+    }
+
+    .hero-panel,
+    .diagram-frame {
+      min-width: 0;
+    }
+
+    .hero-panel .svg-diagram,
+    .diagram-frame > svg {
+      width: 100%;
+      height: auto;
+      margin-inline: auto;
+    }
+
+    body.dark-mode .diagram-frame {
+      background:
+        linear-gradient(180deg, rgba(40, 80, 167, 0.12), rgba(22, 32, 42, 0.96)),
+        var(--surface-strong);
+    }
+
+    .diagram-caption {
+      margin: 12px 0 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .sort-zone-grid {
+      grid-template-columns: minmax(0, 0.7fr) repeat(2, minmax(0, 1fr));
+      align-items: start;
+    }
+
+    .term-bank,
+    .sort-bin,
+    .sequence-bank,
+    .sequence-target,
+    .match-row,
+    .classification-card,
+    .case-card {
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--surface-soft);
+    }
+
+    .term-bank,
+    .sort-bin,
+    .sequence-bank,
+    .sequence-target {
+      padding: 14px;
+    }
+
+    .term-grid,
+    .term-cluster,
+    .sequence-cluster {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .bucket-button,
+    .term-button,
+    .choice-button,
+    .mini-button,
+    .sequence-chip,
+    .region-button {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-strong);
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .bucket-button.is-active {
+      color: var(--ncc-white);
+      background: var(--ncc-primary);
+      border-color: var(--ncc-primary);
+    }
+
+    .sort-bin h4,
+    .term-bank h4,
+    .sequence-bank h4,
+    .sequence-target h4 {
+      margin: 0 0 12px;
+      font-size: 0.95rem;
+    }
+
+    .sort-bin.dorsal h4 {
+      color: var(--ncc-cyan-accent);
+    }
+
+    .sort-bin.ventral h4 {
+      color: var(--ncc-red-accent);
+    }
+
+    .sort-bin small,
+    .sequence-target small,
+    .term-bank small {
+      color: var(--muted);
+    }
+
+    .feedback-panel {
+      margin-top: 14px;
+      border-left: 5px solid var(--ncc-gray-300);
+      display: none;
+    }
+
+    .feedback-panel.visible {
+      display: block;
+    }
+
+    .feedback-panel.correct {
+      border-left-color: var(--ncc-cyan-accent);
+      background: rgba(0, 183, 201, 0.08);
+    }
+
+    .feedback-panel.incorrect {
+      border-left-color: var(--ncc-red-accent);
+      background: rgba(239, 62, 66, 0.08);
+    }
+
+    .hotspot-stage,
+    .plexus-stage {
+      position: relative;
+      min-height: 320px;
+    }
+
+    .hotspot-map,
+    .plexus-map {
+      width: 100%;
+      height: auto;
+    }
+
+    .hotspot-button,
+    .region-button {
+      position: absolute;
+      border: 2px solid var(--ncc-white);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .hotspot-button {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: rgba(40, 80, 167, 0.88);
+      color: var(--ncc-white);
+      font-weight: 800;
+    }
+
+    .hotspot-button:hover,
+    .hotspot-button:focus-visible,
+    .region-button:hover,
+    .region-button:focus-visible {
+      transform: scale(1.04);
+    }
+
+    .region-button {
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(166, 25, 46, 0.92);
+      color: var(--ncc-white);
+      max-width: 124px;
+      min-width: 92px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .hotspot-button.correct-hit {
+      background: rgba(0, 183, 201, 0.95);
+    }
+
+    .hotspot-button.incorrect-hit {
+      background: rgba(239, 62, 66, 0.95);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .comparison-card {
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--surface-soft);
+    }
+
+    .comparison-card.segmental {
+      border-top: 5px solid var(--ncc-cyan-accent);
+    }
+
+    .comparison-card.peripheral {
+      border-top: 5px solid var(--ncc-blue-accent);
+    }
+
+    .sequence-layout {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    }
+
+    .sequence-chip {
+      width: 100%;
+    }
+
+    .sequence-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+    }
+
+    .sequence-count {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      display: inline-grid;
+      place-items: center;
+      color: var(--ncc-white);
+      background: linear-gradient(180deg, var(--ncc-blue-accent), var(--ncc-primary));
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .match-grid,
+    .classification-grid,
+    .case-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .match-row,
+    .classification-card,
+    .case-card {
+      padding: 14px;
+    }
+
+    .match-row {
+      display: grid;
+      grid-template-columns: minmax(160px, 1fr) minmax(130px, 0.75fr) minmax(170px, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .match-row strong,
+    .classification-card strong,
+    .case-card strong,
+    .results-stat strong {
+      display: block;
+      color: var(--text);
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-strong);
+      color: var(--text);
+    }
+
+    .hint-text {
+      display: none;
+      margin-top: 10px;
+      color: var(--ncc-blue-accent);
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+
+    .hint-text.visible {
+      display: block;
+    }
+
+    .choice-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .choice-button {
+      width: 100%;
+    }
+
+    .choice-button[aria-pressed="true"] {
+      border-color: rgba(40, 80, 167, 0.35);
+      background: rgba(40, 80, 167, 0.08);
+    }
+
+    fieldset {
+      padding: 0;
+      margin: 0;
+      border: none;
+    }
+
+    legend {
+      padding: 0;
+      margin-bottom: 10px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .radio-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .radio-option {
+      display: flex;
+      gap: 12px;
+      align-items: start;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-soft);
+    }
+
+    .radio-option input {
+      margin-top: 3px;
+    }
+
+    .answer-key {
+      display: none;
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(40, 80, 167, 0.08);
+      border: 1px solid rgba(40, 80, 167, 0.24);
+    }
+
+    body.review-mode .answer-key,
+    body.reveal-answers .answer-key {
+      display: block;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+
+    .summary-card {
+      min-height: 100%;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .results-card {
+      text-align: center;
+    }
+
+    .results-value {
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      margin-bottom: 6px;
+    }
+
+    .results-stat {
+      display: grid;
+      gap: 4px;
+    }
+
+    .mission-card.is-complete {
+      border-color: rgba(0, 183, 201, 0.28);
+    }
+
+    .review-only {
+      display: none;
+    }
+
+    body.review-mode .review-only,
+    body.reveal-answers .review-only {
+      display: block;
+    }
+
+    .mission-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .footer-tip {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .locked-note {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .print-note {
+      margin-top: 14px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 1180px) {
+      .app-shell {
+        max-width: 100%;
+        padding: 14px 14px 34px;
+      }
+
+      .topbar {
+        position: static;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px 18px;
+        border-radius: 22px;
+      }
+
+      .topbar h1 {
+        font-size: clamp(1.8rem, 4vw, 2.35rem);
+      }
+
+      .topbar-tools,
+      .landing-grid,
+      .two-column,
+      .comparison-grid,
+      .sequence-layout,
+      .summary-grid,
+      .results-grid,
+      .sort-zone-grid,
+      .match-row {
+        grid-template-columns: 1fr;
+      }
+      .mission-card > .section-inner,
+      details.objective-panel > .details-inner,
+      .details-heading {
+        padding: 22px;
+      }
+
+      .hero-panel,
+      .content-card,
+      .quiz-block,
+      .feedback-panel,
+      .callout,
+      .panel-card,
+      .summary-card,
+      .results-card {
+        padding: 16px;
+      }
+
+      .button-primary,
+      .button-secondary,
+      .button-ghost,
+      .mini-button,
+      .bucket-button,
+      .term-button,
+      .choice-button,
+      .sequence-chip {
+        min-height: 48px;
+        padding: 12px 16px;
+      }
+
+      select {
+        min-height: 48px;
+        padding: 12px 14px;
+      }
+
+      .radio-option,
+      .classification-card,
+      .match-row,
+      .case-card {
+        padding: 16px;
+      }
+
+      .progress-row,
+      .chip-row,
+      .button-row,
+      .bucket-toggle,
+      .hint-row,
+      .toolbar-buttons {
+        gap: 12px;
+      }
+
+      .toolbar-buttons {
+        justify-content: flex-start;
+      }
+
+      .progress-pill,
+      .info-chip,
+      .badge-chip {
+        min-height: 40px;
+        padding: 10px 14px;
+      }
+
+      .hotspot-stage,
+      .plexus-stage {
+        min-height: 0;
+        margin-inline: auto;
+      }
+
+      .hotspot-button {
+        width: 52px;
+        height: 52px;
+      }
+
+      .hero-panel .svg-diagram,
+      .diagram-frame > svg {
+        max-width: 520px;
+      }
+
+      .diagram-frame {
+        width: 100%;
+        max-width: 100%;
+        margin-inline: auto;
+        display: grid;
+        justify-items: center;
+      }
+
+      .hotspot-stage {
+        width: 100%;
+        max-width: 520px;
+      }
+
+      .plexus-stage {
+        width: 100%;
+        max-width: 360px;
+      }
+
+      .region-button {
+        min-width: 104px;
+        min-height: 48px;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+      }
+
+      .results-value {
+        font-size: clamp(2rem, 5vw, 2.6rem);
+      }
+    }
+
+    @media (min-width: 1181px) and (max-width: 1220px) {
+    }
+
+    @media (max-width: 980px) {
+      .topbar,
+      .landing-grid,
+      .two-column,
+      .sequence-layout,
+      .comparison-grid,
+      .summary-grid,
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        position: static;
+        flex-direction: column;
+      }
+
+      .topbar-tools,
+      .layout-grid {
+        min-width: 0;
+      }
+
+      .sort-zone-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .match-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app-shell {
+        padding-inline: 12px;
+      }
+
+      .mission-card > .section-inner,
+      details.objective-panel > .details-inner,
+      .details-heading {
+        padding-inline: 18px;
+      }
+
+      .mission-heading {
+        flex-direction: column;
+      }
+
+      .toolbar-buttons,
+      .button-row {
+        justify-content: stretch;
+      }
+
+      .toolbar-buttons > *,
+      .button-row > * {
+        flex: 1 1 auto;
+      }
+
+      .diagram-frame {
+        padding: 12px;
+        width: 100%;
+        max-width: 100%;
+        margin-inline: auto;
+        display: grid;
+        justify-items: center;
+      }
+
+      .hero-panel .svg-diagram,
+      .diagram-frame > svg,
+      .hotspot-stage {
+        max-width: 100%;
+      }
+
+      .plexus-stage {
+        max-width: 300px;
+      }
+
+      .hotspot-button {
+        width: 42px;
+        height: 42px;
+      }
+
+      .region-button {
+        min-width: 76px;
+        max-width: 92px;
+        min-height: 40px;
+        padding: 8px 8px;
+        font-size: 0.76rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        color: #111111;
+      }
+
+      .topbar,
+      .button-row,
+      .toolbar-buttons,
+      .mini-button,
+      .bucket-toggle,
+      .term-bank,
+      .feedback-panel:not(.visible) {
+        display: none !important;
+      }
+
+      .app-shell {
+        max-width: none;
+        padding: 0;
+      }
+
+      .layout-grid,
+      .landing-grid,
+      .two-column,
+      .summary-grid,
+      .comparison-grid,
+      .results-grid {
+        display: block;
+      }
+
+      .mission-card,
+      .content-card,
+      .quiz-block,
+      .callout,
+      .summary-card,
+      .results-card {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+
+      .answer-key,
+      .review-only {
+        display: block !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" id="app">
+    <header class="topbar">
+      <div class="topbar-title">
+        <p class="kicker">Foundational Movement Science Lab Manual</p>
+        <h1>Spinal Cord &amp; Innervation Interactive Lab Manual</h1>
+        <p class="subtitle">Entry/Exit Pathways, Plexuses, Dermatomes, and Myotomes</p>
+      </div>
+      <div class="topbar-tools">
+        <div class="progress-panel" aria-label="Lab progress">
+          <div class="progress-row">
+            <div class="progress-pill"><strong id="progressText">0 / 7 checkpoints complete</strong></div>
+            <div class="progress-pill"><span id="scoreText">Mastery score 0 / 9</span></div>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+        <div class="toolbar-buttons">
+          <button class="button-secondary" id="darkModeToggle" type="button" aria-pressed="false">Dark mode</button>
+          <button class="button-ghost" id="reviewModeToggle" type="button" aria-pressed="false" disabled>Review mode locked</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-grid">
+      <main class="main-column">
+        <section class="mission-card" id="landing">
+          <div class="section-inner landing-grid">
+            <div class="landing-copy">
+              <p class="eyebrow">Lab Overview</p>
+              <h2>Build your localization map before lab.</h2>
+              <p>This interactive manual guides you through a sequence of short stations that build clinical understanding of sensory versus motor roots, dorsal root ganglia, plexus mixing, dermatomes, and myotomes. The goal is not memorization in isolation. The goal is to recognize why a pattern points toward a spinal nerve root, a named peripheral nerve, or a mixed spinal nerve pathway.</p>
+              <div class="chip-row">
+                <span class="info-chip">Estimated time: 20-30 minutes</span>
+                <span class="info-chip">Use for pre-lab, in-class, or independent review</span>
+                <span class="info-chip">Offline single-file handout</span>
+              </div>
+              <div class="button-row" style="margin-top: 18px;">
+                <button class="button-primary" id="startLabButton" type="button">Start Lab</button>
+                <button class="button-ghost" type="button" data-target="objectives">Preview learning objectives</button>
+              </div>
+              <details class="callout" style="margin-top: 18px;">
+                <summary><strong>Before you begin</strong> <span class="locked-note">Show or hide</span></summary>
+                <p style="margin-top: 12px;">As you move through the stations, pause after each checkpoint and decide whether the pattern is most consistent with a root-level problem, a mixed spinal nerve pathway, or a named peripheral nerve pattern. That habit will make the final clinical checkout easier.</p>
+              </details>
+            </div>
+            <div class="hero-panel">
+              <p class="eyebrow">Orientation Schematic</p>
+              <svg class="svg-diagram" viewBox="0 0 520 360" role="img" aria-label="Simplified spinal cord root and plexus branching schematic">
+                <defs>
+                  <linearGradient id="cordGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#2850a7" stop-opacity="0.24"></stop>
+                    <stop offset="100%" stop-color="#a6192e" stop-opacity="0.08"></stop>
+                  </linearGradient>
+                  <linearGradient id="branchGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#2850a7" stop-opacity="0.9"></stop>
+                    <stop offset="100%" stop-color="#00b7c9" stop-opacity="0.9"></stop>
+                  </linearGradient>
+                </defs>
+                <rect x="48" y="68" width="154" height="224" rx="54" fill="url(#cordGlow)" stroke="#2850a7" stroke-width="3"></rect>
+                <rect x="110" y="42" width="34" height="276" rx="17" fill="#ffffff" stroke="#1f2b37" stroke-width="3"></rect>
+                <path d="M144 128 C188 96 228 92 258 112" fill="none" stroke="#00b7c9" stroke-width="9" stroke-linecap="round"></path>
+                <circle cx="272" cy="118" r="18" fill="#ffffff" stroke="#00b7c9" stroke-width="6"></circle>
+                <path d="M290 126 C302 130 313 136 324 146" fill="none" stroke="#00b7c9" stroke-width="9" stroke-linecap="round"></path>
+                <path d="M144 204 C212 200 274 194 324 146" fill="none" stroke="#ef3e42" stroke-width="9" stroke-linecap="round"></path>
+                <path d="M324 146 L356 146" stroke="#232a33" stroke-width="11" stroke-linecap="round"></path>
+                <path d="M356 146 C388 132 416 108 460 86" fill="none" stroke="url(#branchGlow)" stroke-width="9" stroke-linecap="round"></path>
+                <path d="M356 146 C394 150 422 170 462 196" fill="none" stroke="url(#branchGlow)" stroke-width="9" stroke-linecap="round"></path>
+                <path d="M356 146 C394 170 424 214 462 266" fill="none" stroke="url(#branchGlow)" stroke-width="9" stroke-linecap="round"></path>
+                <g transform="translate(26 18)">
+                  <rect width="112" height="30" rx="15" fill="#ffffff" stroke="#c8d1dc"></rect>
+                  <text x="56" y="20" text-anchor="middle" fill="#232a33" font-size="14" font-weight="700">Spinal cord</text>
+                </g>
+                <g transform="translate(214 30)">
+                  <rect width="110" height="30" rx="15" fill="#e6fbfd" stroke="#00b7c9"></rect>
+                  <text x="55" y="20" text-anchor="middle" fill="#007d8a" font-size="14" font-weight="700">Dorsal root</text>
+                </g>
+                <g transform="translate(216 238)">
+                  <rect width="116" height="30" rx="15" fill="#fff0f1" stroke="#ef3e42"></rect>
+                  <text x="58" y="20" text-anchor="middle" fill="#b2222a" font-size="14" font-weight="700">Ventral root</text>
+                </g>
+                <g transform="translate(284 98)">
+                  <rect width="138" height="32" rx="16" fill="#ffffff" stroke="#c8d1dc"></rect>
+                  <text x="69" y="21" text-anchor="middle" fill="#232a33" font-size="14" font-weight="700">Mixed spinal nerve</text>
+                </g>
+                <g transform="translate(386 42)">
+                  <rect width="92" height="30" rx="15" fill="#eef3ff" stroke="#2850a7"></rect>
+                  <text x="46" y="20" text-anchor="middle" fill="#2850a7" font-size="13" font-weight="700">Cervical</text>
+                </g>
+                <g transform="translate(386 150)">
+                  <rect width="92" height="30" rx="15" fill="#eef3ff" stroke="#2850a7"></rect>
+                  <text x="46" y="20" text-anchor="middle" fill="#2850a7" font-size="13" font-weight="700">Brachial</text>
+                </g>
+                <g transform="translate(376 268)">
+                  <rect width="116" height="30" rx="15" fill="#eef3ff" stroke="#2850a7"></rect>
+                  <text x="58" y="20" text-anchor="middle" fill="#2850a7" font-size="13" font-weight="700">Lumbar / Sacral</text>
+                </g>
+              </svg>
+              <p class="diagram-caption">Follow the path from root entry and exit, through the brief mixed spinal nerve segment, into plexus redistribution and named peripheral nerves.</p>
+            </div>
+          </div>
+        </section>
+
+        <details class="mission-card objective-panel" id="objectives" open>
+          <summary class="details-heading">
+            <span>
+              <p class="eyebrow">Learning Objectives</p>
+              <h2 class="panel-title">What students should be able to do</h2>
+            </span>
+            <span class="progress-pill"><strong id="objectiveCount">0 / 6 marked complete</strong></span>
+          </summary>
+          <div class="details-inner">
+            <ul class="objective-list">
+              <li class="objective-item" data-objective="1">
+                <span class="objective-number">1</span>
+                <div>
+                  <strong>Differentiate dorsal and ventral roots.</strong>
+                  <p>Distinguish the anatomical structure and physiological function of the dorsal sensory roots and ventral motor roots.</p>
+                  <span class="objective-status">Linked to Station 1</span>
+                </div>
+              </li>
+              <li class="objective-item" data-objective="2">
+                <span class="objective-number">2</span>
+                <div>
+                  <strong>Locate and interpret the DRG.</strong>
+                  <p>Identify the dorsal root ganglion and explain its role in sensory transmission.</p>
+                  <span class="objective-status">Linked to Station 2</span>
+                </div>
+              </li>
+              <li class="objective-item" data-objective="3">
+                <span class="objective-number">3</span>
+                <div>
+                  <strong>Compare segmental and peripheral nerve innervation.</strong>
+                  <p>Differentiate a single-level root pattern from a named peripheral nerve distribution.</p>
+                  <span class="objective-status">Linked to Station 3</span>
+                </div>
+              </li>
+              <li class="objective-item" data-objective="4">
+                <span class="objective-number">4</span>
+                <div>
+                  <strong>Explain plexus fiber reorganization.</strong>
+                  <p>Describe how ventral rami from multiple spinal segments reorganize into a single named peripheral nerve.</p>
+                  <span class="objective-status">Linked to Station 4</span>
+                </div>
+              </li>
+              <li class="objective-item" data-objective="5">
+                <span class="objective-number">5</span>
+                <div>
+                  <strong>Use dermatomes and myotomes clinically.</strong>
+                  <p>Define each concept and explain how they support localization of root-level or spinal cord-region injury.</p>
+                  <span class="objective-status">Linked to Station 6</span>
+                </div>
+              </li>
+              <li class="objective-item" data-objective="6">
+                <span class="objective-number">6</span>
+                <div>
+                  <strong>Identify the major plexuses.</strong>
+                  <p>Recognize the cervical, brachial, lumbar, and sacral plexuses and their spinal level ranges.</p>
+                  <span class="objective-status">Linked to Station 5</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </details>
+
+        <section class="mission-card" id="mission-1" data-mission-key="m1">
+          <div class="section-inner">
+            <div class="mission-heading">
+              <div>
+                <p class="eyebrow">Station 1</p>
+                <h2 class="mission-title">Dorsal vs Ventral Roots</h2>
+                <p>Start with the directional logic of spinal root traffic before layering in clinical patterns.</p>
+              </div>
+              <div class="badge-row">
+                <span class="badge-chip locked" id="badge-m1">Badge available: Root Foundations</span>
+              </div>
+            </div>
+
+            <div class="learning-target">
+              <strong>Learning target</strong>
+              <span>Differentiate the structure and function of dorsal roots, ventral roots, and the mixed spinal nerve that forms when they join.</span>
+            </div>
+
+            <div class="two-column">
+              <div class="content-card">
+                <h3>Core idea</h3>
+                <p>The dorsal root carries <strong>afferent sensory fibers into the spinal cord</strong>. The ventral root carries <strong>efferent motor fibers out of the spinal cord</strong> toward muscles and glands. When they join, they form a <strong>mixed spinal nerve</strong> that contains both sensory and motor fibers.</p>
+                <div class="diagram-frame">
+                  <svg viewBox="0 0 500 260" role="img" aria-label="Simplified dorsal and ventral root diagram">
+                    <rect x="28" y="38" width="118" height="182" rx="32" fill="#f2f7ff" stroke="#232a33" stroke-width="3"></rect>
+                    <rect x="78" y="24" width="24" height="210" rx="12" fill="#ffffff" stroke="#232a33" stroke-width="3"></rect>
+                    <path d="M144 108 C184 84 218 82 240 98" fill="none" stroke="#00b7c9" stroke-width="9" stroke-linecap="round"></path>
+                    <circle cx="252" cy="104" r="16" fill="#ffffff" stroke="#00b7c9" stroke-width="6"></circle>
+                    <path d="M268 112 C286 118 300 124 318 130" fill="none" stroke="#00b7c9" stroke-width="9" stroke-linecap="round"></path>
+                    <path d="M144 166 C200 176 256 172 318 130" fill="none" stroke="#ef3e42" stroke-width="9" stroke-linecap="round"></path>
+                    <path d="M318 130 L408 130" fill="none" stroke="#232a33" stroke-width="11" stroke-linecap="round"></path>
+                    <polygon points="158,102 146,108 158,114" fill="#00b7c9"></polygon>
+                    <g transform="translate(18 6)">
+                      <rect width="110" height="28" rx="14" fill="#ffffff" stroke="#c8d1dc"></rect>
+                      <text x="55" y="19" text-anchor="middle" font-size="13" font-weight="700" fill="#232a33">Spinal cord</text>
+                    </g>
+                    <g transform="translate(256 34)">
+                      <rect width="144" height="34" rx="17" fill="#e6fbfd" stroke="#00b7c9"></rect>
+                      <text x="72" y="19" text-anchor="middle" font-size="13" font-weight="700" fill="#007d8a">Dorsal root</text>
+                      <text x="72" y="31" text-anchor="middle" font-size="11" font-weight="600" fill="#007d8a">Sensory input to CNS</text>
+                    </g>
+                    <g transform="translate(252 182)">
+                      <rect width="150" height="36" rx="18" fill="#fff0f1" stroke="#ef3e42"></rect>
+                      <text x="75" y="19" text-anchor="middle" font-size="13" font-weight="700" fill="#b2222a">Ventral root</text>
+                      <text x="75" y="31" text-anchor="middle" font-size="11" font-weight="600" fill="#b2222a">Motor output from CNS</text>
+                    </g>
+                    <g transform="translate(292 90)">
+                      <rect width="128" height="30" rx="15" fill="#ffffff" stroke="#c8d1dc"></rect>
+                      <text x="64" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#232a33">Mixed spinal nerve</text>
+                    </g>
+                  </svg>
+                </div>
+                <div class="callout cyan" style="margin-top: 14px;">
+                  <p class="callout-title">Common Mix-Up</p>
+                  <p>A dorsal root is not the same as a dorsal ramus. This station stays focused on the root-level entry and exit pattern before the spinal nerve branches further.</p>
+                </div>
+              </div>
+
+              <div class="quiz-block" aria-labelledby="m1-sort-title">
+                <h3 id="m1-sort-title">Checkpoint: Sort the pathway terms</h3>
+                <p>Select a bucket, then place each term. Click a placed term to return it to the bank. This click-to-place format is the keyboard-friendly fallback for drag behavior.</p>
+                <div class="bucket-toggle" role="group" aria-label="Select active sorting bucket">
+                  <button class="bucket-button is-active" id="m1BucketDorsal" data-bucket="dorsal" type="button">Place into dorsal root</button>
+                  <button class="bucket-button" id="m1BucketVentral" data-bucket="ventral" type="button">Place into ventral root</button>
+                </div>
+
+                <div class="sort-zone-grid" style="margin-top: 14px;">
+                  <div class="term-bank">
+                    <h4>Term bank</h4>
+                    <small>Unassigned terms</small>
+                    <div class="term-grid" id="m1Bank"></div>
+                  </div>
+                  <div class="sort-bin dorsal">
+                    <h4>Dorsal root</h4>
+                    <div class="term-cluster" id="m1DorsalBin"></div>
+                  </div>
+                  <div class="sort-bin ventral">
+                    <h4>Ventral root</h4>
+                    <div class="term-cluster" id="m1VentralBin"></div>
+                  </div>
+                </div>
+
+                <div class="button-row" style="margin-top: 16px;">
+                  <button class="button-primary" id="m1Check" type="button">Check Station 1</button>
+                  <button class="button-ghost" id="m1Reset" type="button">Reset sort</button>
+                </div>
+                <div class="feedback-panel" id="m1Feedback" aria-live="polite"></div>
+                <div class="completion-banner" id="banner-m1">Station complete. You earned the <strong>Root Foundations</strong> badge.</div>
+                <div class="answer-key">
+                  <strong>Review answer</strong>
+                  <p>Dorsal root pairs with afferent, sensory input, and into CNS. Ventral root pairs with efferent, motor output, and away from CNS. The spinal nerve is mixed once both roots join.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mission-card" id="mission-2" data-mission-key="m2">
+          <div class="section-inner">
+            <div class="mission-heading">
+              <div>
+                <p class="eyebrow">Station 2</p>
+                <h2 class="mission-title">Dorsal Root Ganglion (DRG)</h2>
+                <p>Now identify the sensory cell body station that sits just outside the cord on the dorsal root.</p>
+              </div>
+              <div class="badge-row">
+                <span class="badge-chip locked" id="badge-m2">Badge available: DRG Recognition</span>
+              </div>
+            </div>
+
+            <div class="learning-target">
+              <strong>Learning target</strong>
+              <span>Identify the location and significance of the dorsal root ganglion in sensory transmission.</span>
+            </div>
+
+            <div class="two-column">
+              <div class="content-card">
+                <h3>Clinical anatomy</h3>
+                <p>The dorsal root ganglion contains the <strong>cell bodies of sensory neurons</strong>. It lies <strong>outside the spinal cord</strong> along the dorsal root. Sensory information moves through this region before entering the cord, so irritation or compression near the intervertebral foramen can create radiating pain, paresthesia, or numbness.</p>
+                <div class="callout" style="margin-top: 14px;">
+                  <p class="callout-title">Clinical Relevance</p>
+                  <p>A lesion near the intervertebral foramen can mechanically irritate the dorsal root and nearby DRG, helping explain radiating sensory symptoms into the limb.</p>
+                </div>
+                <details class="callout cyan" style="margin-top: 14px;">
+                  <summary><strong>Reflection prompt</strong></summary>
+                  <p style="margin-top: 12px;">Before opening the checkpoint, predict which structure near the intervertebral foramen is most likely to be involved when a patient reports radiating sensory symptoms, and explain your reasoning in one sentence.</p>
+                </details>
+              </div>
+
+              <div class="quiz-block">
+                <h3>Checkpoint: Find the DRG</h3>
+                <p>Click the structure that represents the dorsal root ganglion. The unlabeled markers create a simple click-to-identify challenge without requiring drag-and-drop.</p>
+                <div class="diagram-frame hotspot-stage">
+                  <svg class="hotspot-map" viewBox="0 0 460 300" role="img" aria-label="Simplified spinal root diagram for DRG identification">
+                    <rect x="42" y="58" width="118" height="184" rx="30" fill="#f3f7fc" stroke="#232a33" stroke-width="3"></rect>
+                    <rect x="90" y="42" width="24" height="216" rx="12" fill="#ffffff" stroke="#232a33" stroke-width="3"></rect>
+                    <path d="M114 118 C164 88 208 86 236 100" fill="none" stroke="#00b7c9" stroke-width="9" stroke-linecap="round"></path>
+                    <circle cx="250" cy="104" r="18" fill="#ffffff" stroke="#00b7c9" stroke-width="6"></circle>
+                    <path d="M268 114 C280 122 292 130 306 144" fill="none" stroke="#00b7c9" stroke-width="9" stroke-linecap="round"></path>
+                    <path d="M114 172 C176 184 246 182 306 144" fill="none" stroke="#ef3e42" stroke-width="9" stroke-linecap="round"></path>
+                    <path d="M306 144 L372 144" fill="none" stroke="#232a33" stroke-width="11" stroke-linecap="round"></path>
+                    <circle cx="250" cy="104" r="28" fill="none" stroke="#00b7c9" stroke-width="2" stroke-dasharray="5 5" opacity="0.55"></circle>
+                    <circle cx="194" cy="104" r="24" fill="none" stroke="#2850a7" stroke-width="2" stroke-dasharray="5 5" opacity="0.36"></circle>
+                    <circle cx="214" cy="196" r="24" fill="none" stroke="#ef3e42" stroke-width="2" stroke-dasharray="5 5" opacity="0.32"></circle>
+                    <g transform="translate(24 12)">
+                      <rect width="112" height="30" rx="15" fill="#ffffff" stroke="#c8d1dc"></rect>
+                      <text x="56" y="20" text-anchor="middle" font-size="14" font-weight="700" fill="#232a33">Spinal cord</text>
+                    </g>
+                    <g transform="translate(174 28)">
+                      <rect width="112" height="30" rx="15" fill="#e6fbfd" stroke="#00b7c9"></rect>
+                      <text x="56" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#007d8a">Dorsal root</text>
+                    </g>
+                    <g transform="translate(274 214)">
+                      <rect width="122" height="32" rx="16" fill="#fff0f1" stroke="#ef3e42"></rect>
+                      <text x="61" y="21" text-anchor="middle" font-size="13" font-weight="700" fill="#b2222a">Ventral root</text>
+                    </g>
+                    <g transform="translate(286 118)">
+                      <rect width="118" height="28" rx="14" fill="#ffffff" stroke="#c8d1dc"></rect>
+                      <text x="59" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#232a33">Mixed spinal nerve</text>
+                    </g>
+                  </svg>
+                  <button class="hotspot-button" style="top: 28%; left: 56%;" data-structure="drg" type="button" aria-label="Hotspot 1"></button>
+                  <button class="hotspot-button" style="top: 28%; left: 43%;" data-structure="dorsal-root" type="button" aria-label="Hotspot 2"></button>
+                  <button class="hotspot-button" style="top: 58%; left: 47%;" data-structure="ventral-root" type="button" aria-label="Hotspot 3"></button>
+                </div>
+                <fieldset style="margin-top: 16px;">
+                  <legend>Which statement best explains why the DRG matters clinically?</legend>
+                  <div class="radio-list">
+                    <label class="radio-option"><input type="radio" name="m2Reason" value="c"> <span>It is the junction where dorsal and ventral roots merge to create the mixed spinal nerve.</span></label>
+                    <label class="radio-option"><input type="radio" name="m2Reason" value="a"> <span>It contains primary sensory neuron cell bodies along the sensory root, just outside the spinal cord.</span></label>
+                    <label class="radio-option"><input type="radio" name="m2Reason" value="b"> <span>It contains lower motor neuron cell bodies that project through the ventral root to skeletal muscle.</span></label>
+                  </div>
+                </fieldset>
+                <div class="button-row" style="margin-top: 16px;">
+                  <button class="button-primary" id="m2ReasonCheck" type="button">Check DRG reasoning</button>
+                </div>
+                <div class="feedback-panel" id="m2Feedback" aria-live="polite"></div>
+                <div class="completion-banner" id="banner-m2">Station complete. You earned the <strong>DRG Recognition</strong> badge.</div>
+                <div class="answer-key">
+                  <strong>Review answer</strong>
+                  <p>The DRG is the bulge on the dorsal root outside the spinal cord. It matters because sensory neuron cell bodies are located there, making the region clinically relevant when foraminal compression creates radiating sensory symptoms.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mission-card" id="mission-3" data-mission-key="m3">
+          <div class="section-inner">
+            <div class="mission-heading">
+              <div>
+                <p class="eyebrow">Station 3</p>
+                <h2 class="mission-title">Segmental vs Peripheral Nerve Innervation</h2>
+                <p>Shift from “single root” thinking to the clinically different pattern of a named peripheral nerve.</p>
+              </div>
+              <div class="badge-row">
+                <span class="badge-chip locked" id="badge-m3">Badge available: Pattern Analysis</span>
+              </div>
+            </div>
+
+            <div class="learning-target">
+              <strong>Learning target</strong>
+              <span>Differentiate segmental innervation from peripheral nerve innervation and explain why the resulting clinical patterns differ.</span>
+            </div>
+
+            <div class="comparison-grid">
+              <div class="comparison-card segmental">
+                <h3>Segmental or root-level pattern</h3>
+                <p>Distribution from a <strong>single spinal level</strong>. Think in dermatomes, myotomes, and reflexes associated primarily with one root.</p>
+                <ul>
+                  <li>C6 sensory change can affect the lateral forearm and thumb.</li>
+                  <li>A root lesion may influence several named peripheral nerves that share that root.</li>
+                  <li>The pattern often feels “root based,” not “named nerve based.”</li>
+                </ul>
+              </div>
+              <div class="comparison-card peripheral">
+                <h3>Named peripheral nerve pattern</h3>
+                <p>Distribution within a <strong>single named peripheral nerve</strong> that may contain fibers from more than one spinal level because of plexus mixing.</p>
+                <ul>
+                  <li>Radial, median, and ulnar nerves each contain mixed segmental fibers.</li>
+                  <li>A lesion follows the named nerve’s sensory and motor territory.</li>
+                  <li>The deficit may not match one clean dermatome or one clean myotome.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="two-column" style="margin-top: 18px;">
+              <div class="quiz-block">
+                <h3>Checkpoint: Sort the clinical examples</h3>
+                <p>Use the same click-to-place workflow. These cases are about the pattern, not perfect detail memorization.</p>
+                <div class="bucket-toggle" role="group" aria-label="Select active sorting bucket for station 3">
+                  <button class="bucket-button is-active" id="m3BucketRoot" data-bucket="root" type="button">Place into root-level pattern</button>
+                  <button class="bucket-button" id="m3BucketPeripheral" data-bucket="peripheral" type="button">Place into peripheral nerve pattern</button>
+                </div>
+                <div class="sort-zone-grid" style="margin-top: 14px;">
+                  <div class="term-bank">
+                    <h4>Clinical examples</h4>
+                    <small>Unassigned cards</small>
+                    <div class="term-grid" id="m3Bank"></div>
+                  </div>
+                  <div class="sort-bin dorsal">
+                    <h4>Root-level pattern</h4>
+                    <div class="term-cluster" id="m3RootBin"></div>
+                  </div>
+                  <div class="sort-bin ventral">
+                    <h4>Peripheral nerve pattern</h4>
+                    <div class="term-cluster" id="m3PeripheralBin"></div>
+                  </div>
+                </div>
+                <div class="button-row" style="margin-top: 16px;">
+                  <button class="button-primary" id="m3Check" type="button">Check Station 3</button>
+                  <button class="button-ghost" id="m3Reset" type="button">Reset sort</button>
+                </div>
+                <div class="feedback-panel" id="m3Feedback" aria-live="polite"></div>
+              </div>
+
+              <div class="content-card">
+                <h3>Reason it through</h3>
+                <p>Peripheral nerve distributions do not map one-to-one onto a single spinal level. Use the next question to identify where that relationship changes.</p>
+                <fieldset style="margin-top: 14px;">
+                  <legend>Which explanation best accounts for a named peripheral nerve carrying fibers from more than one spinal level?</legend>
+                  <div class="radio-list">
+                    <label class="radio-option"><input type="radio" name="m3Reason" value="a"> <span>Because sensory fibers are duplicated at the dorsal root ganglion before they enter the limb.</span></label>
+                    <label class="radio-option"><input type="radio" name="m3Reason" value="c"> <span>Because each named peripheral nerve receives one sensory level and a different motor level.</span></label>
+                    <label class="radio-option"><input type="radio" name="m3Reason" value="b"> <span>Because ventral rami from several levels reorganize within a plexus before entering a named peripheral nerve.</span></label>
+                  </div>
+                </fieldset>
+                <div class="button-row" style="margin-top: 16px;">
+                  <button class="button-primary" id="m3ReasonCheck" type="button">Check reasoning</button>
+                </div>
+                <div class="callout blue" style="margin-top: 14px;">
+                  <p class="callout-title">Clinical frame</p>
+                  <p>If the pattern looks like one root level across sensory and motor findings, think segmental. If it follows the territory of one named nerve, think peripheral nerve lesion.</p>
+                </div>
+                <div class="completion-banner" id="banner-m3">Station complete. You earned the <strong>Pattern Analysis</strong> badge.</div>
+                <div class="answer-key">
+                  <strong>Review answer</strong>
+                  <p>Root-level patterns reflect a single spinal level. Named peripheral nerve patterns reflect plexus-based mixing from multiple spinal levels, so they do not map cleanly to one dermatome or myotome.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mission-card" id="mission-4" data-mission-key="m4">
+          <div class="section-inner">
+            <div class="mission-heading">
+              <div>
+                <p class="eyebrow">Station 4</p>
+                <h2 class="mission-title">Plexus Reorganization</h2>
+                <p>Track how fibers move from roots into the mixed spinal nerve, through rami, and into named peripheral nerves.</p>
+              </div>
+              <div class="badge-row">
+                <span class="badge-chip locked" id="badge-m4">Badge available: Plexus Integration</span>
+              </div>
+            </div>
+
+            <div class="learning-target">
+              <strong>Learning target</strong>
+              <span>Explain how multiple spinal segments reorganize in a plexus to form a single peripheral nerve.</span>
+            </div>
+
+            <div class="two-column">
+              <div class="content-card">
+                <h3>Concept pathway</h3>
+                <p>The dorsal and ventral roots join to form a brief mixed spinal nerve. That spinal nerve then divides into rami. In limb regions, the <strong>ventral rami interweave into a plexus</strong>. Fibers are redistributed again into named peripheral nerves.</p>
+                <div class="diagram-frame">
+                  <svg viewBox="0 0 560 290" role="img" aria-label="Pathway from roots to peripheral nerve">
+                    <rect x="18" y="34" width="114" height="206" rx="20" fill="#ffffff" stroke="#c8d1dc"></rect>
+                    <rect x="154" y="34" width="114" height="206" rx="20" fill="#ffffff" stroke="#c8d1dc"></rect>
+                    <rect x="290" y="34" width="114" height="206" rx="20" fill="#ffffff" stroke="#c8d1dc"></rect>
+                    <rect x="426" y="34" width="114" height="206" rx="20" fill="#ffffff" stroke="#c8d1dc"></rect>
+                    <path d="M132 137 L154 137" stroke="#2850a7" stroke-width="4" stroke-linecap="round"></path>
+                    <polygon points="154,137 145,132 145,142" fill="#2850a7"></polygon>
+                    <path d="M268 137 L290 137" stroke="#2850a7" stroke-width="4" stroke-linecap="round"></path>
+                    <polygon points="290,137 281,132 281,142" fill="#2850a7"></polygon>
+                    <path d="M404 137 L426 137" stroke="#2850a7" stroke-width="4" stroke-linecap="round"></path>
+                    <polygon points="426,137 417,132 417,142" fill="#2850a7"></polygon>
+                    <text x="75" y="64" text-anchor="middle" font-size="14" font-weight="700" fill="#232a33">1. Roots join</text>
+                    <text x="211" y="64" text-anchor="middle" font-size="14" font-weight="700" fill="#232a33">2. Spinal nerve</text>
+                    <text x="347" y="64" text-anchor="middle" font-size="14" font-weight="700" fill="#232a33">3. Ventral rami</text>
+                    <text x="483" y="64" text-anchor="middle" font-size="14" font-weight="700" fill="#232a33">4. Named nerve</text>
+                    <path d="M42 116 C62 100 82 100 102 112" fill="none" stroke="#00b7c9" stroke-width="8" stroke-linecap="round"></path>
+                    <path d="M42 160 C64 168 84 168 102 156" fill="none" stroke="#ef3e42" stroke-width="8" stroke-linecap="round"></path>
+                    <path d="M102 136 L118 136" fill="none" stroke="#232a33" stroke-width="10" stroke-linecap="round"></path>
+                    <text x="75" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#586272">Dorsal and ventral</text>
+                    <text x="75" y="216" text-anchor="middle" font-size="12" font-weight="600" fill="#586272">roots briefly unite</text>
+                    <path d="M182 136 L240 136" fill="none" stroke="#232a33" stroke-width="12" stroke-linecap="round"></path>
+                    <text x="211" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#586272">Short segment with</text>
+                    <text x="211" y="216" text-anchor="middle" font-size="12" font-weight="600" fill="#586272">mixed fiber content</text>
+                    <path d="M314 122 C332 108 350 106 378 118" fill="none" stroke="#2850a7" stroke-width="8" stroke-linecap="round"></path>
+                    <path d="M314 150 C332 164 350 166 378 154" fill="none" stroke="#2850a7" stroke-width="8" stroke-linecap="round"></path>
+                    <path d="M378 118 C390 126 390 146 378 154" fill="none" stroke="#00b7c9" stroke-width="6" stroke-linecap="round"></path>
+                    <text x="347" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#586272">Fibers reorganize</text>
+                    <text x="347" y="216" text-anchor="middle" font-size="12" font-weight="600" fill="#586272">inside a plexus</text>
+                    <path d="M450 136 L516 136" fill="none" stroke="#a6192e" stroke-width="12" stroke-linecap="round"></path>
+                    <text x="483" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#586272">One named nerve can</text>
+                    <text x="483" y="216" text-anchor="middle" font-size="12" font-weight="600" fill="#586272">carry mixed root fibers</text>
+                  </svg>
+                </div>
+                <div class="callout cyan" style="margin-top: 14px;">
+                  <p class="callout-title">Key Takeaway</p>
+                  <p>When weakness is reduced rather than absent, ask whether more than one spinal root may contribute to the movement being tested.</p>
+                </div>
+              </div>
+
+              <div class="quiz-block">
+                <h3>Checkpoint: Build the pathway</h3>
+                <p>Click the steps in order. If a step lands in the wrong place, remove it from the current sequence and try again.</p>
+                <div class="sequence-layout" style="margin-top: 14px;">
+                  <div class="sequence-bank">
+                    <h4>Available steps</h4>
+                    <div class="sequence-cluster" id="m4Bank"></div>
+                  </div>
+                  <div class="sequence-target">
+                    <h4>Your pathway sequence</h4>
+                    <div class="case-grid" id="m4Sequence"></div>
+                  </div>
+                </div>
+                <div class="button-row" style="margin-top: 16px;">
+                  <button class="button-primary" id="m4Check" type="button">Check sequence</button>
+                  <button class="button-ghost" id="m4Reset" type="button">Reset sequence</button>
+                </div>
+                <fieldset style="margin-top: 18px;">
+                  <legend>Which explanation best fits partial weakness after damage to a single spinal root?</legend>
+                  <div class="radio-list">
+                    <label class="radio-option"><input type="radio" name="m4Reason" value="b"> <span>Because motor fibers are rerouted through the dorsal root ganglion when one root is compressed.</span></label>
+                    <label class="radio-option"><input type="radio" name="m4Reason" value="a"> <span>Because many named peripheral nerves and tested movements receive fibers from more than one spinal root.</span></label>
+                    <label class="radio-option"><input type="radio" name="m4Reason" value="c"> <span>Because a ventral root lesion mainly alters sensation rather than muscle activation.</span></label>
+                  </div>
+                </fieldset>
+                <div class="button-row" style="margin-top: 16px;">
+                  <button class="button-primary" id="m4ReasonCheck" type="button">Check concept</button>
+                </div>
+                <div class="feedback-panel" id="m4Feedback" aria-live="polite"></div>
+                <div class="completion-banner" id="banner-m4">Station complete. You earned the <strong>Plexus Integration</strong> badge.</div>
+                <div class="answer-key">
+                  <strong>Review answer</strong>
+                  <p>Correct order: roots join to form a mixed spinal nerve, the spinal nerve divides into rami, ventral rami interweave into a plexus, then fibers redistribute into named peripheral nerves. Shared root contribution explains partial weakness rather than total loss.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mission-card" id="mission-5" data-mission-key="m5">
+          <div class="section-inner">
+            <div class="mission-heading">
+              <div>
+                <p class="eyebrow">Station 5</p>
+                <h2 class="mission-title">Major Plexuses</h2>
+                <p>Anchor the four major plexuses by region and spinal level range before applying them clinically.</p>
+              </div>
+              <div class="badge-row">
+                <span class="badge-chip locked" id="badge-m5">Badge available: Plexus Mapping</span>
+              </div>
+            </div>
+
+            <div class="learning-target">
+              <strong>Learning target</strong>
+              <span>Identify the cervical, brachial, lumbar, and sacral plexuses and connect each one to its levels and supplied body region.</span>
+            </div>
+
+            <div class="two-column">
+              <div class="content-card">
+                <h3>Click-to-reveal plexus map</h3>
+                <p>Select a region on the simplified body map to reveal the plexus name, spinal levels, and general distribution.</p>
+                <div class="diagram-frame plexus-stage">
+                  <svg class="plexus-map" viewBox="0 0 320 420" role="img" aria-label="Simplified body map with plexus regions">
+                    <circle cx="160" cy="52" r="32" fill="#f3f7fc" stroke="#232a33" stroke-width="3"></circle>
+                    <rect x="118" y="88" width="84" height="136" rx="28" fill="#f3f7fc" stroke="#232a33" stroke-width="3"></rect>
+                    <path d="M118 118 L72 194" stroke="#232a33" stroke-width="18" stroke-linecap="round"></path>
+                    <path d="M202 118 L248 194" stroke="#232a33" stroke-width="18" stroke-linecap="round"></path>
+                    <path d="M142 224 L122 344" stroke="#232a33" stroke-width="20" stroke-linecap="round"></path>
+                    <path d="M178 224 L198 344" stroke="#232a33" stroke-width="20" stroke-linecap="round"></path>
+                    <line x1="160" y1="84" x2="160" y2="334" stroke="#a6192e" stroke-width="8" stroke-linecap="round"></line>
+                  </svg>
+                  <button class="region-button" style="top: 10%; left: 36%;" data-region="cervical" type="button">Cervical</button>
+                  <button class="region-button" style="top: 24%; left: 70%;" data-region="brachial" type="button">Brachial</button>
+                  <button class="region-button" style="top: 55%; left: 10%;" data-region="lumbar" type="button">Lumbar</button>
+                  <button class="region-button" style="top: 70%; left: 56%;" data-region="sacral" type="button">Sacral</button>
+                </div>
+                <div class="panel-card" id="plexusInfo" style="margin-top: 14px;">
+                  <h3>Plexus reveal</h3>
+                  <p>Select a body region to display the related plexus.</p>
+                </div>
+              </div>
+
+              <div class="quiz-block">
+                <h3>Checkpoint: Match name, levels, and region</h3>
+                <p>Match each plexus with its spinal level range and general supplied region. Use hint mode if you need a first-pass scaffold.</p>
+                <div class="hint-row">
+                  <button class="button-secondary" id="m5HintToggle" type="button" aria-pressed="false">Hint mode</button>
+                </div>
+                <div class="match-grid" style="margin-top: 14px;">
+                  <div class="match-row">
+                    <strong>Cervical plexus</strong>
+                    <label><span class="sr-only">Cervical plexus levels</span><select data-plexus="cervical" data-type="levels">
+                      <option value="">Choose levels</option>
+                      <option value="L1-L4">L1-L4</option>
+                      <option value="C1-C4">C1-C4</option>
+                      <option value="L4-S4">L4-S4</option>
+                      <option value="C5-T1">C5-T1</option>
+                    </select></label>
+                    <label><span class="sr-only">Cervical plexus region</span><select data-plexus="cervical" data-type="region">
+                      <option value="">Choose region</option>
+                      <option value="Upper limb">Upper limb</option>
+                      <option value="Posterior lower limb and foot">Posterior lower limb and foot</option>
+                      <option value="Neck and upper cervical region">Neck and upper cervical region</option>
+                      <option value="Anterior/medial lower limb">Anterior/medial lower limb</option>
+                    </select></label>
+                  </div>
+                  <div class="match-row">
+                    <strong>Brachial plexus</strong>
+                    <label><span class="sr-only">Brachial plexus levels</span><select data-plexus="brachial" data-type="levels">
+                      <option value="">Choose levels</option>
+                      <option value="C5-T1">C5-T1</option>
+                      <option value="L4-S4">L4-S4</option>
+                      <option value="C1-C4">C1-C4</option>
+                      <option value="L1-L4">L1-L4</option>
+                    </select></label>
+                    <label><span class="sr-only">Brachial plexus region</span><select data-plexus="brachial" data-type="region">
+                      <option value="">Choose region</option>
+                      <option value="Posterior lower limb and foot">Posterior lower limb and foot</option>
+                      <option value="Upper limb">Upper limb</option>
+                      <option value="Neck and upper cervical region">Neck and upper cervical region</option>
+                      <option value="Anterior/medial lower limb">Anterior/medial lower limb</option>
+                    </select></label>
+                  </div>
+                  <div class="match-row">
+                    <strong>Lumbar plexus</strong>
+                    <label><span class="sr-only">Lumbar plexus levels</span><select data-plexus="lumbar" data-type="levels">
+                      <option value="">Choose levels</option>
+                      <option value="C5-T1">C5-T1</option>
+                      <option value="L4-S4">L4-S4</option>
+                      <option value="L1-L4">L1-L4</option>
+                      <option value="C1-C4">C1-C4</option>
+                    </select></label>
+                    <label><span class="sr-only">Lumbar plexus region</span><select data-plexus="lumbar" data-type="region">
+                      <option value="">Choose region</option>
+                      <option value="Anterior/medial lower limb">Anterior/medial lower limb</option>
+                      <option value="Upper limb">Upper limb</option>
+                      <option value="Posterior lower limb and foot">Posterior lower limb and foot</option>
+                      <option value="Neck and upper cervical region">Neck and upper cervical region</option>
+                    </select></label>
+                  </div>
+                  <div class="match-row">
+                    <strong>Sacral plexus</strong>
+                    <label><span class="sr-only">Sacral plexus levels</span><select data-plexus="sacral" data-type="levels">
+                      <option value="">Choose levels</option>
+                      <option value="C1-C4">C1-C4</option>
+                      <option value="L1-L4">L1-L4</option>
+                      <option value="C5-T1">C5-T1</option>
+                      <option value="L4-S4">L4-S4</option>
+                    </select></label>
+                    <label><span class="sr-only">Sacral plexus region</span><select data-plexus="sacral" data-type="region">
+                      <option value="">Choose region</option>
+                      <option value="Neck and upper cervical region">Neck and upper cervical region</option>
+                      <option value="Anterior/medial lower limb">Anterior/medial lower limb</option>
+                      <option value="Upper limb">Upper limb</option>
+                      <option value="Posterior lower limb and foot">Posterior lower limb and foot</option>
+                    </select></label>
+                  </div>
+                </div>
+                <p class="hint-text" id="m5HintText">Hint: Think neck = C1-C4, upper limb = C5-T1, anterior lower limb = L1-L4, posterior lower limb = L4-S4.</p>
+                <div class="button-row" style="margin-top: 16px;">
+                  <button class="button-primary" id="m5Check" type="button">Check Station 5</button>
+                </div>
+                <div class="feedback-panel" id="m5Feedback" aria-live="polite"></div>
+                <div class="completion-banner" id="banner-m5">Station complete. You earned the <strong>Plexus Mapping</strong> badge.</div>
+                <div class="answer-key">
+                  <strong>Review answer</strong>
+                  <p>Cervical plexus: C1-C4, neck and upper cervical region. Brachial plexus: C5-T1, upper limb. Lumbar plexus: L1-L4, anterior and medial lower limb. Sacral plexus: L4-S4, posterior lower limb and foot.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mission-card" id="mission-6" data-mission-key="m6">
+          <div class="section-inner">
+            <div class="mission-heading">
+              <div>
+                <p class="eyebrow">Station 6</p>
+                <h2 class="mission-title">Dermatomes and Myotomes</h2>
+                <p>Use sensory territories and characteristic movements to localize findings at the root level.</p>
+              </div>
+              <div class="badge-row">
+                <span class="badge-chip locked" id="badge-m6">Badge available: Clinical Localization</span>
+              </div>
+            </div>
+
+            <div class="learning-target">
+              <strong>Learning target</strong>
+              <span>Define dermatomes and myotomes, and use them to distinguish root lesions from peripheral nerve lesions.</span>
+            </div>
+
+            <div class="two-column">
+              <div class="content-card">
+                <h3>Localization language</h3>
+                <p>A <strong>dermatome</strong> is a sensory territory supplied primarily by one spinal nerve root. A <strong>myotome</strong> is a muscle group or characteristic movement supplied primarily by one spinal nerve root. These concepts matter because root lesions often produce a dermatomal or myotomal pattern, while peripheral nerve lesions often follow a named nerve distribution instead.</p>
+                <div class="callout cyan" style="margin-top: 14px;">
+                  <p class="callout-title">Practice frame</p>
+                  <ul>
+                    <li>Use upper-limb sensory findings to decide whether the pattern fits a dermatome or a named nerve territory.</li>
+                    <li>Use lower-limb weakness patterns to decide whether the deficit fits a myotome or a more distal peripheral nerve problem.</li>
+                    <li>Ask whether the findings align with one root-level pattern or with a named nerve distribution.</li>
+                  </ul>
+                </div>
+                <div class="callout blue" style="margin-top: 14px;">
+                  <p class="callout-title">Clinical distinction</p>
+                  <p>If sensory loss and weakness align with one root-level pattern, think radiculopathy or root lesion. If they line up with one named nerve distribution, think peripheral nerve lesion.</p>
+                </div>
+                <div class="callout" style="margin-top: 14px;">
+                  <p class="callout-title">Reference Links</p>
+                  <p>For a quick lookup, students can review <a href="https://www.ncbi.nlm.nih.gov/books/NBK535401/" target="_blank" rel="noopener noreferrer">NCBI Bookshelf: Anatomy, Skin, Dermatomes</a> and <a href="https://www.merckmanuals.com/professional/neurologic-disorders/peripheral-nervous-system-and-motor-unit-disorders/nerve-root-disorders" target="_blank" rel="noopener noreferrer">Merck Manual Professional: Nerve Root Disorders</a>, which includes common root-level motor findings useful for myotome review.</p>
+                </div>
+              </div>
+
+              <div class="quiz-block">
+                <h3>Checkpoint: Match each finding to the best localization clue</h3>
+                <div class="classification-grid" style="margin-top: 14px;">
+                  <div class="classification-card">
+                    <strong>Lateral forearm and thumb sensory change</strong>
+                    <label style="display: block; margin-top: 10px;">
+                      <span class="sr-only">Best localization for lateral forearm and thumb sensory change</span>
+                      <select data-classification="a">
+                        <option value="">Choose best match</option>
+                        <option value="Peripheral nerve pattern">Peripheral nerve pattern</option>
+                        <option value="C6 dermatome">C6 dermatome</option>
+                        <option value="L4-L5 myotome">L4-L5 myotome</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="classification-card">
+                    <strong>Ankle dorsiflexion weakness during heel walking</strong>
+                    <label style="display: block; margin-top: 10px;">
+                      <span class="sr-only">Best localization for ankle dorsiflexion weakness</span>
+                      <select data-classification="b">
+                        <option value="">Choose best match</option>
+                        <option value="C6 dermatome">C6 dermatome</option>
+                        <option value="Peripheral nerve pattern">Peripheral nerve pattern</option>
+                        <option value="L4-L5 myotome">L4-L5 myotome</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="classification-card">
+                    <strong>Numbness isolated to a named ulnar nerve sensory territory after cubital tunnel irritation</strong>
+                    <label style="display: block; margin-top: 10px;">
+                      <span class="sr-only">Best localization for named ulnar nerve sensory loss</span>
+                      <select data-classification="c">
+                        <option value="">Choose best match</option>
+                        <option value="L4-L5 myotome">L4-L5 myotome</option>
+                        <option value="Peripheral nerve pattern">Peripheral nerve pattern</option>
+                        <option value="C6 dermatome">C6 dermatome</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+                <fieldset style="margin-top: 18px;">
+                  <legend>Mini-case: Which localization is more likely?</legend>
+                  <div class="radio-list">
+                    <label class="radio-option"><input type="radio" name="m6Case" value="peripheral"> <span>An isolated named peripheral nerve lesion is more likely.</span></label>
+                    <label class="radio-option"><input type="radio" name="m6Case" value="root"> <span>A C6 root-level lesion is more likely.</span></label>
+                  </div>
+                </fieldset>
+                <div class="button-row" style="margin-top: 16px;">
+                  <button class="button-primary" id="m6Check" type="button">Check Station 6</button>
+                </div>
+                <div class="feedback-panel" id="m6Feedback" aria-live="polite"></div>
+                <div class="completion-banner" id="banner-m6">Station complete. You earned the <strong>Clinical Localization</strong> badge.</div>
+                <div class="answer-key">
+                  <strong>Review answer</strong>
+                  <p>Lateral forearm and thumb sensory change maps to a C6 dermatome. Ankle dorsiflexion weakness maps to an L4-L5 myotome. A named ulnar nerve sensory territory suggests a peripheral nerve pattern. Mixed findings spanning more than one named nerve can support a root lesion.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mission-card" id="final-challenge" data-mission-key="final">
+          <div class="section-inner">
+            <div class="mission-heading">
+              <div>
+                <p class="eyebrow">Final Challenge</p>
+                <h2 class="mission-title">Clinical Checkout</h2>
+                <p>Complete three short cases to finish the lab. Your first-pass accuracy becomes the final challenge score.</p>
+              </div>
+              <div class="badge-row">
+                <span class="badge-chip locked" id="badge-final">Review mode unlocks after all three cases are submitted</span>
+              </div>
+            </div>
+
+            <div class="learning-target">
+              <strong>Learning target</strong>
+              <span>Integrate root function, DRG location, plexus mixing, and localization logic in short clinical vignettes.</span>
+            </div>
+
+            <div class="case-grid" id="finalCases">
+              <article class="case-card" data-case-id="case1">
+                <p class="eyebrow">Case 1</p>
+                <strong>A patient has weakness of voluntary muscle activation after injury isolated to the ventral root, with no primary loss of cutaneous sensation.</strong>
+                <p>Which statement best fits this lesion?</p>
+                <fieldset>
+                  <legend class="sr-only">Case 1 options</legend>
+                  <div class="radio-list">
+                    <label class="radio-option"><input type="radio" name="case1" value="c"> <span>The lesion is most consistent with a distal named peripheral nerve after plexus redistribution.</span></label>
+                    <label class="radio-option"><input type="radio" name="case1" value="a"> <span>The lesion interrupts motor fibers exiting the spinal cord before they join sensory fibers.</span></label>
+                    <label class="radio-option"><input type="radio" name="case1" value="b"> <span>The lesion primarily affects the sensory neuron cell bodies that lie along the dorsal root.</span></label>
+                  </div>
+                </fieldset>
+                <div class="button-row" style="margin-top: 14px;">
+                  <button class="button-primary final-submit" type="button" data-case-id="case1" data-label="Case 1">Submit Case 1</button>
+                </div>
+                <div class="feedback-panel" id="feedback-case1" aria-live="polite"></div>
+              </article>
+
+              <article class="case-card" data-case-id="case2">
+                <p class="eyebrow">Case 2</p>
+                <strong>A patient reports radiating pain and numbness down the limb when a structure near the intervertebral foramen is compressed.</strong>
+                <p>Which explanation best accounts for the sensory symptoms?</p>
+                <fieldset>
+                  <legend class="sr-only">Case 2 options</legend>
+                  <div class="radio-list">
+                    <label class="radio-option"><input type="radio" name="case2" value="b"> <span>The ventral root is the most likely source, because it carries the fibers leaving the cord toward the limb.</span></label>
+                    <label class="radio-option"><input type="radio" name="case2" value="c"> <span>The mixed spinal nerve is the most likely source, because sensory symptoms begin only after sensory and motor fibers have joined.</span></label>
+                    <label class="radio-option"><input type="radio" name="case2" value="a"> <span>A sensory structure along the dorsal root lies outside the cord in a region vulnerable to foraminal compression.</span></label>
+                  </div>
+                </fieldset>
+                <div class="button-row" style="margin-top: 14px;">
+                  <button class="button-primary final-submit" type="button" data-case-id="case2" data-label="Case 2">Submit Case 2</button>
+                </div>
+                <div class="feedback-panel" id="feedback-case2" aria-live="polite"></div>
+              </article>
+
+              <article class="case-card" data-case-id="case3">
+                <p class="eyebrow">Case 3</p>
+                <strong>A patient has lateral forearm and thumb sensory change plus weakness in motions that receive contribution from more than one named upper-limb nerve. Strength is reduced, but not absent.</strong>
+                <p>Which interpretation is most consistent with this pattern?</p>
+                <fieldset>
+                  <legend class="sr-only">Case 3 options</legend>
+                  <div class="radio-list">
+                    <label class="radio-option"><input type="radio" name="case3" value="c"> <span>A lesion at the brachial plexus is more likely, because plexus lesions commonly cause weakness that is reduced rather than absent.</span></label>
+                    <label class="radio-option"><input type="radio" name="case3" value="b"> <span>A C6 root-level problem is plausible, because the sensory pattern is segmental and upper-limb movements often retain contribution from other roots.</span></label>
+                    <label class="radio-option"><input type="radio" name="case3" value="a"> <span>An isolated named peripheral nerve lesion is more likely, because mixed sensory and motor findings in the upper limb often follow one distal nerve territory.</span></label>
+                  </div>
+                </fieldset>
+                <div class="button-row" style="margin-top: 14px;">
+                  <button class="button-primary final-submit" type="button" data-case-id="case3" data-label="Case 3">Submit Case 3</button>
+                </div>
+                <div class="feedback-panel" id="feedback-case3" aria-live="polite"></div>
+              </article>
+            </div>
+
+            <div class="summary-grid" style="margin-top: 18px;">
+              <div class="summary-card">
+                <h3>Final challenge status</h3>
+                <p id="finalStatusText">Submit all three cases to calculate your clinical checkout score.</p>
+                <div class="button-row" style="margin-top: 16px;">
+                  <button class="button-secondary" id="retryIncorrect" type="button" disabled>Retry incorrect cases only</button>
+                </div>
+              </div>
+              <div class="summary-card">
+                <h3>Completion snapshot</h3>
+                <div class="results-grid">
+                  <div class="results-card">
+                    <div class="results-stat">
+                      <span class="results-value" id="finalPercent">0%</span>
+                      <strong>Case score</strong>
+                    </div>
+                  </div>
+                  <div class="results-card">
+                    <div class="results-stat">
+                      <span class="results-value" id="badgeCount">0</span>
+                      <strong>Badges earned</strong>
+                    </div>
+                  </div>
+                  <div class="results-card">
+                    <div class="results-stat">
+                      <span class="results-value" id="missionCount">0</span>
+                      <strong>Stations complete</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+                <div class="completion-banner" id="banner-final">Clinical checkout complete. Review mode is now available.</div>
+          </div>
+        </section>
+
+        <section class="mission-card" id="wrap-up">
+          <div class="section-inner">
+            <p class="eyebrow">Wrap-Up / Review Mode</p>
+            <h2 class="mission-title">What to remember</h2>
+            <p>The lab is designed for re-use. After completion, you can switch on review mode, print the page, or restart for another pass.</p>
+
+            <div class="summary-grid">
+              <div class="summary-card">
+                <h3>Quick review by concept</h3>
+                <ul class="summary-list">
+                  <li>Dorsal roots bring afferent sensory information into the spinal cord. Ventral roots send efferent motor output away from the spinal cord.</li>
+                  <li>The dorsal root ganglion sits on the dorsal root outside the spinal cord and contains sensory neuron cell bodies.</li>
+                  <li>Segmental patterns point toward a spinal level. Named peripheral nerve patterns reflect plexus-based mixing from multiple levels.</li>
+                  <li>Ventral rami interweave in the cervical, brachial, lumbar, and sacral plexuses before fibers redistribute into named nerves.</li>
+                  <li>Dermatomes are sensory territories. Myotomes are characteristic movement or muscle-group patterns. Both support localization.</li>
+                </ul>
+              </div>
+              <div class="summary-card">
+                <h3>Review controls</h3>
+                <p>Use these controls for a study pass, instructor projection, or print-friendly review handout.</p>
+                <div class="button-row" style="margin-top: 14px;">
+                  <button class="button-primary" id="restartLab" type="button">Restart lab</button>
+                  <button class="button-secondary" id="revealAnswersButton" type="button" aria-pressed="false">Reveal all correct answers</button>
+                  <button class="button-ghost" id="printButton" type="button">Print / save PDF</button>
+                </div>
+                <p class="print-note">Print styling hides most controls and reveals answer keys for a cleaner review handout.</p>
+                <div class="review-only callout blue" style="margin-top: 14px;">
+                  <p class="callout-title">Review mode available</p>
+                  <p>Answer keys are visible because review mode or reveal-all mode is active.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const missionMeta = {
+      m1: {
+        badge: "Root Foundations",
+        objectives: [1]
+      },
+      m2: {
+        badge: "DRG Recognition",
+        objectives: [2]
+      },
+      m3: {
+        badge: "Pattern Analysis",
+        objectives: [3]
+      },
+      m4: {
+        badge: "Plexus Integration",
+        objectives: [4]
+      },
+      m5: {
+        badge: "Plexus Mapping",
+        objectives: [6]
+      },
+      m6: {
+        badge: "Clinical Localization",
+        objectives: [5]
+      }
+    };
+
+    const plexusRevealData = {
+      cervical: {
+        title: "Cervical plexus",
+        body: "Levels: C1-C4. General region: neck and upper cervical structures."
+      },
+      brachial: {
+        title: "Brachial plexus",
+        body: "Levels: C5-T1. General region: upper limb."
+      },
+      lumbar: {
+        title: "Lumbar plexus",
+        body: "Levels: L1-L4. General region: anterior and medial lower limb."
+      },
+      sacral: {
+        title: "Sacral plexus",
+        body: "Levels: L4-S4. General region: posterior lower limb and foot."
+      }
+    };
+
+    const m1Terms = [
+      { id: "dorsal-root", label: "dorsal root", answer: "dorsal" },
+      { id: "ventral-root", label: "ventral root", answer: "ventral" },
+      { id: "afferent", label: "afferent", answer: "dorsal" },
+      { id: "efferent", label: "efferent", answer: "ventral" },
+      { id: "sensory-input", label: "sensory input", answer: "dorsal" },
+      { id: "motor-output", label: "motor output", answer: "ventral" },
+      { id: "into-cns", label: "into CNS", answer: "dorsal" },
+      { id: "away-cns", label: "away from CNS", answer: "ventral" }
+    ];
+
+    const m3Terms = [
+      { id: "c6-root", label: "C6 sensory change into the lateral forearm and thumb", answer: "root" },
+      { id: "radial-nerve", label: "Findings isolated to one named radial nerve territory", answer: "peripheral" },
+      { id: "single-level-reflex", label: "Sensory change plus reflex findings tied mainly to one root level", answer: "root" },
+      { id: "ulnar-territory", label: "Symptoms limited to a named ulnar nerve distribution", answer: "peripheral" }
+    ];
+
+    const m4Steps = [
+      "Dorsal and ventral roots join to form a mixed spinal nerve",
+      "The spinal nerve divides into rami",
+      "In limb regions, ventral rami interweave into a plexus",
+      "Fibers redistribute into named peripheral nerves"
+    ];
+
+    const finalCaseMeta = {
+      case1: {
+        correct: "a",
+        explanation: "Correct. The ventral root carries efferent motor output away from the spinal cord, so isolated ventral root injury primarily creates motor deficits."
+      },
+      case2: {
+        correct: "a",
+        explanation: "Correct. The DRG contains sensory neuron cell bodies on the dorsal root outside the cord, so irritation near the foramen can produce radiating sensory symptoms."
+      },
+      case3: {
+        correct: "b",
+        explanation: "Correct. A C6-type root pattern fits the dermatomal sensory change, and mixed root contribution through plexus organization can weaken movement without erasing it completely."
+      }
+    };
+
+    const state = {
+      started: false,
+      darkMode: false,
+      reviewMode: false,
+      revealAnswers: false,
+      score: {
+        total: 0,
+        max: 9,
+        finalCorrect: 0,
+        finalTotal: 3
+      },
+      completedMissions: {
+        m1: false,
+        m2: false,
+        m3: false,
+        m4: false,
+        m5: false,
+        m6: false,
+        final: false
+      },
+      badges: [],
+      objectives: {
+        1: false,
+        2: false,
+        3: false,
+        4: false,
+        5: false,
+        6: false
+      },
+      activities: {
+        m1: {
+          activeBucket: "dorsal",
+          assignments: {}
+        },
+        m2: {
+          hotspotCorrect: false,
+          reasonCorrect: false
+        },
+        m3: {
+          activeBucket: "root",
+          assignments: {},
+          reasonCorrect: false
+        },
+        m4: {
+          sequence: [],
+          bankOrder: shuffle([...m4Steps]),
+          sequenceCorrect: false,
+          reasonCorrect: false
+        },
+        m5: {
+          hintMode: false
+        },
+        m6: {
+          classificationCorrect: false,
+          caseCorrect: false
+        }
+      },
+      finalCases: {
+        case1: { submitted: false, correct: false, correctedOnRetry: false },
+        case2: { submitted: false, correct: false, correctedOnRetry: false },
+        case3: { submitted: false, correct: false, correctedOnRetry: false }
+      }
+    };
+
+    function shuffle(array) {
+      const clone = [...array];
+      for (let index = clone.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [clone[index], clone[swapIndex]] = [clone[swapIndex], clone[index]];
+      }
+      return clone;
+    }
+
+    function scrollToSection(id) {
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function setFeedback(id, type, title, body) {
+      const panel = document.getElementById(id);
+      panel.className = `feedback-panel visible ${type}`;
+      panel.innerHTML = `<strong>${title}</strong><p>${body}</p>`;
+    }
+
+    function clearFeedback(id) {
+      const panel = document.getElementById(id);
+      panel.className = "feedback-panel";
+      panel.textContent = "";
+    }
+
+    function updateHeaderProgress() {
+      const checkpointCount = Object.values(state.completedMissions).filter(Boolean).length;
+      const missionCount = ["m1", "m2", "m3", "m4", "m5", "m6"].filter((key) => state.completedMissions[key]).length;
+      state.score.total = missionCount + state.score.finalCorrect;
+      document.getElementById("progressText").textContent = `${checkpointCount} / 7 checkpoints complete`;
+      document.getElementById("scoreText").textContent = `Mastery score ${state.score.total} / ${state.score.max}`;
+      document.getElementById("progressFill").style.width = `${(checkpointCount / 7) * 100}%`;
+      document.getElementById("missionCount").textContent = String(missionCount);
+      document.getElementById("badgeCount").textContent = String(state.badges.length);
+      document.getElementById("finalPercent").textContent = `${Math.round((state.score.finalCorrect / state.score.finalTotal) * 100)}%`;
+    }
+
+    function updateObjectiveUI() {
+      const completeObjectives = Object.values(state.objectives).filter(Boolean).length;
+      document.getElementById("objectiveCount").textContent = `${completeObjectives} / 6 marked complete`;
+      document.querySelectorAll(".objective-item").forEach((item) => {
+        const objectiveId = item.getAttribute("data-objective");
+        item.classList.toggle("is-complete", Boolean(state.objectives[objectiveId]));
+      });
+    }
+
+    function unlockBadge(missionKey) {
+      const badge = missionMeta[missionKey].badge;
+      if (!state.badges.includes(badge)) {
+        state.badges.push(badge);
+      }
+      const badgeElement = document.getElementById(`badge-${missionKey}`);
+      badgeElement.textContent = `Badge earned: ${badge}`;
+      badgeElement.classList.remove("locked");
+      badgeElement.classList.add("unlocked");
+    }
+
+    function markMissionComplete(missionKey) {
+      if (!state.completedMissions[missionKey]) {
+        state.completedMissions[missionKey] = true;
+        document.getElementById(`banner-${missionKey}`).classList.add("visible");
+      }
+
+      if (missionMeta[missionKey]) {
+        unlockBadge(missionKey);
+        missionMeta[missionKey].objectives.forEach((objectiveId) => {
+          state.objectives[objectiveId] = true;
+        });
+        const missionSection = document.querySelector(`[data-mission-key="${missionKey}"]`);
+        if (missionSection) {
+          missionSection.classList.add("is-complete");
+        }
+      }
+
+      updateObjectiveUI();
+      updateHeaderProgress();
+    }
+
+    function maybeCompleteMission2() {
+      if (state.activities.m2.hotspotCorrect && state.activities.m2.reasonCorrect) {
+        markMissionComplete("m2");
+      }
+    }
+
+    function maybeCompleteMission3() {
+      const sortedCorrectly = m3Terms.every((term) => state.activities.m3.assignments[term.id] === term.answer);
+      if (sortedCorrectly && state.activities.m3.reasonCorrect) {
+        markMissionComplete("m3");
+      }
+    }
+
+    function maybeCompleteMission4() {
+      if (state.activities.m4.sequenceCorrect && state.activities.m4.reasonCorrect) {
+        markMissionComplete("m4");
+      }
+    }
+
+    function maybeCompleteMission6() {
+      if (state.activities.m6.classificationCorrect && state.activities.m6.caseCorrect) {
+        markMissionComplete("m6");
+      }
+    }
+
+    function renderClickSort(terms, stateKey, bankId, binAId, binBId, labels) {
+      const activity = state.activities[stateKey];
+      const bank = document.getElementById(bankId);
+      const binA = document.getElementById(binAId);
+      const binB = document.getElementById(binBId);
+      bank.innerHTML = "";
+      binA.innerHTML = "";
+      binB.innerHTML = "";
+
+      const unassigned = terms.filter((term) => !activity.assignments[term.id]);
+      const assignedA = terms.filter((term) => activity.assignments[term.id] === labels.a);
+      const assignedB = terms.filter((term) => activity.assignments[term.id] === labels.b);
+
+      unassigned.forEach((term) => bank.appendChild(buildTermButton(term, stateKey, null)));
+      assignedA.forEach((term) => binA.appendChild(buildTermButton(term, stateKey, labels.a)));
+      assignedB.forEach((term) => binB.appendChild(buildTermButton(term, stateKey, labels.b)));
+    }
+
+    function buildTermButton(term, missionKey, placement) {
+      const button = document.createElement("button");
+      button.className = "term-button";
+      button.type = "button";
+      button.textContent = term.label;
+      button.addEventListener("click", () => {
+        const activity = state.activities[missionKey];
+        if (placement) {
+          delete activity.assignments[term.id];
+        } else {
+          activity.assignments[term.id] = activity.activeBucket;
+        }
+        if (missionKey === "m1") {
+          renderMission1();
+          clearFeedback("m1Feedback");
+        } else {
+          renderMission3();
+          clearFeedback("m3Feedback");
+        }
+      });
+      return button;
+    }
+
+    function renderMission1() {
+      document.getElementById("m1BucketDorsal").classList.toggle("is-active", state.activities.m1.activeBucket === "dorsal");
+      document.getElementById("m1BucketVentral").classList.toggle("is-active", state.activities.m1.activeBucket === "ventral");
+      renderClickSort(m1Terms, "m1", "m1Bank", "m1DorsalBin", "m1VentralBin", { a: "dorsal", b: "ventral" });
+    }
+
+    function renderMission3() {
+      document.getElementById("m3BucketRoot").classList.toggle("is-active", state.activities.m3.activeBucket === "root");
+      document.getElementById("m3BucketPeripheral").classList.toggle("is-active", state.activities.m3.activeBucket === "peripheral");
+      renderClickSort(m3Terms, "m3", "m3Bank", "m3RootBin", "m3PeripheralBin", { a: "root", b: "peripheral" });
+    }
+
+    function renderMission4() {
+      const bank = document.getElementById("m4Bank");
+      const sequence = document.getElementById("m4Sequence");
+      bank.innerHTML = "";
+      sequence.innerHTML = "";
+
+      state.activities.m4.bankOrder
+        .filter((step) => !state.activities.m4.sequence.includes(step))
+        .forEach((step) => {
+          const button = document.createElement("button");
+          button.className = "sequence-chip";
+          button.type = "button";
+          button.textContent = step;
+          button.addEventListener("click", () => {
+            state.activities.m4.sequence.push(step);
+            renderMission4();
+            clearFeedback("m4Feedback");
+          });
+          bank.appendChild(button);
+        });
+
+      state.activities.m4.sequence.forEach((step, index) => {
+        const item = document.createElement("button");
+        item.className = "sequence-item";
+        item.type = "button";
+        item.innerHTML = `<span class="sequence-count">${index + 1}</span><span>${step}</span>`;
+        item.addEventListener("click", () => {
+          state.activities.m4.sequence.splice(index, 1);
+          renderMission4();
+          clearFeedback("m4Feedback");
+        });
+        sequence.appendChild(item);
+      });
+    }
+
+    function updateReviewModeUI() {
+      document.body.classList.toggle("dark-mode", state.darkMode);
+      document.body.classList.toggle("review-mode", state.reviewMode);
+      document.body.classList.toggle("reveal-answers", state.revealAnswers);
+
+      const darkModeToggle = document.getElementById("darkModeToggle");
+      darkModeToggle.setAttribute("aria-pressed", String(state.darkMode));
+      darkModeToggle.textContent = state.darkMode ? "Light mode" : "Dark mode";
+
+      const reviewModeToggle = document.getElementById("reviewModeToggle");
+      if (state.completedMissions.final) {
+        reviewModeToggle.disabled = false;
+        reviewModeToggle.setAttribute("aria-pressed", String(state.reviewMode));
+        reviewModeToggle.textContent = state.reviewMode ? "Review mode on" : "Review mode";
+      } else {
+        reviewModeToggle.disabled = true;
+        reviewModeToggle.setAttribute("aria-pressed", "false");
+        reviewModeToggle.textContent = "Review mode locked";
+      }
+
+      const revealAnswersButton = document.getElementById("revealAnswersButton");
+      revealAnswersButton.setAttribute("aria-pressed", String(state.revealAnswers));
+      revealAnswersButton.textContent = state.revealAnswers ? "Hide revealed answers" : "Reveal all correct answers";
+    }
+
+    function updateFinalChallengeUI() {
+      const submittedCount = Object.values(state.finalCases).filter((caseState) => caseState.submitted).length;
+      const incorrectCount = Object.values(state.finalCases).filter((caseState) => caseState.submitted && !caseState.correct).length;
+      const allSubmitted = submittedCount === state.score.finalTotal;
+
+      document.getElementById("retryIncorrect").disabled = !allSubmitted || incorrectCount === 0;
+      document.getElementById("finalStatusText").textContent = allSubmitted
+        ? `Clinical checkout submitted. First-pass score: ${state.score.finalCorrect} / ${state.score.finalTotal}. ${incorrectCount ? "You may retry the incorrect cases for additional practice." : "All cases were correct on the first attempt."}`
+        : "Submit all three cases to calculate your clinical checkout score.";
+
+      if (allSubmitted && !state.completedMissions.final) {
+        state.completedMissions.final = true;
+        document.getElementById("banner-final").classList.add("visible");
+        const badge = document.getElementById("badge-final");
+        badge.textContent = "Clinical checkout complete: Review mode available";
+        badge.classList.remove("locked");
+        badge.classList.add("unlocked");
+        updateReviewModeUI();
+        updateHeaderProgress();
+      }
+    }
+
+    function setFinalCaseLocked(caseId, locked) {
+      document.querySelectorAll(`input[name="${caseId}"]`).forEach((input) => {
+        input.disabled = locked;
+      });
+      const submitButton = document.querySelector(`.final-submit[data-case-id="${caseId}"]`);
+      if (submitButton) {
+        submitButton.disabled = locked;
+        submitButton.textContent = `${locked ? "Submitted" : "Submit"} ${submitButton.dataset.label}`;
+      }
+    }
+
+    function handleFinalCaseSubmit(caseId) {
+      const selected = document.querySelector(`input[name="${caseId}"]:checked`);
+      if (!selected) {
+        setFeedback(`feedback-${caseId}`, "incorrect", "Select a response", "Read the vignette again, choose the best option, and then submit your answer.");
+        return;
+      }
+
+      const caseState = state.finalCases[caseId];
+      const caseConfig = finalCaseMeta[caseId];
+      const firstSubmission = !caseState.submitted;
+      caseState.submitted = true;
+
+      if (selected.value === caseConfig.correct) {
+        if (firstSubmission) {
+          state.score.finalCorrect += 1;
+        } else if (!caseState.correct) {
+          caseState.correctedOnRetry = true;
+        }
+        caseState.correct = true;
+        setFeedback(`feedback-${caseId}`, "correct", "Correct response", caseConfig.explanation);
+      } else {
+        caseState.correct = false;
+        setFeedback(`feedback-${caseId}`, "incorrect", "Review the clinical pattern", `${caseConfig.explanation} Keep the difference between root-level and named peripheral nerve patterns in mind.`);
+      }
+
+      setFinalCaseLocked(caseId, true);
+      updateHeaderProgress();
+      updateFinalChallengeUI();
+    }
+
+    function initButtons() {
+      document.querySelectorAll("[data-target]").forEach((button) => {
+        button.addEventListener("click", () => {
+          scrollToSection(button.getAttribute("data-target"));
+        });
+      });
+
+      document.getElementById("startLabButton").addEventListener("click", () => {
+        state.started = true;
+        scrollToSection("objectives");
+      });
+
+      document.getElementById("darkModeToggle").addEventListener("click", () => {
+        state.darkMode = !state.darkMode;
+        updateReviewModeUI();
+      });
+
+      document.getElementById("reviewModeToggle").addEventListener("click", () => {
+        if (state.completedMissions.final) {
+          state.reviewMode = !state.reviewMode;
+          updateReviewModeUI();
+        }
+      });
+
+      document.getElementById("revealAnswersButton").addEventListener("click", () => {
+        state.revealAnswers = !state.revealAnswers;
+        updateReviewModeUI();
+      });
+
+      document.getElementById("printButton").addEventListener("click", () => window.print());
+
+      document.getElementById("restartLab").addEventListener("click", () => window.location.reload());
+    }
+
+    function initMission1() {
+      document.getElementById("m1BucketDorsal").addEventListener("click", () => {
+        state.activities.m1.activeBucket = "dorsal";
+        renderMission1();
+      });
+      document.getElementById("m1BucketVentral").addEventListener("click", () => {
+        state.activities.m1.activeBucket = "ventral";
+        renderMission1();
+      });
+      document.getElementById("m1Check").addEventListener("click", () => {
+        const allAssigned = m1Terms.every((term) => state.activities.m1.assignments[term.id]);
+        if (!allAssigned) {
+          setFeedback("m1Feedback", "incorrect", "Complete the sort first", "Place every term into either the dorsal or ventral root bucket, then check your answer.");
+          return;
+        }
+        const correct = m1Terms.every((term) => state.activities.m1.assignments[term.id] === term.answer);
+        if (correct) {
+          setFeedback("m1Feedback", "correct", "Correct response", "Dorsal root terms describe sensory input moving into the CNS. Ventral root terms describe motor output moving away from the CNS. The mixed spinal nerve forms once the roots unite.");
+          markMissionComplete("m1");
+        } else {
+          setFeedback("m1Feedback", "incorrect", "Review the direction terms", "Use dorsal for afferent sensory traffic into the CNS and ventral for efferent motor traffic away from the CNS.");
+        }
+      });
+      document.getElementById("m1Reset").addEventListener("click", () => {
+        state.activities.m1.assignments = {};
+        clearFeedback("m1Feedback");
+        renderMission1();
+      });
+      renderMission1();
+    }
+
+    function initMission2() {
+      document.querySelectorAll(".hotspot-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const correct = button.getAttribute("data-structure") === "drg";
+          document.querySelectorAll(".hotspot-button").forEach((inner) => inner.classList.remove("correct-hit", "incorrect-hit"));
+          button.classList.add(correct ? "correct-hit" : "incorrect-hit");
+          if (correct) {
+            state.activities.m2.hotspotCorrect = true;
+            setFeedback("m2Feedback", "correct", "Correct structure", "That bulge on the dorsal root is the dorsal root ganglion, which houses sensory neuron cell bodies outside the spinal cord.");
+            maybeCompleteMission2();
+          } else {
+            setFeedback("m2Feedback", "incorrect", "Review the structure", "The DRG is the rounded swelling on the dorsal root, not the ventral root or the thin dorsal root segment itself.");
+          }
+        });
+      });
+
+      document.getElementById("m2ReasonCheck").addEventListener("click", () => {
+        const choice = document.querySelector('input[name="m2Reason"]:checked');
+        if (!choice) {
+          setFeedback("m2Feedback", "incorrect", "Select an explanation", "Choose the best explanation for why the DRG matters in sensory transmission.");
+          return;
+        }
+        if (choice.value === "a") {
+          state.activities.m2.reasonCorrect = true;
+          setFeedback("m2Feedback", "correct", "Correct explanation", "The DRG contains sensory neuron cell bodies along the dorsal root outside the spinal cord, which helps explain why irritation there produces sensory symptoms.");
+          maybeCompleteMission2();
+        } else {
+          setFeedback("m2Feedback", "incorrect", "Review the anatomical role", "The DRG is specifically tied to sensory neurons, not motor synapses or plexus formation.");
+        }
+      });
+    }
+
+    function initMission3() {
+      document.getElementById("m3BucketRoot").addEventListener("click", () => {
+        state.activities.m3.activeBucket = "root";
+        renderMission3();
+      });
+      document.getElementById("m3BucketPeripheral").addEventListener("click", () => {
+        state.activities.m3.activeBucket = "peripheral";
+        renderMission3();
+      });
+      document.getElementById("m3Check").addEventListener("click", () => {
+        const allAssigned = m3Terms.every((term) => state.activities.m3.assignments[term.id]);
+        if (!allAssigned) {
+          setFeedback("m3Feedback", "incorrect", "Complete the classification first", "Assign each clinical example to either the root-level pattern or the peripheral nerve pattern before checking.");
+          return;
+        }
+        const correct = m3Terms.every((term) => state.activities.m3.assignments[term.id] === term.answer);
+        if (correct) {
+          setFeedback("m3Feedback", "correct", "Appropriate classification", "Root-level findings follow a single spinal level. Named peripheral nerve findings follow one nerve territory after fibers have already mixed in a plexus.");
+          maybeCompleteMission3();
+        } else {
+          setFeedback("m3Feedback", "incorrect", "Review the distribution pattern", "If the pattern points to one dermatome or one root, sort it as root-level. If it follows a named nerve territory, sort it as peripheral nerve.");
+        }
+      });
+      document.getElementById("m3Reset").addEventListener("click", () => {
+        state.activities.m3.assignments = {};
+        clearFeedback("m3Feedback");
+        renderMission3();
+      });
+      document.getElementById("m3ReasonCheck").addEventListener("click", () => {
+        const choice = document.querySelector('input[name="m3Reason"]:checked');
+        if (!choice) {
+          setFeedback("m3Feedback", "incorrect", "Select an explanation", "Answer the reasoning prompt about why named peripheral nerves include multiple spinal levels.");
+          return;
+        }
+        if (choice.value === "b") {
+          state.activities.m3.reasonCorrect = true;
+          setFeedback("m3Feedback", "correct", "Correct explanation", "Ventral rami interweave in plexuses, so the resulting named peripheral nerves contain fibers from more than one spinal level.");
+          maybeCompleteMission3();
+        } else {
+          setFeedback("m3Feedback", "incorrect", "Review the plexus concept", "The key idea is plexus reorganization of ventral rami from multiple levels before a named peripheral nerve forms.");
+        }
+      });
+      renderMission3();
+    }
+
+    function initMission4() {
+      document.getElementById("m4Check").addEventListener("click", () => {
+        if (state.activities.m4.sequence.length !== m4Steps.length) {
+          setFeedback("m4Feedback", "incorrect", "Sequence incomplete", "Place all four steps in order before checking the pathway.");
+          return;
+        }
+        const correct = m4Steps.every((step, index) => state.activities.m4.sequence[index] === step);
+        if (correct) {
+          state.activities.m4.sequenceCorrect = true;
+          setFeedback("m4Feedback", "correct", "Correct sequence", "Fibers move from roots to the mixed spinal nerve, then to rami, into plexus mixing, and finally into named peripheral nerves.");
+          maybeCompleteMission4();
+        } else {
+          state.activities.m4.sequenceCorrect = false;
+          setFeedback("m4Feedback", "incorrect", "Review the order of the middle steps", "Remember that the mixed spinal nerve forms before rami appear, and ventral rami interweave in the plexus before named peripheral nerves emerge.");
+        }
+      });
+
+      document.getElementById("m4Reset").addEventListener("click", () => {
+        state.activities.m4.sequence = [];
+        state.activities.m4.sequenceCorrect = false;
+        state.activities.m4.bankOrder = shuffle([...m4Steps]);
+        clearFeedback("m4Feedback");
+        renderMission4();
+      });
+
+      document.getElementById("m4ReasonCheck").addEventListener("click", () => {
+        const choice = document.querySelector('input[name="m4Reason"]:checked');
+        if (!choice) {
+          setFeedback("m4Feedback", "incorrect", "Select an explanation", "Answer the concept check about why one root lesion may weaken, but not erase, a movement.");
+          return;
+        }
+        if (choice.value === "a") {
+          state.activities.m4.reasonCorrect = true;
+          setFeedback("m4Feedback", "correct", "Correct explanation", "Because named peripheral nerves and movements often receive fibers from multiple roots, one damaged root may reduce strength without removing all contribution.");
+          maybeCompleteMission4();
+        } else {
+          setFeedback("m4Feedback", "incorrect", "Review the concept of shared contribution", "The best explanation is mixed root contribution through plexus organization, not DRG replacement or sensory-only ventral roots.");
+        }
+      });
+      renderMission4();
+    }
+
+    function initMission5() {
+      document.querySelectorAll(".region-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const key = button.getAttribute("data-region");
+          const info = plexusRevealData[key];
+          document.getElementById("plexusInfo").innerHTML = `<h3>${info.title}</h3><p>${info.body}</p>`;
+        });
+      });
+
+      document.getElementById("m5HintToggle").addEventListener("click", () => {
+        state.activities.m5.hintMode = !state.activities.m5.hintMode;
+        const toggle = document.getElementById("m5HintToggle");
+        toggle.setAttribute("aria-pressed", String(state.activities.m5.hintMode));
+        document.getElementById("m5HintText").classList.toggle("visible", state.activities.m5.hintMode);
+      });
+
+      document.getElementById("m5Check").addEventListener("click", () => {
+        const answerKey = {
+          cervical: {
+            levels: "C1-C4",
+            region: "Neck and upper cervical region"
+          },
+          brachial: {
+            levels: "C5-T1",
+            region: "Upper limb"
+          },
+          lumbar: {
+            levels: "L1-L4",
+            region: "Anterior/medial lower limb"
+          },
+          sacral: {
+            levels: "L4-S4",
+            region: "Posterior lower limb and foot"
+          }
+        };
+
+        const allCorrect = Object.entries(answerKey).every(([plexus, answers]) => {
+          const levelValue = document.querySelector(`select[data-plexus="${plexus}"][data-type="levels"]`).value;
+          const regionValue = document.querySelector(`select[data-plexus="${plexus}"][data-type="region"]`).value;
+          return levelValue === answers.levels && regionValue === answers.region;
+        });
+
+        if (allCorrect) {
+          setFeedback("m5Feedback", "correct", "Appropriate match", "You matched the four major plexuses with the correct level ranges and body regions. These anchors are key for later localization work.");
+          markMissionComplete("m5");
+        } else {
+          setFeedback("m5Feedback", "incorrect", "Review the region-to-level pairings", "Recheck which plexus serves the neck, upper limb, anterior and medial lower limb, and posterior lower limb before you resubmit.");
+        }
+      });
+    }
+
+    function initMission6() {
+      document.getElementById("m6Check").addEventListener("click", () => {
+        const answers = {
+          a: "C6 dermatome",
+          b: "L4-L5 myotome",
+          c: "Peripheral nerve pattern"
+        };
+
+        const classificationCorrect = Object.entries(answers).every(([key, answer]) => {
+          return document.querySelector(`select[data-classification="${key}"]`).value === answer;
+        });
+
+        const caseChoice = document.querySelector('input[name="m6Case"]:checked');
+        const caseCorrect = caseChoice && caseChoice.value === "root";
+
+        state.activities.m6.classificationCorrect = classificationCorrect;
+        state.activities.m6.caseCorrect = Boolean(caseCorrect);
+
+        if (classificationCorrect && caseCorrect) {
+          setFeedback("m6Feedback", "correct", "Appropriate localization", "You matched the findings to the appropriate dermatome, myotome, and peripheral nerve category, and you correctly identified the mini-case as more consistent with a root lesion.");
+          maybeCompleteMission6();
+        } else {
+          setFeedback("m6Feedback", "incorrect", "Review the localization pattern", "Ask whether each finding is best described as a sensory territory, a characteristic movement, or a named peripheral nerve distribution, then reconsider the case pattern.");
+        }
+      });
+    }
+
+    function initFinalChallenge() {
+      document.querySelectorAll(".final-submit").forEach((button) => {
+        button.addEventListener("click", () => {
+          handleFinalCaseSubmit(button.getAttribute("data-case-id"));
+        });
+      });
+
+      document.getElementById("retryIncorrect").addEventListener("click", () => {
+        Object.entries(state.finalCases).forEach(([caseId, caseState]) => {
+          if (caseState.submitted && !caseState.correct) {
+            caseState.submitted = false;
+            caseState.correct = false;
+            const inputs = document.querySelectorAll(`input[name="${caseId}"]`);
+            inputs.forEach((input) => {
+              input.checked = false;
+            });
+            setFinalCaseLocked(caseId, false);
+            clearFeedback(`feedback-${caseId}`);
+          }
+        });
+        state.completedMissions.final = false;
+        state.reviewMode = false;
+        document.getElementById("banner-final").classList.remove("visible");
+        const badge = document.getElementById("badge-final");
+        badge.textContent = "Review mode unlocks after all three cases are submitted";
+        badge.classList.add("locked");
+        badge.classList.remove("unlocked");
+        updateHeaderProgress();
+        updateFinalChallengeUI();
+        updateReviewModeUI();
+      });
+    }
+
+    function initApp() {
+      initButtons();
+      initMission1();
+      initMission2();
+      initMission3();
+      initMission4();
+      initMission5();
+      initMission6();
+      initFinalChallenge();
+      updateObjectiveUI();
+      updateHeaderProgress();
+      updateReviewModeUI();
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
