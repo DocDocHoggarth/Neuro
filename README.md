@@ -24,26 +24,6 @@ To run a specific activity, append the file name to the end of that URL.
 
 - `https://docdochoggarth.github.io/Neuro/LE-nerve-study-tool.html`
 - `https://docdochoggarth.github.io/Neuro/Neuroanatomy-Intro.html`
-- `https://docdochoggarth.github.io/Neuro/build_a_neuron.html`
-- `https://docdochoggarth.github.io/Neuro/sequence_the_synapse.html`
-- `https://docdochoggarth.github.io/Neuro/spinal-cord-innervation-interactive-lab-manual.html`
-
-## Activity list
-
-### LE-nerve-study-tool.html
-A browser-based activity for studying and reviewing nerve-related content.
-
-### Neuroanatomy-Intro.html
-An introductory activity for foundational neuroanatomy concepts.
-
-### build_a_neuron.html
-An interactive module focused on neuron structure and organization.
-
-### sequence_the_synapse.html
-An activity that helps students learn the sequence of events involved in synaptic transmission.
-
-### spinal-cord-innervation-interactive-lab-manual.html
-An interactive lab-style activity focused on spinal cord anatomy and innervation.
 
 ## Notes
 
