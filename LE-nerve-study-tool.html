@@ -1,0 +1,3041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DPTD 731 Lower Extremity Nerve Atlas</title>
+  <script>
+    window.tailwind = {
+      config: {
+        theme: {
+          extend: {
+            boxShadow: {
+              atlas: "0 18px 42px rgba(17, 34, 51, 0.12)",
+              card: "0 10px 28px rgba(17, 34, 51, 0.09)",
+              soft: "0 6px 18px rgba(17, 34, 51, 0.06)",
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap");
+
+    :root {
+      --bg: #f5f7fa;
+      --paper: #f8fafc;
+      --paper-strong: #ffffff;
+      --slate: #0f1115;
+      --slate-soft: #586272;
+      --border: rgba(35, 42, 51, 0.12);
+      --teal: #00b7c9;
+      --teal-soft: rgba(0, 183, 201, 0.14);
+      --amber: #a6192e;
+      --amber-soft: rgba(166, 25, 46, 0.14);
+      --rose: #ef3e42;
+      --rose-soft: rgba(239, 62, 66, 0.14);
+      --success: #2850a7;
+      --success-soft: rgba(40, 80, 167, 0.14);
+      --neutral-soft: rgba(35, 42, 51, 0.06);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Source Sans 3", sans-serif;
+      color: var(--slate);
+      background:
+        radial-gradient(circle at top left, rgba(166, 25, 46, 0.1), transparent 24rem),
+        radial-gradient(circle at top right, rgba(0, 183, 201, 0.12), transparent 22rem),
+        radial-gradient(circle at bottom right, rgba(40, 80, 167, 0.08), transparent 26rem),
+        linear-gradient(180deg, #fbfcfe 0%, #eef2f6 100%);
+    }
+
+    #root {
+      min-height: 100vh;
+    }
+
+    ::selection {
+      background: rgba(166, 25, 46, 0.18);
+    }
+
+    [data-card-animation="fade"] {
+      animation: fadeIn 420ms ease;
+    }
+
+    [data-card-animation="slide"] {
+      animation: slideIn 440ms ease;
+    }
+
+    [data-dragging="true"] {
+      opacity: 0.62;
+      transform: scale(0.98);
+    }
+
+    [data-drop-state="active"] {
+      box-shadow: 0 0 0 2px rgba(91, 143, 139, 0.35), 0 16px 32px rgba(91, 143, 139, 0.12);
+      transform: translateY(-2px);
+      border-color: rgba(91, 143, 139, 0.55);
+      background: linear-gradient(180deg, rgba(91, 143, 139, 0.1), rgba(255, 255, 255, 0.96));
+    }
+
+    [data-feedback="correct"] {
+      animation: pulseGood 480ms ease;
+    }
+
+    [data-feedback="incorrect"] {
+      animation: shake 420ms ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulseGood {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.02);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes shake {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      20% {
+        transform: translateX(-6px);
+      }
+      40% {
+        transform: translateX(6px);
+      }
+      60% {
+        transform: translateX(-4px);
+      }
+      80% {
+        transform: translateX(4px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel" data-type="module" data-presets="react">
+    const { useState, useEffect, useMemo, useCallback } = window.React;
+
+    const APP_SECTIONS = [
+      { key: "explorer", label: "Nerve Explorer" },
+      { key: "nerveId", label: "Nerve Identification" },
+      { key: "matching", label: "Matching" },
+      { key: "compartment", label: "Compartment Challenge" },
+      { key: "spaces", label: "Anatomical Spaces" },
+      { key: "clinical", label: "Clinical Scenarios" },
+      { key: "dashboard", label: "Score Dashboard" },
+    ];
+
+    const SCORED_SECTIONS = APP_SECTIONS.filter((section) => section.key !== "dashboard");
+
+    const INITIAL_SCORES = {
+      explorer: { correct: 0, attempted: 0 },
+      nerveId: { correct: 0, attempted: 0 },
+      matching: { correct: 0, attempted: 0 },
+      compartment: { correct: 0, attempted: 0 },
+      spaces: { correct: 0, attempted: 0 },
+      clinical: { correct: 0, attempted: 0 },
+    };
+
+    const explorerData = {
+      lumbar: [
+        {
+          id: "iliohypogastric",
+          name: "Iliohypogastric nerve",
+          roots: "L1",
+          course: "Emerges from the lumbar plexus and travels across the posterior abdominal wall toward the lower abdominal region.",
+          motor: "Lower abdominal wall musculature.",
+          sensory: "Skin of the lower abdominal and superolateral gluteal region.",
+          clinical: "May be irritated after lower abdominal or pelvic surgery.",
+        },
+        {
+          id: "ilioinguinal",
+          name: "Ilioinguinal nerve",
+          roots: "L1",
+          course: "Runs inferior to the iliohypogastric pathway and passes toward the inguinal canal region.",
+          motor: "Lower abdominal wall musculature.",
+          sensory: "Upper medial thigh and anterior external genital region.",
+          clinical: "Can be entrapped in the inguinal region and contribute to groin pain.",
+        },
+        {
+          id: "genitofemoral",
+          name: "Genitofemoral nerve",
+          roots: "L1-L2",
+          course: "Pierces the psoas major and descends on its anterior surface before dividing into genital and femoral branches.",
+          motor: "Cremaster muscle via the genital branch.",
+          sensory: "Upper anterior thigh and genital region.",
+          clinical: "May be involved in anterior thigh or groin sensory symptoms after retroperitoneal procedures.",
+        },
+        {
+          id: "lateral-femoral-cutaneous",
+          name: "Lateral femoral cutaneous nerve",
+          roots: "L2-L3",
+          course: "Crosses the iliacus and passes near or beneath the inguinal ligament toward the lateral thigh.",
+          motor: "None; purely sensory.",
+          sensory: "Lateral thigh.",
+          clinical: "Entrapment near the inguinal ligament causes meralgia paresthetica.",
+        },
+        {
+          id: "obturator",
+          name: "Obturator nerve",
+          roots: "L2-L4",
+          course: "Descends along the medial border of psoas major and enters the medial thigh through the obturator canal.",
+          motor: "Primary nerve to the medial thigh adductor compartment.",
+          sensory: "Medial thigh.",
+          clinical: "Injury weakens adduction and can alter medial thigh sensation.",
+          branches: [
+            {
+              title: "Anterior branch",
+              details: "Adductor longus, adductor brevis, gracilis, obturator externus.",
+            },
+            {
+              title: "Posterior branch",
+              details: "Adductor magnus.",
+            },
+          ],
+        },
+        {
+          id: "femoral",
+          name: "Femoral nerve",
+          roots: "L2-L4",
+          course: "Passes between psoas major and iliacus, then travels beneath the inguinal ligament into the anterior thigh.",
+          motor: "Anterior thigh compartment, including quadriceps femoris.",
+          sensory: "Anterior thigh; medial leg and foot via the saphenous nerve.",
+          clinical: "Injury causes weak knee extension, reduced patellar reflex, and sensory loss over the anterior thigh and medial leg.",
+          branches: [
+            {
+              title: "Muscular branches",
+              details: "Quadriceps femoris, sartorius, pectineus.",
+            },
+            {
+              title: "Articular branches",
+              details: "Hip and knee joint branches.",
+            },
+            {
+              title: "Saphenous nerve",
+              details: "L2-L4; cutaneous to the medial leg and medial foot.",
+            },
+          ],
+        },
+        {
+          id: "lumbosacral-trunk",
+          name: "Lumbosacral trunk",
+          roots: "L4-L5",
+          course: "Connects the lumbar plexus to the sacral plexus as it descends toward the pelvic brim.",
+          motor: "Forms part of the sacral plexus rather than acting as a named terminal motor nerve.",
+          sensory: "No independent cutaneous territory listed in the handout summary.",
+          clinical: "Important conduit carrying L4-L5 fibers into the sacral plexus.",
+        },
+      ],
+      sacral: [
+        {
+          id: "sciatic",
+          name: "Sciatic nerve",
+          roots: "L4-S3",
+          course: "Exits the pelvis inferior to piriformis and descends through the posterior thigh before dividing into its terminal branches.",
+          motor: "Hamstrings and the hamstring portion of adductor magnus before division.",
+          sensory: "No direct cutaneous territory before terminal branches.",
+          clinical: "Large mixed nerve vulnerable in posterior hip trauma and deep gluteal region compression.",
+          branches: [
+            {
+              title: "Tibial nerve",
+              details: "Posterior leg muscles: gastrocnemius, soleus, tibialis posterior, flexor digitorum longus, flexor hallucis longus.",
+              children: [
+                "Medial plantar nerve: flexor hallucis brevis, abductor hallucis, 1st lumbrical, flexor digitorum brevis.",
+                "Lateral plantar nerve: abductor digiti minimi, quadratus plantae, flexor digiti minimi brevis, adductor hallucis, lumbricals 2-4, all interossei.",
+                "Sural nerve contribution, calcaneal branches, and sole of foot innervation via plantar branches.",
+              ],
+            },
+            {
+              title: "Common fibular nerve",
+              details: "Winds around the neck of the fibula and divides into deep and superficial fibular branches.",
+              children: [
+                "Deep fibular nerve: tibialis anterior, extensor digitorum longus, extensor hallucis longus, fibularis tertius; sensation to the first dorsal web space.",
+                "Superficial fibular nerve: fibularis longus, fibularis brevis; sensation to the anterolateral leg and dorsum of the foot.",
+              ],
+            },
+          ],
+        },
+        {
+          id: "superior-gluteal",
+          name: "Superior gluteal nerve",
+          roots: "L4-S1",
+          course: "Exits the pelvis superior to piriformis and travels between gluteus medius and minimus.",
+          motor: "Gluteus medius, gluteus minimus, tensor fasciae latae.",
+          sensory: "No cutaneous distribution.",
+          clinical: "Injury produces pelvic drop on the unsupported side during gait.",
+        },
+        {
+          id: "inferior-gluteal",
+          name: "Inferior gluteal nerve",
+          roots: "L5-S2",
+          course: "Exits inferior to piriformis and courses to gluteus maximus.",
+          motor: "Gluteus maximus.",
+          sensory: "No cutaneous distribution.",
+          clinical: "Weak hip extension can follow posterior hip surgery or deep gluteal trauma.",
+        },
+        {
+          id: "nerve-to-piriformis",
+          name: "Nerve to piriformis",
+          roots: "S1-S2",
+          course: "Travels directly to piriformis within the gluteal region.",
+          motor: "Piriformis.",
+          sensory: "None.",
+          clinical: "Relevant when localizing deep gluteal neuromuscular dysfunction.",
+        },
+        {
+          id: "nerve-to-obturator-internus",
+          name: "Nerve to obturator internus",
+          roots: "L5, S1, S2",
+          course: "Exits the pelvis and re-enters the perineal/gluteal region to reach obturator internus and superior gemellus.",
+          motor: "Obturator internus and superior gemellus.",
+          sensory: "None.",
+          clinical: "Helpful when differentiating short external rotator involvement.",
+        },
+        {
+          id: "nerve-to-quadratus-femoris",
+          name: "Nerve to quadratus femoris",
+          roots: "L4, L5, S1",
+          course: "Courses deep in the gluteal region to quadratus femoris and inferior gemellus.",
+          motor: "Quadratus femoris and inferior gemellus.",
+          sensory: "None.",
+          clinical: "Lesion can weaken deep external rotation of the hip.",
+        },
+        {
+          id: "posterior-femoral-cutaneous",
+          name: "Posterior femoral cutaneous nerve",
+          roots: "S1-S3",
+          course: "Leaves the pelvis inferior to piriformis and descends superficial to the posterior thigh.",
+          motor: "None; cutaneous nerve.",
+          sensory: "Posterior thigh and lower buttock via inferior cluneal branches.",
+          clinical: "May contribute to posterior thigh dysesthesia without motor loss.",
+        },
+        {
+          id: "pudendal",
+          name: "Pudendal nerve",
+          roots: "S2-S4",
+          course: "Exits through the greater sciatic foramen, hooks around the sacrospinous ligament, and re-enters through the lesser sciatic foramen into Alcock's canal.",
+          motor: "External anal and external urethral sphincters.",
+          sensory: "Perineum.",
+          clinical: "Injury can cause perineal numbness and bowel or bladder sphincter dysfunction.",
+        },
+      ],
+      cluneal: [
+        {
+          id: "superior-cluneal",
+          name: "Superior cluneal nerves",
+          roots: "Dorsal rami L1-L3",
+          course: "Cross the iliac crest to the superior buttock.",
+          motor: "None.",
+          sensory: "Upper buttock.",
+          clinical: "Dorsal rami origin distinguishes them from plexus-derived ventral rami nerves.",
+        },
+        {
+          id: "middle-cluneal",
+          name: "Middle cluneal nerves",
+          roots: "Dorsal rami S1-S3",
+          course: "Travel to the central gluteal skin over the sacral region.",
+          motor: "None.",
+          sensory: "Mid-buttock.",
+          clinical: "Part of the three-zone cluneal sensory map of the buttock.",
+        },
+        {
+          id: "inferior-cluneal",
+          name: "Inferior cluneal nerves",
+          roots: "Branch of posterior femoral cutaneous nerve",
+          course: "Curve laterally from the posterior femoral cutaneous nerve into the inferior gluteal fold region.",
+          motor: "None.",
+          sensory: "Lower buttock.",
+          clinical: "Represents the ventral-rami-derived inferior zone of cluneal cutaneous supply.",
+        },
+      ],
+      spaces: [
+        {
+          id: "femoral-triangle",
+          name: "Femoral Triangle",
+          roots: "Anatomical space",
+          course: "Triangular transition zone of the proximal anterior thigh immediately inferior to the inguinal ligament.",
+          motor: "Floor: adductor longus, pectineus, iliopsoas.",
+          sensory: "Contents lateral to medial: NAVeL = nerve, artery, vein, empty space, lymphatics.",
+          clinical: "Borders: superior inguinal ligament, medial adductor longus, lateral sartorius.",
+        },
+        {
+          id: "adductor-canal",
+          name: "Adductor Canal",
+          roots: "Anatomical space",
+          course: "Intermuscular tunnel beginning at the apex of the femoral triangle and ending at the adductor hiatus.",
+          motor: "Borders: roof sartorius plus vastoadductor membrane; lateral wall vastus medialis; posterior/medial wall adductor longus superior and adductor magnus inferior.",
+          sensory: "Contents: femoral artery, femoral vein, saphenous nerve, nerve to vastus medialis.",
+          clinical: "Important location for adductor canal block targeting the saphenous nerve.",
+        },
+        {
+          id: "popliteal-fossa",
+          name: "Popliteal Fossa",
+          roots: "Anatomical space",
+          course: "Diamond-shaped space posterior to the knee.",
+          motor: "Borders: superomedial semimembranosus plus semitendinosus, superolateral biceps femoris, inferomedial medial head of gastrocnemius, inferolateral lateral head of gastrocnemius plus plantaris.",
+          sensory: "Contents superficial to deep: tibial nerve, popliteal vein, popliteal artery; common fibular nerve runs along the lateral border and the small saphenous vein also enters the fossa.",
+          clinical: "The popliteal artery is the deepest major neurovascular structure in the fossa.",
+        },
+      ],
+    };
+
+    const nerveIdBank = [
+      {
+        id: "ni-1",
+        prompt: "This nerve arises from L2-L4, passes beneath the inguinal ligament, and is the largest branch of the lumbar plexus. It innervates the quadriceps femoris.",
+        options: ["Femoral nerve", "Obturator nerve", "Sciatic nerve", "Saphenous nerve"],
+        answer: "Femoral nerve",
+        explanation: "The femoral nerve is the large L2-L4 lumbar plexus branch that passes beneath the inguinal ligament and supplies the quadriceps femoris.",
+      },
+      {
+        id: "ni-2",
+        prompt: "This purely sensory nerve (L2-L3) can become entrapped near the inguinal ligament, causing meralgia paresthetica.",
+        options: ["Lateral femoral cutaneous nerve", "Posterior femoral cutaneous nerve", "Saphenous nerve", "Ilioinguinal nerve"],
+        answer: "Lateral femoral cutaneous nerve",
+        explanation: "Meralgia paresthetica classically reflects lateral femoral cutaneous nerve entrapment near the inguinal ligament.",
+      },
+      {
+        id: "ni-3",
+        prompt: "This nerve winds around the neck of the fibula, making it vulnerable to injury at that location.",
+        options: ["Tibial nerve", "Common fibular nerve", "Superficial fibular nerve", "Sural nerve"],
+        answer: "Common fibular nerve",
+        explanation: "The common fibular nerve wraps around the fibular neck, a classic site of compression or trauma.",
+      },
+      {
+        id: "ni-4",
+        prompt: "This nerve passes through Alcock's canal and controls the external anal and urethral sphincters.",
+        options: ["Pudendal nerve", "Obturator nerve", "Inferior gluteal nerve", "Posterior femoral cutaneous nerve"],
+        answer: "Pudendal nerve",
+        explanation: "The pudendal nerve travels in Alcock's canal and provides motor supply to the external anal and urethral sphincters.",
+      },
+      {
+        id: "ni-5",
+        prompt: "This nerve exits the pelvis through the greater sciatic foramen, hooks around the sacrospinous ligament, and re-enters through the lesser sciatic foramen.",
+        options: ["Pudendal nerve", "Sciatic nerve", "Nerve to obturator internus", "Inferior gluteal nerve"],
+        answer: "Pudendal nerve",
+        explanation: "That characteristic greater sciatic foramen to lesser sciatic foramen route is the pudendal nerve pathway.",
+      },
+      {
+        id: "ni-6",
+        prompt: "This terminal branch of the tibial nerve innervates the abductor hallucis, flexor digitorum brevis, flexor hallucis brevis, and the 1st lumbrical.",
+        options: ["Lateral plantar nerve", "Medial plantar nerve", "Deep fibular nerve", "Saphenous nerve"],
+        answer: "Medial plantar nerve",
+        explanation: "The medial plantar nerve supplies abductor hallucis, flexor digitorum brevis, flexor hallucis brevis, and the 1st lumbrical.",
+      },
+      {
+        id: "ni-7",
+        prompt: "This nerve (L4-S1) emerges superior to the piriformis and innervates the gluteus medius, gluteus minimus, and tensor fasciae latae.",
+        options: ["Superior gluteal nerve", "Inferior gluteal nerve", "Sciatic nerve", "Nerve to piriformis"],
+        answer: "Superior gluteal nerve",
+        explanation: "The superior gluteal nerve exits superior to piriformis and powers the hip abductors and tensor fasciae latae.",
+      },
+      {
+        id: "ni-8",
+        prompt: "This nerve innervates the hamstrings and the hamstring portion of adductor magnus before dividing into the tibial and common fibular nerves.",
+        options: ["Sciatic nerve", "Femoral nerve", "Posterior femoral cutaneous nerve", "Obturator nerve"],
+        answer: "Sciatic nerve",
+        explanation: "The sciatic nerve supplies the posterior thigh before splitting into the tibial and common fibular nerves.",
+      },
+      {
+        id: "ni-9",
+        prompt: "The sural nerve is formed by contributions from which two nerves?",
+        options: [
+          "Tibial nerve and common fibular nerve",
+          "Femoral nerve and obturator nerve",
+          "Tibial nerve and superficial fibular nerve",
+          "Deep fibular nerve and common fibular nerve",
+        ],
+        answer: "Tibial nerve and common fibular nerve",
+        explanation: "The sural nerve is formed from the tibial nerve via the medial sural cutaneous branch and the common fibular nerve via the sural communicating branch.",
+      },
+      {
+        id: "ni-10",
+        prompt: "This nerve's anterior branch innervates adductor longus, adductor brevis, gracilis, and obturator externus.",
+        options: ["Obturator nerve", "Femoral nerve", "Tibial nerve", "Pudendal nerve"],
+        answer: "Obturator nerve",
+        explanation: "In the DPTD 731 handout, the obturator nerve anterior branch is listed with adductor longus, adductor brevis, gracilis, and obturator externus.",
+      },
+      {
+        id: "ni-11",
+        prompt: "Damage to this nerve would result in loss of sensation to the medial leg and foot, with no motor deficit.",
+        options: ["Saphenous nerve", "Superficial fibular nerve", "Deep fibular nerve", "Lateral plantar nerve"],
+        answer: "Saphenous nerve",
+        explanation: "The saphenous nerve is a purely sensory femoral branch supplying the medial leg and medial foot.",
+      },
+      {
+        id: "ni-12",
+        prompt: "This nerve innervates the quadratus femoris and inferior gemellus.",
+        options: ["Nerve to quadratus femoris", "Inferior gluteal nerve", "Nerve to obturator internus", "Superior gluteal nerve"],
+        answer: "Nerve to quadratus femoris",
+        explanation: "The nerve to quadratus femoris supplies quadratus femoris and inferior gemellus.",
+      },
+      {
+        id: "ni-13",
+        prompt: "The deep branch of this nerve innervates the lateral 3 lumbricals, adductor hallucis, and all interossei.",
+        options: ["Lateral plantar nerve", "Medial plantar nerve", "Tibial nerve", "Deep fibular nerve"],
+        answer: "Lateral plantar nerve",
+        explanation: "The lateral plantar nerve supplies the deeper intrinsic lateral sole group, including lumbricals 2-4, adductor hallucis, and all interossei.",
+      },
+      {
+        id: "ni-14",
+        prompt: "These nerves arise from dorsal rami rather than ventral rami and supply the skin of the buttock in three zones.",
+        options: ["Cluneal nerves", "Posterior femoral cutaneous nerve", "Pudendal nerve", "Femoral nerve"],
+        answer: "Cluneal nerves",
+        explanation: "The cluneal nerves define superior, middle, and inferior buttock cutaneous zones, with superior and middle cluneal nerves arising from dorsal rami.",
+      },
+      {
+        id: "ni-15",
+        prompt: "This nerve (L5-S2) emerges inferior to the piriformis and mainly supplies the gluteus maximus.",
+        options: ["Inferior gluteal nerve", "Superior gluteal nerve", "Sciatic nerve", "Posterior femoral cutaneous nerve"],
+        answer: "Inferior gluteal nerve",
+        explanation: "The inferior gluteal nerve exits inferior to piriformis and primarily innervates gluteus maximus.",
+      },
+      {
+        id: "ni-16",
+        prompt: "This nerve supplies the fibularis longus and fibularis brevis and provides cutaneous sensation to the anterolateral leg and dorsum of the foot.",
+        options: ["Superficial fibular nerve", "Deep fibular nerve", "Tibial nerve", "Sural nerve"],
+        answer: "Superficial fibular nerve",
+        explanation: "The superficial fibular nerve is the lateral compartment motor nerve and a major cutaneous nerve to the anterolateral leg and dorsum of the foot.",
+      },
+    ];
+
+    const matchingActivities = [
+      {
+        id: "match-roots",
+        title: "Activity 3A - Nerve to Root Levels",
+        subtitle: "Drag each nerve to the correct spinal root pattern.",
+        bankLabel: "Nerve bank",
+        dropPrompt: "Drop the matching nerve here",
+        items: [
+          { id: "mra-femoral", label: "Femoral nerve" },
+          { id: "mra-obturator", label: "Obturator nerve" },
+          { id: "mra-lfcn", label: "Lateral femoral cutaneous" },
+          { id: "mra-sciatic", label: "Sciatic nerve" },
+          { id: "mra-sup-glut", label: "Superior gluteal nerve" },
+          { id: "mra-inf-glut", label: "Inferior gluteal nerve" },
+          { id: "mra-tibial", label: "Tibial nerve" },
+          { id: "mra-common-fib", label: "Common fibular nerve" },
+          { id: "mra-pudendal", label: "Pudendal nerve" },
+          { id: "mra-pfcn", label: "Posterior femoral cutaneous" },
+        ],
+        categories: [
+          { id: "roots-l234", title: "L2, L3, L4", note: "Shared root pattern" },
+          { id: "roots-l23", title: "L2, L3", note: "Shared root pattern" },
+          { id: "roots-l4s3", title: "L4-S3", note: "Shared root pattern" },
+          { id: "roots-l4s1", title: "L4-S1", note: "Shared root pattern" },
+          { id: "roots-l5s2", title: "L5-S2", note: "Shared root pattern" },
+          { id: "roots-l4s2", title: "L4-S2", note: "Shared root pattern" },
+          { id: "roots-s24", title: "S2-S4", note: "Shared root pattern" },
+          { id: "roots-s13", title: "S1-S3", note: "Shared root pattern" },
+        ],
+        answerMap: {
+          "mra-femoral": "roots-l234",
+          "mra-obturator": "roots-l234",
+          "mra-lfcn": "roots-l23",
+          "mra-sciatic": "roots-l4s3",
+          "mra-sup-glut": "roots-l4s1",
+          "mra-inf-glut": "roots-l5s2",
+          "mra-tibial": "roots-l4s3",
+          "mra-common-fib": "roots-l4s2",
+          "mra-pudendal": "roots-s24",
+          "mra-pfcn": "roots-s13",
+        },
+        itemTracking: {
+          "mra-femoral": { nerves: ["Femoral nerve"] },
+          "mra-obturator": { nerves: ["Obturator nerve"] },
+          "mra-lfcn": { nerves: ["Lateral femoral cutaneous nerve"], sensory: ["Lateral thigh"] },
+          "mra-sciatic": { nerves: ["Sciatic nerve"] },
+          "mra-sup-glut": { nerves: ["Superior gluteal nerve"] },
+          "mra-inf-glut": { nerves: ["Inferior gluteal nerve"] },
+          "mra-tibial": { nerves: ["Tibial nerve"] },
+          "mra-common-fib": { nerves: ["Common fibular nerve"] },
+          "mra-pudendal": { nerves: ["Pudendal nerve"] },
+          "mra-pfcn": { nerves: ["Posterior femoral cutaneous nerve"], sensory: ["Posterior thigh, lower buttocks"] },
+        },
+      },
+      {
+        id: "match-muscles",
+        title: "Activity 3B - Nerve to Muscles",
+        subtitle: "Place each nerve on the muscle group it primarily supplies.",
+        bankLabel: "Nerve bank",
+        dropPrompt: "Drop the matching nerve here",
+        items: [
+          { id: "mmb-femoral", label: "Femoral nerve" },
+          { id: "mmb-obt-ant", label: "Obturator nerve (anterior branch)" },
+          { id: "mmb-obt-post", label: "Obturator nerve (posterior branch)" },
+          { id: "mmb-sup-glut", label: "Superior gluteal nerve" },
+          { id: "mmb-inf-glut", label: "Inferior gluteal nerve" },
+          { id: "mmb-deep-fib", label: "Deep fibular nerve" },
+          { id: "mmb-superficial-fib", label: "Superficial fibular nerve" },
+          { id: "mmb-tibial", label: "Tibial nerve (posterior leg)" },
+          { id: "mmb-medial-plantar", label: "Medial plantar nerve" },
+          { id: "mmb-lateral-plantar", label: "Lateral plantar nerve" },
+        ],
+        categories: [
+          { id: "mm-target-1", title: "Quadriceps femoris, sartorius, pectineus", note: "Primary muscle group" },
+          { id: "mm-target-2", title: "Adductor longus, adductor brevis, gracilis, obturator externus", note: "Primary muscle group" },
+          { id: "mm-target-3", title: "Adductor magnus (adductor portion)", note: "Primary muscle group" },
+          { id: "mm-target-4", title: "Gluteus medius, gluteus minimus, TFL", note: "Primary muscle group" },
+          { id: "mm-target-5", title: "Gluteus maximus", note: "Primary muscle group" },
+          { id: "mm-target-6", title: "Tibialis anterior, EDL, EHL, fibularis tertius", note: "Primary muscle group" },
+          { id: "mm-target-7", title: "Fibularis longus, fibularis brevis", note: "Primary muscle group" },
+          { id: "mm-target-8", title: "Gastrocnemius, soleus, tibialis posterior, FDL, FHL", note: "Primary muscle group" },
+          { id: "mm-target-9", title: "Abductor hallucis, FDB, FHB, 1st lumbrical", note: "Primary muscle group" },
+          { id: "mm-target-10", title: "Abductor digiti minimi, quadratus plantae, adductor hallucis, interossei, lumbricals 2-4", note: "Primary muscle group" },
+        ],
+        answerMap: {
+          "mmb-femoral": "mm-target-1",
+          "mmb-obt-ant": "mm-target-2",
+          "mmb-obt-post": "mm-target-3",
+          "mmb-sup-glut": "mm-target-4",
+          "mmb-inf-glut": "mm-target-5",
+          "mmb-deep-fib": "mm-target-6",
+          "mmb-superficial-fib": "mm-target-7",
+          "mmb-tibial": "mm-target-8",
+          "mmb-medial-plantar": "mm-target-9",
+          "mmb-lateral-plantar": "mm-target-10",
+        },
+        itemTracking: {
+          "mmb-femoral": { nerves: ["Femoral nerve"] },
+          "mmb-obt-ant": { nerves: ["Obturator nerve"] },
+          "mmb-obt-post": { nerves: ["Obturator nerve"] },
+          "mmb-sup-glut": { nerves: ["Superior gluteal nerve"] },
+          "mmb-inf-glut": { nerves: ["Inferior gluteal nerve"] },
+          "mmb-deep-fib": { nerves: ["Deep fibular nerve"], sensory: ["First dorsal web space"] },
+          "mmb-superficial-fib": { nerves: ["Superficial fibular nerve"], sensory: ["Anterolateral leg, dorsum of foot"] },
+          "mmb-tibial": { nerves: ["Tibial nerve"] },
+          "mmb-medial-plantar": { nerves: ["Medial plantar nerve"], sensory: ["Sole, medial 3.5 digits"] },
+          "mmb-lateral-plantar": { nerves: ["Lateral plantar nerve"], sensory: ["Sole, lateral 1.5 digits"] },
+        },
+      },
+      {
+        id: "match-sensory",
+        title: "Activity 3C - Nerve to Sensory Distribution",
+        subtitle: "Match each nerve with its cutaneous territory.",
+        bankLabel: "Nerve bank",
+        dropPrompt: "Drop the matching nerve here",
+        items: [
+          { id: "msc-saphenous", label: "Saphenous nerve" },
+          { id: "msc-lfcn", label: "Lateral femoral cutaneous" },
+          { id: "msc-sural", label: "Sural nerve" },
+          { id: "msc-deep-fib", label: "Deep fibular nerve" },
+          { id: "msc-superficial-fib", label: "Superficial fibular nerve" },
+          { id: "msc-pfcn", label: "Posterior femoral cutaneous" },
+          { id: "msc-medial-plantar", label: "Medial plantar nerve" },
+          { id: "msc-lateral-plantar", label: "Lateral plantar nerve" },
+          { id: "msc-superior-cluneal", label: "Superior cluneal nerves" },
+          { id: "msc-middle-cluneal", label: "Middle cluneal nerves" },
+          { id: "msc-inferior-cluneal", label: "Inferior cluneal nerves" },
+        ],
+        categories: [
+          { id: "ms-target-1", title: "Medial leg and medial foot", note: "Cutaneous territory" },
+          { id: "ms-target-2", title: "Lateral thigh", note: "Cutaneous territory" },
+          { id: "ms-target-3", title: "Posterior/lateral distal leg, lateral foot", note: "Cutaneous territory" },
+          { id: "ms-target-4", title: "First dorsal web space", note: "Cutaneous territory" },
+          { id: "ms-target-5", title: "Anterolateral leg, dorsum of foot", note: "Cutaneous territory" },
+          { id: "ms-target-6", title: "Posterior thigh, lower buttocks", note: "Cutaneous territory" },
+          { id: "ms-target-7", title: "Sole, medial 3.5 digits", note: "Cutaneous territory" },
+          { id: "ms-target-8", title: "Sole, lateral 1.5 digits", note: "Cutaneous territory" },
+          { id: "ms-target-9", title: "Upper buttock", note: "Cutaneous territory" },
+          { id: "ms-target-10", title: "Mid-buttock", note: "Cutaneous territory" },
+          { id: "ms-target-11", title: "Lower buttock", note: "Cutaneous territory" },
+        ],
+        answerMap: {
+          "msc-saphenous": "ms-target-1",
+          "msc-lfcn": "ms-target-2",
+          "msc-sural": "ms-target-3",
+          "msc-deep-fib": "ms-target-4",
+          "msc-superficial-fib": "ms-target-5",
+          "msc-pfcn": "ms-target-6",
+          "msc-medial-plantar": "ms-target-7",
+          "msc-lateral-plantar": "ms-target-8",
+          "msc-superior-cluneal": "ms-target-9",
+          "msc-middle-cluneal": "ms-target-10",
+          "msc-inferior-cluneal": "ms-target-11",
+        },
+        itemTracking: {
+          "msc-saphenous": { nerves: ["Saphenous nerve"], sensory: ["Medial leg and medial foot"] },
+          "msc-lfcn": { nerves: ["Lateral femoral cutaneous nerve"], sensory: ["Lateral thigh"] },
+          "msc-sural": { nerves: ["Sural nerve"], sensory: ["Posterior/lateral distal leg, lateral foot"] },
+          "msc-deep-fib": { nerves: ["Deep fibular nerve"], sensory: ["First dorsal web space"] },
+          "msc-superficial-fib": { nerves: ["Superficial fibular nerve"], sensory: ["Anterolateral leg, dorsum of foot"] },
+          "msc-pfcn": { nerves: ["Posterior femoral cutaneous nerve"], sensory: ["Posterior thigh, lower buttocks"] },
+          "msc-medial-plantar": { nerves: ["Medial plantar nerve"], sensory: ["Sole, medial 3.5 digits"] },
+          "msc-lateral-plantar": { nerves: ["Lateral plantar nerve"], sensory: ["Sole, lateral 1.5 digits"] },
+          "msc-superior-cluneal": { nerves: ["Cluneal nerves"], sensory: ["Upper buttock"] },
+          "msc-middle-cluneal": { nerves: ["Cluneal nerves"], sensory: ["Mid-buttock"] },
+          "msc-inferior-cluneal": { nerves: ["Cluneal nerves"], sensory: ["Lower buttock"] },
+        },
+      },
+    ];
+
+    const compartmentActivity = {
+      id: "compartment-sort",
+      title: "Lower Extremity Region Sort",
+      subtitle: "Drag each nerve to the compartment or region where it primarily operates.",
+      bankLabel: "Nerve bank",
+      dropPrompt: "Drop the region's primary nerve here",
+      revealSubtitleAsHint: true,
+      hintButtonLabel: "Reveal nerve hint",
+      items: [
+        { id: "c-femoral", label: "Femoral nerve" },
+        { id: "c-obturator", label: "Obturator nerve" },
+        { id: "c-lfcn", label: "Lateral femoral cutaneous" },
+        { id: "c-superior-gluteal", label: "Superior gluteal nerve" },
+        { id: "c-inferior-gluteal", label: "Inferior gluteal nerve" },
+        { id: "c-sciatic", label: "Sciatic nerve" },
+        { id: "c-deep-fibular", label: "Deep fibular nerve" },
+        { id: "c-superficial-fibular", label: "Superficial fibular nerve" },
+        { id: "c-tibial", label: "Tibial nerve" },
+        { id: "c-medial-plantar", label: "Medial plantar nerve" },
+        { id: "c-lateral-plantar", label: "Lateral plantar nerve" },
+      ],
+      categories: [
+        { id: "anterior-thigh", title: "Anterior thigh", subtitle: "Femoral nerve (L2-L4)", note: "Iliacus, sartorius, quadriceps, pectineus" },
+        { id: "medial-thigh", title: "Medial thigh", subtitle: "Obturator nerve (L2-L4)", note: "Adductors, gracilis, obturator externus" },
+        { id: "lateral-thigh", title: "Lateral thigh (cutaneous)", subtitle: "Lateral femoral cutaneous (L2-L3)", note: "None; purely sensory" },
+        { id: "gluteal-abduction", title: "Gluteal region (abduction)", subtitle: "Superior gluteal nerve (L4-S1)", note: "Glut med, glut min, TFL" },
+        { id: "gluteal-extension", title: "Gluteal region (extension)", subtitle: "Inferior gluteal nerve (L5-S2)", note: "Glut max" },
+        { id: "posterior-thigh", title: "Posterior thigh", subtitle: "Sciatic nerve (L4-S3)", note: "Hamstrings, hamstring portion of adductor magnus" },
+        { id: "anterior-leg", title: "Anterior leg", subtitle: "Deep fibular nerve (L4-L5)", note: "Tibialis anterior, EDL, EHL, fibularis tertius" },
+        { id: "lateral-leg", title: "Lateral leg", subtitle: "Superficial fibular nerve (L5-S1)", note: "Fibularis longus, fibularis brevis" },
+        { id: "posterior-leg", title: "Posterior leg", subtitle: "Tibial nerve (L4-S3)", note: "Gastrocnemius, soleus, tibialis posterior, FDL, FHL" },
+        { id: "medial-plantar-foot", title: "Medial plantar foot", subtitle: "Medial plantar nerve (L4-L5)", note: "Abductor hallucis, FDB, FHB, 1st lumbrical" },
+        { id: "lateral-plantar-foot", title: "Lateral plantar foot", subtitle: "Lateral plantar nerve (S1-S2)", note: "Quadratus plantae, ADM, adductor hallucis, interossei" },
+      ],
+      answerMap: {
+        "c-femoral": "anterior-thigh",
+        "c-obturator": "medial-thigh",
+        "c-lfcn": "lateral-thigh",
+        "c-superior-gluteal": "gluteal-abduction",
+        "c-inferior-gluteal": "gluteal-extension",
+        "c-sciatic": "posterior-thigh",
+        "c-deep-fibular": "anterior-leg",
+        "c-superficial-fibular": "lateral-leg",
+        "c-tibial": "posterior-leg",
+        "c-medial-plantar": "medial-plantar-foot",
+        "c-lateral-plantar": "lateral-plantar-foot",
+      },
+      itemTracking: {
+        "c-femoral": { nerves: ["Femoral nerve"] },
+        "c-obturator": { nerves: ["Obturator nerve"] },
+        "c-lfcn": { nerves: ["Lateral femoral cutaneous nerve"], sensory: ["Lateral thigh"] },
+        "c-superior-gluteal": { nerves: ["Superior gluteal nerve"] },
+        "c-inferior-gluteal": { nerves: ["Inferior gluteal nerve"] },
+        "c-sciatic": { nerves: ["Sciatic nerve"] },
+        "c-deep-fibular": { nerves: ["Deep fibular nerve"], sensory: ["First dorsal web space"] },
+        "c-superficial-fibular": { nerves: ["Superficial fibular nerve"], sensory: ["Anterolateral leg, dorsum of foot"] },
+        "c-tibial": { nerves: ["Tibial nerve"] },
+        "c-medial-plantar": { nerves: ["Medial plantar nerve"], sensory: ["Sole, medial 3.5 digits"] },
+        "c-lateral-plantar": { nerves: ["Lateral plantar nerve"], sensory: ["Sole, lateral 1.5 digits"] },
+      },
+    };
+
+    const spaceActivities = [
+      {
+        id: "space-femoral-triangle",
+        title: "Activity 5A - Femoral Triangle Builder",
+        subtitle: "Sort the structural pieces into the correct border, floor, and content categories.",
+        categories: [
+          { id: "ft-superior", title: "Superior Border", note: "Inguinal side of the triangle" },
+          { id: "ft-medial", title: "Medial Border", note: "Adductor longus side" },
+          { id: "ft-lateral", title: "Lateral Border", note: "Sartorius side" },
+          { id: "ft-floor", title: "Floor", note: "Deep muscular bed" },
+          { id: "ft-contents", title: "Contents (lateral to medial)", note: "NAVeL" },
+        ],
+        items: [
+          { id: "ft-item-1", label: "Inguinal ligament" },
+          { id: "ft-item-2", label: "Medial border of adductor longus" },
+          { id: "ft-item-3", label: "Medial border of sartorius" },
+          { id: "ft-item-4", label: "Adductor longus muscle" },
+          { id: "ft-item-5", label: "Pectineus muscle" },
+          { id: "ft-item-6", label: "Iliopsoas muscle" },
+          { id: "ft-item-7", label: "Femoral nerve" },
+          { id: "ft-item-8", label: "Femoral artery" },
+          { id: "ft-item-9", label: "Femoral vein" },
+          { id: "ft-item-10", label: "Lymphatics" },
+        ],
+        answerMap: {
+          "ft-item-1": "ft-superior",
+          "ft-item-2": "ft-medial",
+          "ft-item-3": "ft-lateral",
+          "ft-item-4": "ft-floor",
+          "ft-item-5": "ft-floor",
+          "ft-item-6": "ft-floor",
+          "ft-item-7": "ft-contents",
+          "ft-item-8": "ft-contents",
+          "ft-item-9": "ft-contents",
+          "ft-item-10": "ft-contents",
+        },
+        tracking: { spaces: ["Femoral Triangle"] },
+        hints: [
+          "So I May Always Love Sally: superior = inguinal ligament, medial = adductor longus, lateral = sartorius.",
+          "NAVeL: nerve, artery, vein, empty space, lymphatics from lateral to medial.",
+        ],
+      },
+      {
+        id: "space-adductor-canal",
+        title: "Activity 5B - Adductor Canal",
+        subtitle: "Organize the canal walls, contents, and landmarks.",
+        categories: [
+          { id: "ac-roof", title: "Anterior/Roof", note: "Covering structures" },
+          { id: "ac-lateral", title: "Lateral Wall", note: "Vastus medialis side" },
+          { id: "ac-post", title: "Posterior/Medial Wall", note: "Adductor wall" },
+          { id: "ac-contents", title: "Contents", note: "Neurovascular bundle and nerve" },
+          { id: "ac-landmarks", title: "Key Landmarks", note: "Proximal and distal limits" },
+        ],
+        items: [
+          { id: "ac-item-1", label: "Sartorius muscle" },
+          { id: "ac-item-2", label: "Vastoadductor membrane" },
+          { id: "ac-item-3", label: "Vastus medialis" },
+          { id: "ac-item-4", label: "Adductor longus (superior)" },
+          { id: "ac-item-5", label: "Adductor magnus (inferior)" },
+          { id: "ac-item-6", label: "Femoral artery" },
+          { id: "ac-item-7", label: "Femoral vein" },
+          { id: "ac-item-8", label: "Saphenous nerve" },
+          { id: "ac-item-9", label: "Nerve to vastus medialis" },
+          { id: "ac-item-10", label: "Apex of femoral triangle" },
+          { id: "ac-item-11", label: "Adductor hiatus" },
+        ],
+        answerMap: {
+          "ac-item-1": "ac-roof",
+          "ac-item-2": "ac-roof",
+          "ac-item-3": "ac-lateral",
+          "ac-item-4": "ac-post",
+          "ac-item-5": "ac-post",
+          "ac-item-6": "ac-contents",
+          "ac-item-7": "ac-contents",
+          "ac-item-8": "ac-contents",
+          "ac-item-9": "ac-contents",
+          "ac-item-10": "ac-landmarks",
+          "ac-item-11": "ac-landmarks",
+        },
+        tracking: { spaces: ["Adductor Canal"] },
+      },
+      {
+        id: "space-popliteal-fossa",
+        title: "Activity 5C - Popliteal Fossa",
+        subtitle: "Place each border and content into the proper fossa category.",
+        categories: [
+          { id: "pf-superomedial", title: "Superomedial Border", note: "Hamstring side" },
+          { id: "pf-superolateral", title: "Superolateral Border", note: "Lateral hamstring" },
+          { id: "pf-inferomedial", title: "Inferomedial Border", note: "Medial calf side" },
+          { id: "pf-inferolateral", title: "Inferolateral Border", note: "Lateral calf side" },
+          { id: "pf-contents", title: "Contents (superficial to deep)", note: "Tibial nerve, popliteal vein, popliteal artery" },
+        ],
+        items: [
+          { id: "pf-item-1", label: "Semimembranosus + semitendinosus" },
+          { id: "pf-item-2", label: "Biceps femoris" },
+          { id: "pf-item-3", label: "Medial head of gastrocnemius" },
+          { id: "pf-item-4", label: "Lateral head of gastrocnemius + plantaris" },
+          { id: "pf-item-5", label: "Tibial nerve" },
+          { id: "pf-item-6", label: "Popliteal vein" },
+          { id: "pf-item-7", label: "Popliteal artery" },
+          { id: "pf-item-8", label: "Common fibular nerve" },
+          { id: "pf-item-9", label: "Small saphenous vein" },
+        ],
+        answerMap: {
+          "pf-item-1": "pf-superomedial",
+          "pf-item-2": "pf-superolateral",
+          "pf-item-3": "pf-inferomedial",
+          "pf-item-4": "pf-inferolateral",
+          "pf-item-5": "pf-contents",
+          "pf-item-6": "pf-contents",
+          "pf-item-7": "pf-contents",
+          "pf-item-8": "pf-contents",
+          "pf-item-9": "pf-contents",
+        },
+        tracking: { spaces: ["Popliteal Fossa"] },
+      },
+    ];
+
+    const clinicalBank = [
+      {
+        id: "cl-1",
+        prompt: "A patient presents with foot drop and inability to dorsiflex the ankle or extend the toes after wearing a tight leg cast. Which nerve is most likely injured?",
+        options: ["Common fibular nerve", "Tibial nerve", "Femoral nerve", "Superior gluteal nerve"],
+        answer: "Common fibular nerve",
+        explanation: "The common fibular nerve is vulnerable at the fibular neck and injury there classically causes foot drop.",
+      },
+      {
+        id: "cl-2",
+        prompt: "After a total hip replacement via a posterior approach, a patient cannot extend the hip against gravity. Retraction occurred near piriformis. Which nerve was most likely injured?",
+        options: ["Inferior gluteal nerve", "Superior gluteal nerve", "Sciatic nerve", "Pudendal nerve"],
+        answer: "Inferior gluteal nerve",
+        explanation: "The inferior gluteal nerve exits inferior to piriformis and supplies gluteus maximus, the prime hip extensor.",
+      },
+      {
+        id: "cl-3",
+        prompt: "A patient has a positive Trendelenburg sign with pelvic drop on the unsupported side during single-leg stance. Which nerve is affected?",
+        options: ["Superior gluteal nerve", "Inferior gluteal nerve", "Femoral nerve", "Obturator nerve"],
+        answer: "Superior gluteal nerve",
+        explanation: "The superior gluteal nerve innervates gluteus medius and gluteus minimus, which stabilize the pelvis during stance.",
+      },
+      {
+        id: "cl-4",
+        prompt: "A patient reports burning pain and numbness on the lateral thigh after significant weight gain. There is no motor deficit, and symptoms worsen with hip extension. Which nerve is likely compressed?",
+        options: ["Lateral femoral cutaneous nerve", "Femoral nerve", "Obturator nerve", "Posterior femoral cutaneous nerve"],
+        answer: "Lateral femoral cutaneous nerve",
+        explanation: "This is the classic meralgia paresthetica pattern involving the lateral femoral cutaneous nerve.",
+      },
+      {
+        id: "cl-5",
+        prompt: "Following a difficult vaginal delivery, a patient reports fecal incontinence and perineal numbness. Which nerve was most likely injured?",
+        options: ["Pudendal nerve", "Saphenous nerve", "Sciatic nerve", "Inferior gluteal nerve"],
+        answer: "Pudendal nerve",
+        explanation: "The pudendal nerve provides perineal sensation and motor control to the external anal sphincter.",
+      },
+      {
+        id: "cl-6",
+        prompt: "A patient cannot extend the knee and has a diminished patellar reflex. Sensation is reduced on the anterior thigh and medial leg. Which nerve is affected?",
+        options: ["Femoral nerve", "Obturator nerve", "Tibial nerve", "Common fibular nerve"],
+        answer: "Femoral nerve",
+        explanation: "The femoral nerve powers quadriceps, supports the patellar reflex, and gives rise to the saphenous nerve for medial leg sensation.",
+      },
+      {
+        id: "cl-7",
+        prompt: "A runner presents with medial knee pain. Sensation is diminished along the medial leg and medial foot, but motor function is intact. Which nerve is likely affected?",
+        options: ["Saphenous nerve", "Femoral nerve", "Superficial fibular nerve", "Tibial nerve"],
+        answer: "Saphenous nerve",
+        explanation: "The saphenous nerve is a purely sensory branch, so medial leg and foot symptoms without motor loss fit that lesion.",
+      },
+      {
+        id: "cl-8",
+        prompt: "A patient receiving an adductor canal block after total knee arthroplasty is being targeted for which primary nerve?",
+        options: ["Saphenous nerve", "Obturator nerve", "Femoral nerve", "Deep fibular nerve"],
+        answer: "Saphenous nerve",
+        explanation: "The saphenous nerve travels in the adductor canal and is the principal sensory target of that block.",
+      },
+      {
+        id: "cl-9",
+        prompt: "A patient has weakness of ankle plantarflexion and toe flexion, with numbness on the sole of the foot. The injury is at the level of the popliteal fossa. Which nerve is affected?",
+        options: ["Tibial nerve", "Common fibular nerve", "Sural nerve", "Femoral nerve"],
+        answer: "Tibial nerve",
+        explanation: "The tibial nerve supplies posterior leg plantarflexors and continues to the sole through the plantar nerves.",
+      },
+      {
+        id: "cl-10",
+        prompt: "A patient with a posterior knee dislocation has absent pedal pulses. The deepest neurovascular structure in the diamond-shaped fossa behind the knee is which structure?",
+        options: ["Popliteal artery", "Popliteal vein", "Tibial nerve", "Common fibular nerve"],
+        answer: "Popliteal artery",
+        explanation: "In the popliteal fossa, the popliteal artery lies deepest, beneath the popliteal vein and tibial nerve.",
+      },
+    ];
+
+    const nerveIdTrackingMap = {
+      "ni-1": { nerves: ["Femoral nerve"] },
+      "ni-2": { nerves: ["Lateral femoral cutaneous nerve"], sensory: ["Lateral thigh"] },
+      "ni-3": { nerves: ["Common fibular nerve"] },
+      "ni-4": { nerves: ["Pudendal nerve"] },
+      "ni-5": { nerves: ["Pudendal nerve"] },
+      "ni-6": { nerves: ["Medial plantar nerve"], sensory: ["Sole, medial 3.5 digits"] },
+      "ni-7": { nerves: ["Superior gluteal nerve"] },
+      "ni-8": { nerves: ["Sciatic nerve"] },
+      "ni-9": { nerves: ["Tibial nerve", "Common fibular nerve", "Sural nerve"], sensory: ["Posterior/lateral distal leg, lateral foot"] },
+      "ni-10": { nerves: ["Obturator nerve"] },
+      "ni-11": { nerves: ["Saphenous nerve"], sensory: ["Medial leg and medial foot"] },
+      "ni-12": { nerves: ["Nerve to quadratus femoris"] },
+      "ni-13": { nerves: ["Lateral plantar nerve"], sensory: ["Sole, lateral 1.5 digits"] },
+      "ni-14": { nerves: ["Cluneal nerves"], sensory: ["Upper buttock", "Mid-buttock", "Lower buttock"] },
+      "ni-15": { nerves: ["Inferior gluteal nerve"] },
+      "ni-16": { nerves: ["Superficial fibular nerve"], sensory: ["Anterolateral leg, dorsum of foot"] },
+    };
+
+    const clinicalTrackingMap = {
+      "cl-1": { nerves: ["Common fibular nerve"] },
+      "cl-2": { nerves: ["Inferior gluteal nerve"] },
+      "cl-3": { nerves: ["Superior gluteal nerve"] },
+      "cl-4": { nerves: ["Lateral femoral cutaneous nerve"], sensory: ["Lateral thigh"] },
+      "cl-5": { nerves: ["Pudendal nerve"] },
+      "cl-6": { nerves: ["Femoral nerve", "Saphenous nerve"], sensory: ["Anterior thigh", "Medial leg and medial foot"] },
+      "cl-7": { nerves: ["Saphenous nerve"], sensory: ["Medial leg and medial foot"] },
+      "cl-8": { nerves: ["Saphenous nerve"], spaces: ["Adductor Canal"] },
+      "cl-9": { nerves: ["Tibial nerve"], spaces: ["Popliteal Fossa"], sensory: ["Sole, medial 3.5 digits", "Sole, lateral 1.5 digits"] },
+      "cl-10": { spaces: ["Popliteal Fossa"] },
+    };
+
+    const anatomyMapRegions = {
+      front: [
+        {
+          id: "anterior-thigh",
+          label: "Anterior thigh",
+          shape: "path",
+          d: "M106 150 C98 176 100 220 108 248 L132 248 C140 220 142 176 134 150 C126 144 114 144 106 150 Z",
+          anchorX: 120,
+          anchorY: 194,
+          calloutX: 44,
+          calloutY: 186,
+        },
+        {
+          id: "medial-thigh",
+          label: "Medial thigh",
+          shape: "path",
+          d: "M108 152 C104 176 104 220 110 248 L120 248 C118 220 118 178 120 152 Z",
+          anchorX: 111,
+          anchorY: 214,
+          calloutX: 48,
+          calloutY: 222,
+        },
+        {
+          id: "lateral-thigh",
+          label: "Lateral thigh",
+          shape: "path",
+          d: "M122 152 C124 178 124 220 120 248 L132 248 C138 220 138 176 132 152 Z",
+          anchorX: 130,
+          anchorY: 206,
+          calloutX: 194,
+          calloutY: 206,
+        },
+        {
+          id: "anterior-leg",
+          label: "Anterior leg",
+          shape: "path",
+          d: "M108 256 C102 292 104 334 110 368 L122 368 C126 334 126 292 122 256 Z",
+          anchorX: 116,
+          anchorY: 314,
+          calloutX: 44,
+          calloutY: 312,
+        },
+        {
+          id: "lateral-leg",
+          label: "Lateral leg",
+          shape: "path",
+          d: "M122 256 C128 292 130 334 128 368 L140 368 C142 334 140 292 134 256 Z",
+          anchorX: 132,
+          anchorY: 316,
+          calloutX: 194,
+          calloutY: 314,
+        },
+        {
+          id: "medial-leg",
+          label: "Medial leg",
+          shape: "path",
+          d: "M102 256 C96 292 98 334 104 368 L112 368 C108 334 108 292 112 256 Z",
+          anchorX: 104,
+          anchorY: 342,
+          calloutX: 46,
+          calloutY: 346,
+        },
+        {
+          id: "dorsum-foot",
+          label: "Dorsum foot",
+          shape: "path",
+          d: "M102 374 C112 368 128 368 140 374 L146 390 C134 396 112 396 100 390 Z",
+          anchorX: 126,
+          anchorY: 382,
+          calloutX: 194,
+          calloutY: 390,
+        },
+        {
+          id: "medial-foot",
+          label: "Medial foot",
+          shape: "path",
+          d: "M100 374 C108 370 116 370 124 374 L122 392 C112 392 106 390 100 374 Z",
+          anchorX: 108,
+          anchorY: 382,
+          calloutX: 46,
+          calloutY: 392,
+        },
+        {
+          id: "first-web-space",
+          label: "1st web space",
+          shape: "circle",
+          cx: 138,
+          cy: 376,
+          r: 6,
+          anchorX: 138,
+          anchorY: 376,
+          calloutX: 194,
+          calloutY: 360,
+        },
+      ],
+      back: [
+        {
+          id: "gluteal-lateral",
+          label: "Gluteal abductors",
+          shape: "ellipse",
+          cx: 148,
+          cy: 184,
+          rx: 22,
+          ry: 28,
+          anchorX: 148,
+          anchorY: 184,
+          calloutX: 194,
+          calloutY: 176,
+        },
+        {
+          id: "gluteus-maximus",
+          label: "Gluteus maximus",
+          shape: "path",
+          d: "M96 162 C94 184 100 210 120 220 C140 210 146 184 144 162 C138 146 130 138 120 138 C110 138 102 146 96 162 Z",
+          anchorX: 136,
+          anchorY: 194,
+          calloutX: 194,
+          calloutY: 206,
+        },
+        {
+          id: "posterior-thigh",
+          label: "Posterior thigh",
+          shape: "path",
+          d: "M106 222 C98 248 100 282 108 308 L132 308 C140 282 142 248 134 222 C126 216 114 216 106 222 Z",
+          anchorX: 118,
+          anchorY: 264,
+          calloutX: 48,
+          calloutY: 262,
+        },
+        {
+          id: "posterior-thigh-cutaneous",
+          label: "Posterior cutaneous thigh",
+          shape: "path",
+          d: "M96 222 C90 248 92 282 98 308 L106 308 C102 282 102 248 106 222 Z",
+          anchorX: 100,
+          anchorY: 278,
+          calloutX: 48,
+          calloutY: 286,
+        },
+        {
+          id: "posterior-leg",
+          label: "Posterior leg",
+          shape: "path",
+          d: "M108 312 C98 340 100 362 110 382 L132 382 C142 362 144 340 134 312 Z",
+          anchorX: 118,
+          anchorY: 350,
+          calloutX: 48,
+          calloutY: 350,
+        },
+        {
+          id: "posterolateral-distal-leg",
+          label: "Posterolateral distal leg",
+          shape: "path",
+          d: "M126 338 C132 354 134 366 132 382 L142 382 C144 366 142 350 136 334 Z",
+          anchorX: 134,
+          anchorY: 362,
+          calloutX: 194,
+          calloutY: 362,
+        },
+        {
+          id: "lateral-foot",
+          label: "Lateral foot",
+          shape: "path",
+          d: "M128 374 C138 374 146 378 150 388 L140 398 C132 396 128 392 128 374 Z",
+          anchorX: 140,
+          anchorY: 388,
+          calloutX: 194,
+          calloutY: 392,
+        },
+        {
+          id: "sole-medial",
+          label: "Medial sole",
+          shape: "path",
+          d: "M102 374 C110 370 118 370 124 374 L122 396 C114 396 108 392 102 374 Z",
+          anchorX: 110,
+          anchorY: 388,
+          calloutX: 48,
+          calloutY: 392,
+        },
+        {
+          id: "sole-lateral",
+          label: "Lateral sole",
+          shape: "path",
+          d: "M120 374 C128 372 136 374 144 378 L138 396 C130 396 124 392 120 374 Z",
+          anchorX: 130,
+          anchorY: 384,
+          calloutX: 194,
+          calloutY: 364,
+        },
+        {
+          id: "upper-buttock",
+          label: "Upper buttock",
+          shape: "path",
+          d: "M94 148 C102 140 138 140 146 148 L140 160 C132 156 108 156 100 160 Z",
+          anchorX: 108,
+          anchorY: 152,
+          calloutX: 48,
+          calloutY: 152,
+        },
+        {
+          id: "mid-buttock",
+          label: "Mid-buttock",
+          shape: "path",
+          d: "M96 166 C106 160 134 160 144 166 L140 182 C132 176 108 176 100 182 Z",
+          anchorX: 108,
+          anchorY: 172,
+          calloutX: 48,
+          calloutY: 178,
+        },
+        {
+          id: "lower-buttock",
+          label: "Lower buttock",
+          shape: "path",
+          d: "M100 186 C110 182 130 182 140 186 L136 202 C128 198 112 198 104 202 Z",
+          anchorX: 108,
+          anchorY: 194,
+          calloutX: 48,
+          calloutY: 204,
+        },
+      ],
+    };
+
+    const anatomyMapNerves = [
+      {
+        id: "femoral-map",
+        name: "Femoral nerve",
+        roots: "L2-L4",
+        modeSummary: {
+          motor: "Highlights the anterior thigh compartment for quadriceps, sartorius, iliacus, and pectineus.",
+          sensory: "Highlights the anterior thigh and the saphenous continuation to the medial leg and medial foot.",
+        },
+        motorRegions: ["anterior-thigh"],
+        sensoryRegions: ["anterior-thigh", "medial-leg", "medial-foot"],
+      },
+      {
+        id: "obturator-map",
+        name: "Obturator nerve",
+        roots: "L2-L4",
+        modeSummary: {
+          motor: "Highlights the medial thigh adductor corridor.",
+          sensory: "Highlights the medial thigh cutaneous strip.",
+        },
+        motorRegions: ["medial-thigh"],
+        sensoryRegions: ["medial-thigh"],
+      },
+      {
+        id: "lateral-femoral-cutaneous-map",
+        name: "Lateral femoral cutaneous nerve",
+        roots: "L2-L3",
+        modeSummary: {
+          motor: "No motor territory. This is a pure sensory nerve.",
+          sensory: "Highlights the lateral thigh sensory field involved in meralgia paresthetica.",
+        },
+        motorRegions: [],
+        sensoryRegions: ["lateral-thigh"],
+      },
+      {
+        id: "superior-gluteal-map",
+        name: "Superior gluteal nerve",
+        roots: "L4-S1",
+        modeSummary: {
+          motor: "Highlights the lateral gluteal abductor region for gluteus medius, gluteus minimus, and TFL.",
+          sensory: "No cutaneous territory is listed for this nerve.",
+        },
+        motorRegions: ["gluteal-lateral"],
+        sensoryRegions: [],
+      },
+      {
+        id: "inferior-gluteal-map",
+        name: "Inferior gluteal nerve",
+        roots: "L5-S2",
+        modeSummary: {
+          motor: "Highlights the gluteus maximus region responsible for powerful hip extension.",
+          sensory: "No cutaneous territory is listed for this nerve.",
+        },
+        motorRegions: ["gluteus-maximus"],
+        sensoryRegions: [],
+      },
+      {
+        id: "sciatic-map",
+        name: "Sciatic nerve",
+        roots: "L4-S3",
+        modeSummary: {
+          motor: "Highlights the posterior thigh where the sciatic nerve supplies the hamstrings before dividing.",
+          sensory: "No direct cutaneous territory before its terminal branches.",
+        },
+        motorRegions: ["posterior-thigh"],
+        sensoryRegions: [],
+      },
+      {
+        id: "tibial-map",
+        name: "Tibial nerve",
+        roots: "L4-S3",
+        modeSummary: {
+          motor: "Highlights the posterior leg and plantar foot through its plantar branches.",
+          sensory: "Highlights the sole of the foot through its plantar distributions.",
+        },
+        motorRegions: ["posterior-leg", "sole-medial", "sole-lateral"],
+        sensoryRegions: ["sole-medial", "sole-lateral"],
+      },
+      {
+        id: "common-fibular-map",
+        name: "Common fibular nerve",
+        roots: "L4-S2",
+        modeSummary: {
+          motor: "Highlights the anterior and lateral leg through its deep and superficial fibular branches.",
+          sensory: "Highlights the anterolateral leg and dorsum of foot through its terminal branches.",
+        },
+        motorRegions: ["anterior-leg", "lateral-leg"],
+        sensoryRegions: ["lateral-leg", "dorsum-foot", "first-web-space"],
+      },
+      {
+        id: "deep-fibular-map",
+        name: "Deep fibular nerve",
+        roots: "L4-L5",
+        modeSummary: {
+          motor: "Highlights the anterior leg dorsiflexor compartment.",
+          sensory: "Highlights the first dorsal web space.",
+        },
+        motorRegions: ["anterior-leg"],
+        sensoryRegions: ["first-web-space"],
+      },
+      {
+        id: "superficial-fibular-map",
+        name: "Superficial fibular nerve",
+        roots: "L5-S1",
+        modeSummary: {
+          motor: "Highlights the lateral leg compartment.",
+          sensory: "Highlights the anterolateral leg and dorsum of foot.",
+        },
+        motorRegions: ["lateral-leg"],
+        sensoryRegions: ["lateral-leg", "dorsum-foot"],
+      },
+      {
+        id: "saphenous-map",
+        name: "Saphenous nerve",
+        roots: "L2-L4",
+        modeSummary: {
+          motor: "No motor territory. This is a pure sensory femoral branch.",
+          sensory: "Highlights the medial leg and medial foot.",
+        },
+        motorRegions: [],
+        sensoryRegions: ["medial-leg", "medial-foot"],
+      },
+      {
+        id: "sural-map",
+        name: "Sural nerve",
+        roots: "Tibial + common fibular contributions",
+        modeSummary: {
+          motor: "No motor territory. This is a cutaneous nerve.",
+          sensory: "Highlights the posterolateral distal leg and lateral foot.",
+        },
+        motorRegions: [],
+        sensoryRegions: ["posterolateral-distal-leg", "lateral-foot"],
+      },
+      {
+        id: "medial-plantar-map",
+        name: "Medial plantar nerve",
+        roots: "L4-L5",
+        modeSummary: {
+          motor: "Highlights the medial plantar intrinsic foot group.",
+          sensory: "Highlights the sole and medial 3.5 digits territory.",
+        },
+        motorRegions: ["sole-medial"],
+        sensoryRegions: ["sole-medial"],
+      },
+      {
+        id: "lateral-plantar-map",
+        name: "Lateral plantar nerve",
+        roots: "S1-S2",
+        modeSummary: {
+          motor: "Highlights the lateral plantar intrinsic foot group.",
+          sensory: "Highlights the sole and lateral 1.5 digits territory.",
+        },
+        motorRegions: ["sole-lateral"],
+        sensoryRegions: ["sole-lateral"],
+      },
+      {
+        id: "posterior-femoral-cutaneous-map",
+        name: "Posterior femoral cutaneous nerve",
+        roots: "S1-S3",
+        modeSummary: {
+          motor: "No motor territory. This is a cutaneous nerve.",
+          sensory: "Highlights the posterior thigh and lower buttock.",
+        },
+        motorRegions: [],
+        sensoryRegions: ["posterior-thigh-cutaneous", "lower-buttock"],
+      },
+      {
+        id: "cluneal-map",
+        name: "Cluneal nerves",
+        roots: "Superior L1-L3, Middle S1-S3, Inferior via posterior femoral cutaneous",
+        modeSummary: {
+          motor: "No motor territory. These are cutaneous nerves.",
+          sensory: "Highlights the superior, middle, and inferior buttock zones.",
+        },
+        motorRegions: [],
+        sensoryRegions: ["upper-buttock", "mid-buttock", "lower-buttock"],
+      },
+    ];
+
+    const comparisonSets = [
+      {
+        id: "femoral-obturator",
+        title: "Femoral vs Obturator",
+        focus: "Anterior-thigh extensor pattern vs medial-thigh adductor pattern.",
+        left: {
+          name: "Femoral nerve",
+          roots: "L2-L4",
+          motor: "Quadriceps femoris, sartorius, pectineus.",
+          sensory: "Anterior thigh; medial leg and foot via saphenous nerve.",
+          hallmark: "Weak knee extension, diminished patellar reflex.",
+          clue: "Passes beneath the inguinal ligament into the anterior thigh.",
+        },
+        right: {
+          name: "Obturator nerve",
+          roots: "L2-L4",
+          motor: "Adductor longus, adductor brevis, gracilis, obturator externus; adductor magnus via posterior branch.",
+          sensory: "Medial thigh.",
+          hallmark: "Weak hip adduction.",
+          clue: "Enters the thigh through the obturator canal.",
+        },
+      },
+      {
+        id: "tibial-common-fibular",
+        title: "Tibial vs Common Fibular",
+        focus: "Posterior leg plantarflexion pattern vs anterior/lateral leg dorsiflexion and eversion pattern.",
+        left: {
+          name: "Tibial nerve",
+          roots: "L4-S3",
+          motor: "Posterior leg muscles and plantar branches to the sole.",
+          sensory: "Sole of the foot; lateral foot via sural contribution.",
+          hallmark: "Loss of plantarflexion and toe flexion.",
+          clue: "Most superficial midline structure in the popliteal fossa.",
+        },
+        right: {
+          name: "Common fibular nerve",
+          roots: "L4-S2",
+          motor: "Divides into deep and superficial fibular branches for anterior and lateral leg.",
+          sensory: "Anterolateral leg, dorsum of foot, first web space depending on branch.",
+          hallmark: "Foot drop after fibular neck injury.",
+          clue: "Wraps around the neck of the fibula.",
+        },
+      },
+      {
+        id: "medial-lateral-plantar",
+        title: "Medial vs Lateral Plantar",
+        focus: "Medial plantar resembles median-nerve style territory; lateral plantar supplies deeper intrinsic foot muscles.",
+        left: {
+          name: "Medial plantar nerve",
+          roots: "L4-L5",
+          motor: "Abductor hallucis, FDB, FHB, 1st lumbrical.",
+          sensory: "Sole, medial 3.5 digits.",
+          hallmark: "Weak great-toe intrinsic support with medial sole sensory loss.",
+          clue: "Terminal tibial branch serving the medial sole.",
+        },
+        right: {
+          name: "Lateral plantar nerve",
+          roots: "S1-S2",
+          motor: "ADM, quadratus plantae, FDM brevis, adductor hallucis, lumbricals 2-4, all interossei.",
+          sensory: "Sole, lateral 1.5 digits.",
+          hallmark: "Intrinsic foot weakness affecting interossei and lateral lumbricals.",
+          clue: "Terminal tibial branch serving the lateral and deep sole.",
+        },
+      },
+      {
+        id: "superior-inferior-gluteal",
+        title: "Superior vs Inferior Gluteal",
+        focus: "Pelvic stabilization in stance vs powerful hip extension.",
+        left: {
+          name: "Superior gluteal nerve",
+          roots: "L4-S1",
+          motor: "Gluteus medius, gluteus minimus, TFL.",
+          sensory: "No cutaneous territory.",
+          hallmark: "Trendelenburg sign.",
+          clue: "Exits superior to piriformis.",
+        },
+        right: {
+          name: "Inferior gluteal nerve",
+          roots: "L5-S2",
+          motor: "Gluteus maximus.",
+          sensory: "No cutaneous territory.",
+          hallmark: "Weak hip extension against gravity.",
+          clue: "Exits inferior to piriformis.",
+        },
+      },
+    ];
+
+    const lesionProfiles = [
+      {
+        id: "lesion-femoral",
+        nerve: "Femoral nerve",
+        roots: "L2-L4",
+        vulnerableSite: "Beneath the inguinal ligament or in the femoral triangle.",
+        motorLoss: "Weak knee extension with quadriceps involvement; reduced strength in sartorius and pectineus.",
+        sensoryLoss: "Anterior thigh and medial leg/foot via the saphenous nerve.",
+        reflex: "Patellar reflex diminished.",
+        presentation: "Difficulty rising, climbing stairs, or stabilizing the knee in stance.",
+      },
+      {
+        id: "lesion-obturator",
+        nerve: "Obturator nerve",
+        roots: "L2-L4",
+        vulnerableSite: "Obturator canal or medial pelvic/thigh procedures.",
+        motorLoss: "Weak hip adduction with medial thigh compartment deficits.",
+        sensoryLoss: "Medial thigh sensation may be reduced.",
+        reflex: "No hallmark deep tendon reflex in this handout set.",
+        presentation: "Wide-based gait or instability when crossing the legs.",
+      },
+      {
+        id: "lesion-lfcn",
+        nerve: "Lateral femoral cutaneous nerve",
+        roots: "L2-L3",
+        vulnerableSite: "Near the inguinal ligament.",
+        motorLoss: "None.",
+        sensoryLoss: "Burning, numbness, or paresthesia over the lateral thigh.",
+        reflex: "No reflex change.",
+        presentation: "Meralgia paresthetica, often aggravated by compression or weight gain.",
+      },
+      {
+        id: "lesion-superior-gluteal",
+        nerve: "Superior gluteal nerve",
+        roots: "L4-S1",
+        vulnerableSite: "Gluteal region superior to piriformis or iatrogenic injury.",
+        motorLoss: "Weak gluteus medius/minimus and TFL function.",
+        sensoryLoss: "None.",
+        reflex: "No major reflex change.",
+        presentation: "Positive Trendelenburg sign with pelvic drop on the unsupported side.",
+      },
+      {
+        id: "lesion-inferior-gluteal",
+        nerve: "Inferior gluteal nerve",
+        roots: "L5-S2",
+        vulnerableSite: "Posterior hip procedures or deep gluteal retraction.",
+        motorLoss: "Weak gluteus maximus with loss of powerful hip extension.",
+        sensoryLoss: "None.",
+        reflex: "No major reflex change.",
+        presentation: "Trouble climbing stairs, rising from a chair, or extending the hip against resistance.",
+      },
+      {
+        id: "lesion-common-fibular",
+        nerve: "Common fibular nerve",
+        roots: "L4-S2",
+        vulnerableSite: "Fibular neck.",
+        motorLoss: "Weak dorsiflexion, toe extension, and eversion via deep and superficial fibular branches.",
+        sensoryLoss: "Anterolateral leg and dorsum of foot; first dorsal web space if deep fibular involvement is prominent.",
+        reflex: "No hallmark reflex in this set.",
+        presentation: "Foot drop with steppage gait.",
+      },
+      {
+        id: "lesion-tibial",
+        nerve: "Tibial nerve",
+        roots: "L4-S3",
+        vulnerableSite: "Popliteal fossa or posterior leg.",
+        motorLoss: "Weak plantarflexion, toe flexion, and intrinsic plantar foot function.",
+        sensoryLoss: "Sole of the foot; may include lateral foot depending on sural involvement.",
+        reflex: "No hallmark reflex emphasized in this handout set.",
+        presentation: "Difficulty pushing off during gait with numbness on the sole.",
+      },
+      {
+        id: "lesion-saphenous",
+        nerve: "Saphenous nerve",
+        roots: "L2-L4",
+        vulnerableSite: "Adductor canal or medial knee region.",
+        motorLoss: "None.",
+        sensoryLoss: "Medial leg and medial foot.",
+        reflex: "No reflex change.",
+        presentation: "Medial knee, leg, or foot sensory symptoms with intact motor testing.",
+      },
+      {
+        id: "lesion-pudendal",
+        nerve: "Pudendal nerve",
+        roots: "S2-S4",
+        vulnerableSite: "Alcock's canal or around the sacrospinous ligament.",
+        motorLoss: "Weak external anal and urethral sphincters.",
+        sensoryLoss: "Perineal numbness.",
+        reflex: "Reflex changes are not a primary teaching feature here.",
+        presentation: "Incontinence with perineal sensory change, often after childbirth or pelvic compression.",
+      },
+      {
+        id: "lesion-medial-plantar",
+        nerve: "Medial plantar nerve",
+        roots: "L4-L5",
+        vulnerableSite: "Distal tibial branching into the medial sole.",
+        motorLoss: "Weak abductor hallucis, FDB, FHB, and 1st lumbrical function.",
+        sensoryLoss: "Sole and medial 3.5 digits.",
+        reflex: "No major reflex change.",
+        presentation: "Medial plantar pain or numbness with intrinsic foot weakness.",
+      },
+      {
+        id: "lesion-lateral-plantar",
+        nerve: "Lateral plantar nerve",
+        roots: "S1-S2",
+        vulnerableSite: "Distal tibial branching into the lateral sole.",
+        motorLoss: "Weak interossei, adductor hallucis, quadratus plantae, and lumbricals 2-4.",
+        sensoryLoss: "Sole and lateral 1.5 digits.",
+        reflex: "No major reflex change.",
+        presentation: "Lateral sole numbness with impaired intrinsic foot coordination.",
+      },
+    ];
+
+    const cn = (...values) => values.filter(Boolean).join(" ");
+
+    const shuffleArray = (items, seed = 0) => {
+      const copy = [...items];
+      let currentSeed = seed + items.length * 17 + 9;
+      for (let index = copy.length - 1; index > 0; index -= 1) {
+        currentSeed = (currentSeed * 9301 + 49297) % 233280;
+        const swapIndex = Math.floor((currentSeed / 233280) * (index + 1));
+        [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+      }
+      return copy;
+    };
+
+    const getPercent = (correct, attempted) => {
+      if (!attempted) return 0;
+      return Math.round((correct / attempted) * 100);
+    };
+
+    const getPerformanceTone = (percent, attempted) => {
+      if (!attempted) {
+        return {
+          bar: "rgba(91, 143, 139, 0.24)",
+          chip: "rgba(91, 143, 139, 0.12)",
+          text: "var(--teal)",
+          label: "No attempts yet",
+        };
+      }
+      if (percent > 80) {
+        return {
+          bar: "var(--success)",
+          chip: "var(--success-soft)",
+          text: "var(--success)",
+          label: "Strong retention",
+        };
+      }
+      if (percent >= 60) {
+        return {
+          bar: "var(--amber)",
+          chip: "var(--amber-soft)",
+          text: "var(--amber)",
+          label: "Building consistency",
+        };
+      }
+      return {
+        bar: "var(--rose)",
+        chip: "var(--rose-soft)",
+        text: "var(--rose)",
+        label: "Needs review",
+      };
+    };
+
+    const createEmptyWeakSpots = () => ({
+      nerves: {},
+      spaces: {},
+      sensory: {},
+    });
+
+    const updateWeakSpotBucket = (bucket, labels = [], isCorrect) => {
+      const nextBucket = { ...bucket };
+      labels.forEach((label) => {
+        nextBucket[label] = {
+          attempts: (nextBucket[label]?.attempts || 0) + 1,
+          misses: (nextBucket[label]?.misses || 0) + (isCorrect ? 0 : 1),
+        };
+      });
+      return nextBucket;
+    };
+
+    const recordWeakSpot = (currentWeakSpots, tracking, isCorrect) => {
+      if (!tracking) return currentWeakSpots;
+      return {
+        nerves: updateWeakSpotBucket(currentWeakSpots.nerves, tracking.nerves, isCorrect),
+        spaces: updateWeakSpotBucket(currentWeakSpots.spaces, tracking.spaces, isCorrect),
+        sensory: updateWeakSpotBucket(currentWeakSpots.sensory, tracking.sensory, isCorrect),
+      };
+    };
+
+    const getWeakSpotList = (bucket) =>
+      Object.entries(bucket)
+        .map(([label, stats]) => ({
+          label,
+          attempts: stats.attempts,
+          misses: stats.misses,
+          missRate: stats.attempts ? Math.round((stats.misses / stats.attempts) * 100) : 0,
+        }))
+        .filter((item) => item.misses > 0)
+        .sort((left, right) => {
+          if (right.misses !== left.misses) return right.misses - left.misses;
+          if (right.missRate !== left.missRate) return right.missRate - left.missRate;
+          return left.label.localeCompare(right.label);
+        });
+
+    const SectionShell = ({ eyebrow, title, subtitle, children, actions }) => (
+      <section
+        className="rounded-[28px] border border-[rgba(27,46,68,0.12)] bg-[rgba(255,253,250,0.94)] shadow-atlas backdrop-blur-sm"
+        data-card-animation="fade"
+      >
+        <div className="flex flex-col gap-5 border-b border-[rgba(27,46,68,0.08)] px-6 py-6 md:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-4xl">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--amber)]">{eyebrow}</p>
+              <h2
+                className="text-[2rem] leading-none text-[var(--slate)] md:text-[2.5rem]"
+                style={{ fontFamily: '"Playfair Display", serif' }}
+              >
+                {title}
+              </h2>
+              <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--slate-soft)] md:text-lg">{subtitle}</p>
+            </div>
+            {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
+          </div>
+        </div>
+        <div className="px-6 py-6 md:px-8 md:py-8">{children}</div>
+      </section>
+    );
+
+    const ScorePill = ({ value, label }) => (
+      <div className="rounded-full border border-[rgba(27,46,68,0.12)] bg-white/80 px-4 py-2 shadow-soft">
+        <div className="text-sm font-semibold text-[var(--slate)]">{value}</div>
+        <div className="text-xs uppercase tracking-[0.16em] text-[var(--slate-soft)]">{label}</div>
+      </div>
+    );
+
+    const AnatomyMapOverlay = () => {
+      const [mapMode, setMapMode] = useState("motor");
+      const [selectedNerveId, setSelectedNerveId] = useState(anatomyMapNerves[0].id);
+      const [hoveredNerveId, setHoveredNerveId] = useState(null);
+
+      const activeNerve = anatomyMapNerves.find((item) => item.id === (hoveredNerveId || selectedNerveId)) || anatomyMapNerves[0];
+      const highlightedRegions = mapMode === "motor" ? activeNerve.motorRegions : activeNerve.sensoryRegions;
+      const overlayTone = mapMode === "motor"
+        ? {
+            fill: "rgba(40, 80, 167, 0.72)",
+            stroke: "rgba(40, 80, 167, 0.98)",
+            soft: "rgba(40, 80, 167, 0.14)",
+            copy: "The blue overlay marks the active motor region.",
+          }
+        : {
+            fill: "rgba(166, 25, 46, 0.76)",
+            stroke: "rgba(166, 25, 46, 0.98)",
+            soft: "rgba(166, 25, 46, 0.14)",
+            copy: "The red overlay marks the active sensory territory.",
+          };
+
+      const renderRegion = (region, isHighlighted) => {
+        const commonProps = {
+          key: region.id,
+          fill: isHighlighted ? overlayTone.fill : "rgba(35, 42, 51, 0.08)",
+          stroke: isHighlighted ? overlayTone.stroke : "rgba(35, 42, 51, 0.12)",
+          strokeWidth: isHighlighted ? 2.4 : 1,
+        };
+
+        if (region.shape === "circle") {
+          return <circle {...commonProps} cx={region.cx} cy={region.cy} r={region.r} />;
+        }
+
+        if (region.shape === "ellipse") {
+          return <ellipse {...commonProps} cx={region.cx} cy={region.cy} rx={region.rx} ry={region.ry} />;
+        }
+
+        if (region.shape === "path") {
+          return <path {...commonProps} d={region.d} />;
+        }
+
+        return <rect {...commonProps} x={region.x} y={region.y} width={region.width} height={region.height} rx={region.rx || 0} />;
+      };
+
+      const renderSilhouette = (view) => (
+        <g>
+          <circle cx="120" cy="34" r="18" fill="rgba(35,42,51,0.042)" stroke="rgba(35,42,51,0.10)" />
+          <path d="M112 50 C112 60 128 60 128 50 L126 68 L114 68 Z" fill="rgba(35,42,51,0.042)" />
+          <path
+            d={view === "front"
+              ? "M84 78 C90 62 102 58 120 58 C138 58 150 62 156 78 L160 112 C152 128 140 138 120 140 C100 138 88 128 80 112 Z"
+              : "M84 78 C90 60 102 56 120 56 C138 56 150 60 156 78 L160 112 C152 128 140 140 120 142 C100 140 88 128 80 112 Z"}
+            fill="rgba(35,42,51,0.042)"
+            stroke="rgba(35,42,51,0.10)"
+          />
+          <path d="M82 88 C68 114 64 148 70 188" stroke="rgba(35,42,51,0.075)" strokeWidth="10" strokeLinecap="round" />
+          <path d="M158 88 C172 114 176 148 170 188" stroke="rgba(35,42,51,0.075)" strokeWidth="10" strokeLinecap="round" />
+          <path d="M68 188 C68 198 72 206 78 212" stroke="rgba(35,42,51,0.075)" strokeWidth="8" strokeLinecap="round" />
+          <path d="M170 188 C170 198 166 206 160 212" stroke="rgba(35,42,51,0.075)" strokeWidth="8" strokeLinecap="round" />
+          <path
+            d={view === "front"
+              ? "M92 118 C98 136 108 146 120 148 C132 146 142 136 148 118 L144 156 C138 168 132 176 120 178 C108 176 102 168 96 156 Z"
+              : "M92 118 C98 134 108 144 120 146 C132 144 142 134 148 118 L144 156 C138 168 132 176 120 178 C108 176 102 168 96 156 Z"}
+            fill="rgba(35,42,51,0.048)"
+            stroke="rgba(35,42,51,0.10)"
+          />
+          <path d="M104 178 C98 212 100 252 110 382" stroke="rgba(35,42,51,0.085)" strokeWidth="18" strokeLinecap="round" />
+          <path d="M136 178 C142 212 140 252 130 382" stroke="rgba(35,42,51,0.085)" strokeWidth="18" strokeLinecap="round" />
+          <path d="M100 394 C110 388 120 388 128 394" stroke="rgba(35,42,51,0.085)" strokeWidth="10" strokeLinecap="round" />
+          <path d="M118 394 C128 388 138 388 146 394" stroke="rgba(35,42,51,0.085)" strokeWidth="10" strokeLinecap="round" />
+        </g>
+      );
+
+      const FigurePanel = ({ title, regions, view }) => (
+        <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-4 shadow-soft">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--slate-soft)]">{title}</p>
+          <svg viewBox="0 0 240 430" className="mt-3 h-[25rem] w-full">
+            {renderSilhouette(view)}
+            {regions.map((region) => renderRegion(region, highlightedRegions.includes(region.id)))}
+            {regions
+              .filter((region) => highlightedRegions.includes(region.id) && region.label)
+              .map((region) => (
+                <g key={`${region.id}-label`}>
+                  {(() => {
+                    const chipWidth = region.label.length * 6.6 + 16;
+                    return (
+                      <>
+                        <line
+                          x1={region.anchorX}
+                          y1={region.anchorY}
+                          x2={region.calloutX}
+                          y2={region.calloutY - 14}
+                          stroke={overlayTone.stroke}
+                          strokeWidth="1.4"
+                        />
+                        <circle cx={region.anchorX} cy={region.anchorY} r="3.5" fill={overlayTone.stroke} />
+                        <rect
+                          x={region.calloutX - chipWidth / 2}
+                          y={region.calloutY - 24}
+                          width={chipWidth}
+                          height="20"
+                          rx="10"
+                          fill="rgba(255,255,255,0.94)"
+                          stroke={overlayTone.stroke}
+                        />
+                        <text
+                          x={region.calloutX}
+                          y={region.calloutY - 10}
+                          fontSize="10.5"
+                          fontWeight="700"
+                          textAnchor="middle"
+                          fill="rgba(15,17,21,0.9)"
+                        >
+                          {region.label}
+                        </text>
+                      </>
+                    );
+                  })()}
+                </g>
+              ))}
+            {!highlightedRegions.length ? (
+              <>
+                <rect x="54" y="194" width="132" height="36" rx="18" fill="rgba(255,255,255,0.94)" stroke="rgba(35,42,51,0.12)" />
+                <text x="120" y="216" textAnchor="middle" fontSize="11" fontWeight="700" fill="rgba(88,98,114,0.95)">
+                  No mapped {mapMode === "motor" ? "motor" : "sensory"} area in this view
+                </text>
+              </>
+            ) : null}
+          </svg>
+          <p className="mt-3 text-xs leading-6 text-[var(--slate-soft)]">
+            {overlayTone.copy} Current selection: <span className="font-semibold text-[var(--slate)]">{activeNerve.name}</span>.
+          </p>
+        </div>
+      );
+
+      return (
+        <div className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
+          <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5">
+            <div className="flex flex-wrap gap-3">
+              {[
+                { id: "motor", label: "Motor regions" },
+                { id: "sensory", label: "Sensory territories" },
+              ].map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setMapMode(option.id)}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                    mapMode === option.id
+                      ? "border-[rgba(166,25,46,0.4)] bg-[rgba(166,25,46,0.14)] text-[var(--slate)]"
+                      : "border-[rgba(27,46,68,0.12)] bg-white text-[var(--slate-soft)]"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-5 rounded-[20px] bg-white p-4 shadow-soft">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Hover or focus a nerve</p>
+              <div className="mt-3 grid gap-2">
+                {anatomyMapNerves.map((nerve) => (
+                  <button
+                    key={nerve.id}
+                    type="button"
+                    onMouseEnter={() => setHoveredNerveId(nerve.id)}
+                    onMouseLeave={() => setHoveredNerveId(null)}
+                    onFocus={() => setHoveredNerveId(nerve.id)}
+                    onBlur={() => setHoveredNerveId(null)}
+                    onClick={() => setSelectedNerveId(nerve.id)}
+                    className={cn(
+                      "rounded-[18px] border px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                      activeNerve.id === nerve.id
+                        ? "border-[rgba(166,25,46,0.28)] bg-[rgba(166,25,46,0.1)]"
+                        : "border-[rgba(27,46,68,0.08)] bg-white hover:border-[rgba(0,183,201,0.28)]"
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-semibold text-[var(--slate)]">{nerve.name}</span>
+                      <span className="text-xs uppercase tracking-[0.16em] text-[var(--slate-soft)]">{nerve.roots}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-5">
+            <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-5 shadow-card">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">
+                {mapMode === "motor" ? "Motor emphasis" : "Sensory emphasis"}
+              </p>
+              <h3 className="mt-2 text-3xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                {activeNerve.name}
+              </h3>
+              <p className="mt-3 text-base leading-7 text-[var(--slate-soft)]">{activeNerve.modeSummary[mapMode]}</p>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <FigurePanel title="Anterior view" regions={anatomyMapRegions.front} view="front" />
+              <FigurePanel title="Posterior / plantar view" regions={anatomyMapRegions.back} view="back" />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const CompareNervesView = () => {
+      const [activeComparison, setActiveComparison] = useState(comparisonSets[0].id);
+      const comparison = comparisonSets.find((item) => item.id === activeComparison) || comparisonSets[0];
+
+      const CompareCard = ({ side, tone }) => (
+        <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-5 shadow-soft">
+          <div className="inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]" style={{ background: tone.bg, color: tone.text }}>
+            {side.roots}
+          </div>
+          <h3 className="mt-3 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+            {side.name}
+          </h3>
+          <div className="mt-4 grid gap-3 text-sm leading-6 text-[var(--slate)]">
+            <div className="rounded-[18px] bg-[rgba(27,46,68,0.04)] p-4"><strong>Motor:</strong> {side.motor}</div>
+            <div className="rounded-[18px] bg-[rgba(0,183,201,0.08)] p-4"><strong>Sensory:</strong> {side.sensory}</div>
+            <div className="rounded-[18px] bg-[rgba(166,25,46,0.08)] p-4"><strong>Hallmark lesion clue:</strong> {side.hallmark}</div>
+            <div className="rounded-[18px] bg-[rgba(40,80,167,0.08)] p-4"><strong>Distinguishing path:</strong> {side.clue}</div>
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="grid gap-6">
+          <div className="flex flex-wrap gap-3">
+            {comparisonSets.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveComparison(item.id)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                  activeComparison === item.id
+                    ? "border-[rgba(166,25,46,0.4)] bg-[rgba(166,25,46,0.14)] text-[var(--slate)]"
+                    : "border-[rgba(27,46,68,0.12)] bg-white text-[var(--slate-soft)]"
+                )}
+              >
+                {item.title}
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Fast distinction</p>
+            <p className="mt-2 text-base leading-7 text-[var(--slate-soft)]">{comparison.focus}</p>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <CompareCard side={comparison.left} tone={{ bg: "rgba(0,183,201,0.12)", text: "var(--teal)" }} />
+            <CompareCard side={comparison.right} tone={{ bg: "rgba(166,25,46,0.12)", text: "var(--amber)" }} />
+          </div>
+        </div>
+      );
+    };
+
+    const LesionBuilderView = () => {
+      const [selectedProfileId, setSelectedProfileId] = useState(lesionProfiles[0].id);
+      const profile = lesionProfiles.find((item) => item.id === selectedProfileId) || lesionProfiles[0];
+
+      return (
+        <div className="grid gap-6 lg:grid-cols-[0.72fr_1.28fr]">
+          <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Choose an injured nerve</p>
+            <div className="mt-4 grid gap-2">
+              {lesionProfiles.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setSelectedProfileId(item.id)}
+                  className={cn(
+                    "rounded-[18px] border px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                    selectedProfileId === item.id
+                      ? "border-[rgba(166,25,46,0.28)] bg-[rgba(166,25,46,0.1)]"
+                      : "border-[rgba(27,46,68,0.08)] bg-white hover:border-[rgba(0,183,201,0.28)]"
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold text-[var(--slate)]">{item.nerve}</span>
+                    <span className="text-xs uppercase tracking-[0.16em] text-[var(--slate-soft)]">{item.roots}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-6 shadow-card" data-card-animation="fade">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">Predicted lesion pattern</p>
+            <h3 className="mt-2 text-3xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+              {profile.nerve}
+            </h3>
+            <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--slate-soft)]">{profile.roots}</p>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="rounded-[18px] bg-[rgba(166,25,46,0.08)] p-4"><strong>Vulnerable site:</strong> {profile.vulnerableSite}</div>
+              <div className="rounded-[18px] bg-[rgba(40,80,167,0.08)] p-4"><strong>Classic presentation:</strong> {profile.presentation}</div>
+              <div className="rounded-[18px] bg-[rgba(27,46,68,0.05)] p-4"><strong>Motor loss:</strong> {profile.motorLoss}</div>
+              <div className="rounded-[18px] bg-[rgba(0,183,201,0.08)] p-4"><strong>Sensory loss:</strong> {profile.sensoryLoss}</div>
+              <div className="rounded-[18px] bg-[rgba(239,62,66,0.08)] p-4 md:col-span-2"><strong>Reflex changes:</strong> {profile.reflex}</div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const ExplorerSection = () => {
+      const [activeView, setActiveView] = useState("atlas");
+      const [activeTab, setActiveTab] = useState("lumbar");
+      const [expandedCards, setExpandedCards] = useState(["femoral", "sciatic"]);
+
+      const toggleCard = useCallback((cardId) => {
+        setExpandedCards((current) =>
+          current.includes(cardId) ? current.filter((id) => id !== cardId) : [...current, cardId]
+        );
+      }, []);
+
+      const tabMeta = [
+        { id: "lumbar", label: "Lumbar Plexus" },
+        { id: "sacral", label: "Sacral Plexus" },
+        { id: "cluneal", label: "Cluneal Nerves" },
+        { id: "spaces", label: "Anatomical Spaces" },
+      ];
+
+      const viewTabs = [
+        { id: "atlas", label: "Reference Atlas" },
+        { id: "map", label: "Map Overlay" },
+        { id: "compare", label: "Compare Nerves" },
+        { id: "lesion", label: "Lesion Builder" },
+      ];
+
+      return (
+        <SectionShell
+          eyebrow="Section 1"
+          title="Nerve Explorer"
+          subtitle="Browse the atlas content, hover through motor and sensory map overlays, compare easy-to-confuse nerves, and build lesion predictions from the same DPTD 731 reference set."
+          actions={
+            <>
+              <ScorePill value="Reference Mode" label="Scoring not required" />
+              <ScorePill value="4 learning views" label="Atlas + tools" />
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-3" role="tablist" aria-label="Nerve explorer views">
+            {viewTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={activeView === tab.id}
+                aria-label={`Open ${tab.label}`}
+                onClick={() => setActiveView(tab.id)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                  activeView === tab.id
+                    ? "border-[rgba(166,25,46,0.45)] bg-[rgba(166,25,46,0.14)] text-[var(--slate)]"
+                    : "border-[rgba(27,46,68,0.12)] bg-white/80 text-[var(--slate-soft)] hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)]"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {activeView === "atlas" ? (
+            <>
+              <div className="mt-6 flex flex-wrap gap-3" role="tablist" aria-label="Reference atlas tabs">
+                {tabMeta.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
+                    aria-label={`Open ${tab.label}`}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                      activeTab === tab.id
+                        ? "border-[rgba(166,25,46,0.45)] bg-[rgba(166,25,46,0.14)] text-[var(--slate)]"
+                        : "border-[rgba(27,46,68,0.12)] bg-white/80 text-[var(--slate-soft)] hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)]"
+                    )}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-6 grid gap-4 xl:grid-cols-2">
+                {explorerData[activeTab].map((entry) => {
+                  const expanded = expandedCards.includes(entry.id);
+                  return (
+                    <article
+                      key={entry.id}
+                      className="overflow-hidden rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[var(--paper-strong)] shadow-card"
+                      data-card-animation="slide"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleCard(entry.id)}
+                        aria-expanded={expanded}
+                        aria-label={`${expanded ? "Collapse" : "Expand"} ${entry.name}`}
+                        className="flex w-full items-start justify-between gap-4 px-5 py-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                      >
+                        <div>
+                          <div className="mb-2 flex flex-wrap gap-2">
+                            <span className="rounded-full bg-[rgba(0,183,201,0.13)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--teal)]">
+                              {entry.roots}
+                            </span>
+                            {activeTab === "spaces" ? (
+                              <span className="rounded-full bg-[rgba(166,25,46,0.13)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--amber)]">
+                                Atlas space
+                              </span>
+                            ) : null}
+                          </div>
+                          <h3 className="text-2xl leading-tight text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                            {entry.name}
+                          </h3>
+                          <p className="mt-2 text-sm leading-6 text-[var(--slate-soft)]">{entry.course}</p>
+                        </div>
+                        <span className="rounded-full border border-[rgba(27,46,68,0.1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--slate-soft)]">
+                          {expanded ? "Hide" : "Open"}
+                        </span>
+                      </button>
+
+                      {expanded ? (
+                        <div className="grid gap-4 border-t border-[rgba(27,46,68,0.08)] px-5 py-5 md:grid-cols-2" data-card-animation="fade">
+                          <div className="rounded-[18px] bg-[rgba(27,46,68,0.04)] p-4">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Motor</p>
+                            <p className="mt-2 text-sm leading-6 text-[var(--slate)]">{entry.motor}</p>
+                          </div>
+                          <div className="rounded-[18px] bg-[rgba(0,183,201,0.08)] p-4">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">Sensory / Spatial</p>
+                            <p className="mt-2 text-sm leading-6 text-[var(--slate)]">{entry.sensory}</p>
+                          </div>
+                          <div className="rounded-[18px] bg-[rgba(166,25,46,0.08)] p-4 md:col-span-2">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Key Clinical Point</p>
+                            <p className="mt-2 text-sm leading-6 text-[var(--slate)]">{entry.clinical}</p>
+                          </div>
+
+                          {entry.branches ? (
+                            <div className="md:col-span-2">
+                              <div className="mb-3 flex items-center gap-3">
+                                <div className="h-px flex-1 bg-[rgba(27,46,68,0.08)]"></div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--slate-soft)]">Branch Detail</p>
+                                <div className="h-px flex-1 bg-[rgba(27,46,68,0.08)]"></div>
+                              </div>
+                              <div className="grid gap-3 md:grid-cols-2">
+                                {entry.branches.map((branch) => (
+                                  <div key={branch.title} className="rounded-[18px] border border-[rgba(27,46,68,0.1)] bg-white px-4 py-4 shadow-soft">
+                                    <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--teal)]">{branch.title}</p>
+                                    <p className="mt-2 text-sm leading-6 text-[var(--slate)]">{branch.details}</p>
+                                    {branch.children ? (
+                                      <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--slate-soft)]">
+                                        {branch.children.map((child) => (
+                                          <li key={child} className="rounded-2xl bg-[rgba(27,46,68,0.04)] px-3 py-2">
+                                            {child}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    ) : null}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })}
+              </div>
+            </>
+          ) : null}
+
+          {activeView === "map" ? <div className="mt-6"><AnatomyMapOverlay /></div> : null}
+          {activeView === "compare" ? <div className="mt-6"><CompareNervesView /></div> : null}
+          {activeView === "lesion" ? <div className="mt-6"><LesionBuilderView /></div> : null}
+        </SectionShell>
+      );
+    };
+
+    const QuestionDeck = ({ sectionKey, title, subtitle, questions, onRecord, resetSignal, shuffleChoices = false, trackingMap = null }) => {
+      const [seed, setSeed] = useState(1);
+      const [index, setIndex] = useState(0);
+      const [answers, setAnswers] = useState({});
+
+      const deck = useMemo(
+        () =>
+          shuffleArray(questions, seed).map((question, questionIndex) => ({
+            ...question,
+            displayOptions: shuffleChoices
+              ? shuffleArray(question.options, seed + (questionIndex + 1) * 37 + question.id.length)
+              : question.options,
+          })),
+        [questions, seed, shuffleChoices]
+      );
+      const current = deck[index];
+      const answeredCurrent = current ? answers[current.id] : null;
+      const completed = index >= deck.length;
+
+      useEffect(() => {
+        setSeed(resetSignal + 1);
+        setIndex(0);
+        setAnswers({});
+      }, [resetSignal]);
+
+      const restartDeck = useCallback(() => {
+        setSeed((value) => value + 1);
+        setIndex(0);
+        setAnswers({});
+      }, []);
+
+      const handleAnswer = useCallback(
+        (choice) => {
+          if (!current || answers[current.id]) return;
+          const isCorrect = choice === current.answer;
+          setAnswers((existing) => ({
+            ...existing,
+            [current.id]: {
+              choice,
+              isCorrect,
+            },
+          }));
+          onRecord(sectionKey, isCorrect, trackingMap?.[current.id] || null);
+        },
+        [answers, current, onRecord, sectionKey, trackingMap]
+      );
+
+      const correctCount = Object.values(answers).filter((item) => item.isCorrect).length;
+      const percent = getPercent(correctCount, Object.keys(answers).length);
+
+      return (
+        <SectionShell
+          eyebrow={sectionKey === "nerveId" ? "Section 2" : "Section 6"}
+          title={title}
+          subtitle={subtitle}
+          actions={
+            <>
+              <ScorePill value={`${Math.min(index + (answeredCurrent ? 1 : 0), deck.length)} / ${deck.length}`} label="Current progress" />
+              <ScorePill value={`${correctCount}/${Object.keys(answers).length || 0}`} label="This attempt" />
+            </>
+          }
+        >
+          {completed ? (
+            <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white px-6 py-8 shadow-card" data-card-animation="fade">
+              <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr] md:items-center">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--amber)]">Attempt complete</p>
+                  <h3 className="mt-2 text-3xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                    {correctCount} correct out of {deck.length}
+                  </h3>
+                  <p className="mt-3 max-w-2xl text-base leading-7 text-[var(--slate-soft)]">
+                    Review the explanations and start a fresh randomized attempt whenever you want another pass.
+                  </p>
+                </div>
+                <div className="rounded-[22px] bg-[rgba(27,46,68,0.05)] p-5">
+                  <div className="flex items-end justify-between">
+                    <span className="text-sm uppercase tracking-[0.14em] text-[var(--slate-soft)]">Attempt score</span>
+                    <span className="text-4xl font-semibold text-[var(--slate)]">{percent}%</span>
+                  </div>
+                  <div className="mt-4 h-3 rounded-full bg-[rgba(27,46,68,0.08)]">
+                    <div
+                      className="h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${percent}%`,
+                        background: getPerformanceTone(percent, deck.length).bar,
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={restartDeck}
+                    className="mt-5 w-full rounded-2xl bg-[var(--slate)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                  >
+                    New randomized attempt
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
+              <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--teal)]">Question set</p>
+                <h3 className="mt-2 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                  Immediate feedback
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--slate-soft)]">
+                  Answer one prompt at a time. Correct answers pulse in amber-green, incorrect answers shake and reveal the best answer immediately.
+                </p>
+                <div className="mt-5 space-y-3">
+                  {deck.map((question, questionIndex) => {
+                    const status = answers[question.id];
+                    return (
+                      <div
+                        key={question.id}
+                        className={cn(
+                          "rounded-2xl border px-4 py-3 text-sm transition",
+                          questionIndex === index
+                            ? "border-[rgba(184,135,28,0.35)] bg-[rgba(184,135,28,0.12)]"
+                            : status?.isCorrect
+                              ? "border-[rgba(63,124,83,0.22)] bg-[rgba(63,124,83,0.08)]"
+                              : status && !status.isCorrect
+                                ? "border-[rgba(184,92,111,0.24)] bg-[rgba(184,92,111,0.08)]"
+                                : "border-[rgba(27,46,68,0.08)] bg-white"
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-semibold text-[var(--slate)]">Question {questionIndex + 1}</span>
+                          <span className="text-xs uppercase tracking-[0.18em] text-[var(--slate-soft)]">
+                            {status ? (status.isCorrect ? "Correct" : "Review") : questionIndex === index ? "Active" : "Pending"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-6 shadow-card" data-card-animation="fade">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--amber)]">
+                    Question {index + 1} of {deck.length}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={restartDeck}
+                    className="rounded-full border border-[rgba(27,46,68,0.12)] px-4 py-2 text-sm font-semibold text-[var(--slate-soft)] transition hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                  >
+                    Restart deck
+                  </button>
+                </div>
+                <h3 className="mt-4 text-[1.9rem] leading-tight text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                  {current.prompt}
+                </h3>
+                <div className="mt-6 grid gap-3">
+                  {current.displayOptions.map((option) => {
+                    const selected = answeredCurrent?.choice === option;
+                    const isCorrect = option === current.answer;
+                    const answered = Boolean(answeredCurrent);
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => handleAnswer(option)}
+                        disabled={answered}
+                        aria-label={`Choose ${option}`}
+                        data-feedback={selected ? (answeredCurrent.isCorrect ? "correct" : "incorrect") : undefined}
+                        className={cn(
+                          "rounded-[20px] border px-5 py-4 text-left text-base transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                          !answered && "hover:-translate-y-[1px] hover:border-[rgba(91,143,139,0.35)] hover:bg-[rgba(91,143,139,0.05)]",
+                          answered && isCorrect && "border-[rgba(63,124,83,0.32)] bg-[rgba(63,124,83,0.09)] text-[var(--slate)]",
+                          answered && selected && !isCorrect && "border-[rgba(184,92,111,0.35)] bg-[rgba(184,92,111,0.1)] text-[var(--slate)]",
+                          answered && !selected && !isCorrect && "border-[rgba(27,46,68,0.08)] bg-white text-[var(--slate-soft)]",
+                          !answered && "border-[rgba(27,46,68,0.1)] bg-white text-[var(--slate)]"
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <span>{option}</span>
+                          {answered && isCorrect ? <span className="text-lg text-[var(--success)]">✓</span> : null}
+                          {answered && selected && !isCorrect ? <span className="text-lg text-[var(--rose)]">!</span> : null}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {answeredCurrent ? (
+                  <div
+                    className={cn(
+                      "mt-6 rounded-[22px] border px-5 py-5",
+                      answeredCurrent.isCorrect
+                        ? "border-[rgba(63,124,83,0.24)] bg-[rgba(63,124,83,0.08)]"
+                        : "border-[rgba(184,92,111,0.24)] bg-[rgba(184,92,111,0.08)]"
+                    )}
+                    aria-live="polite"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--slate-soft)]">
+                      {answeredCurrent.isCorrect ? "Correct" : `Incorrect - correct answer: ${current.answer}`}
+                    </p>
+                    <p className="mt-2 text-sm leading-7 text-[var(--slate)]">{current.explanation}</p>
+                    <button
+                      type="button"
+                      onClick={() => setIndex((value) => value + 1)}
+                      className="mt-4 rounded-2xl bg-[var(--slate)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                    >
+                      {index === deck.length - 1 ? "Finish section" : "Next question"}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          )}
+        </SectionShell>
+      );
+    };
+
+    const CategorySortBoard = ({ sectionKey, activity, onRecord, resetSignal, showHintToggle = false }) => {
+      const [placements, setPlacements] = useState({});
+      const [draggedId, setDraggedId] = useState(null);
+      const [activeTarget, setActiveTarget] = useState(null);
+      const [feedback, setFeedback] = useState({ categoryId: null, tone: null, text: "" });
+      const [showHints, setShowHints] = useState(false);
+      const [revealedCategoryHints, setRevealedCategoryHints] = useState({});
+
+      useEffect(() => {
+        setPlacements({});
+        setDraggedId(null);
+        setActiveTarget(null);
+        setFeedback({ categoryId: null, tone: null, text: "" });
+        setShowHints(false);
+        setRevealedCategoryHints({});
+      }, [activity.id, resetSignal]);
+
+      const remainingItems = activity.items.filter((item) => !placements[item.id]);
+
+      const handleDrop = useCallback(
+        (categoryId, itemId) => {
+          const isCorrect = activity.answerMap[itemId] === categoryId;
+          onRecord(sectionKey, isCorrect, activity.itemTracking?.[itemId] || activity.tracking || null);
+
+          if (isCorrect) {
+            setPlacements((current) => ({ ...current, [itemId]: categoryId }));
+            setFeedback({ categoryId, tone: "correct", text: activity.successText || "Placed correctly." });
+          } else {
+            setFeedback({ categoryId, tone: "incorrect", text: activity.errorText || "That item belongs in a different category." });
+          }
+
+          setDraggedId(null);
+          setActiveTarget(null);
+        },
+        [activity.answerMap, activity.itemTracking, activity.tracking, onRecord, sectionKey]
+      );
+
+      const getPlacedItems = useCallback(
+        (categoryId) =>
+          activity.items.filter((item) => placements[item.id] === categoryId),
+        [activity.items, placements]
+      );
+
+      return (
+        <div className="grid gap-6 xl:grid-cols-[0.68fr_1.32fr]" data-card-animation="fade">
+          <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--amber)]">
+                  {activity.bankLabel || "Structure bank"}
+                </p>
+                <h3 className="mt-2 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                  {remainingItems.length ? "Drag into place" : "Board complete"}
+                </h3>
+              </div>
+              {showHintToggle && activity.hints ? (
+                <button
+                  type="button"
+                  onClick={() => setShowHints((current) => !current)}
+                  className="rounded-full border border-[rgba(184,135,28,0.24)] bg-[rgba(184,135,28,0.12)] px-4 py-2 text-sm font-semibold text-[var(--amber)] transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                >
+                  {showHints ? "Hide hints" : "Show hints"}
+                </button>
+              ) : null}
+            </div>
+
+            {showHints && activity.hints ? (
+              <div className="mt-4 space-y-3">
+                {activity.hints.map((hint) => (
+                  <div key={hint} className="rounded-[18px] bg-[rgba(184,135,28,0.1)] px-4 py-3 text-sm leading-6 text-[var(--slate)]">
+                    {hint}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            <div className="mt-5 grid gap-3">
+              {remainingItems.map((item) => (
+                <div
+                  key={item.id}
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.setData("text/plain", item.id);
+                    setDraggedId(item.id);
+                  }}
+                  onDragEnd={() => {
+                    setDraggedId(null);
+                    setActiveTarget(null);
+                  }}
+                  aria-label={`Drag ${item.label}`}
+                  data-dragging={draggedId === item.id ? "true" : "false"}
+                  className="cursor-grab rounded-[20px] border border-[rgba(27,46,68,0.1)] bg-white px-4 py-4 text-sm font-semibold text-[var(--slate)] shadow-soft transition active:cursor-grabbing"
+                >
+                  {item.label}
+                </div>
+              ))}
+              {!remainingItems.length ? (
+                <div className="rounded-[20px] border border-[rgba(63,124,83,0.24)] bg-[rgba(63,124,83,0.08)] px-4 py-4 text-sm leading-6 text-[var(--slate)]">
+                  Every item has been sorted correctly on this activity.
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {activity.categories.map((category) => {
+              const placed = getPlacedItems(category.id);
+              const isActive = activeTarget === category.id;
+              const categoryFeedback = feedback.categoryId === category.id ? feedback.tone : null;
+              const hintRevealed = revealedCategoryHints[category.id];
+              return (
+                <div
+                  key={category.id}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    setActiveTarget(category.id);
+                  }}
+                  onDragLeave={() => setActiveTarget((current) => (current === category.id ? null : current))}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const itemId = event.dataTransfer.getData("text/plain") || draggedId;
+                    if (itemId) handleDrop(category.id, itemId);
+                  }}
+                  aria-label={`${category.title} drop zone`}
+                  data-drop-state={isActive ? "active" : undefined}
+                  data-feedback={categoryFeedback || undefined}
+                  className="min-h-[220px] rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-4 shadow-soft transition"
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--slate-soft)]">{category.note}</p>
+                  <h4 className="mt-2 text-xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                    {category.title}
+                  </h4>
+                  <div className="mt-4 space-y-2">
+                    {placed.length ? (
+                      placed.map((item) => (
+                        <div key={item.id} className="rounded-2xl bg-[rgba(184,135,28,0.12)] px-3 py-2 text-sm font-semibold text-[var(--slate)]">
+                          {item.label}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-[rgba(27,46,68,0.16)] px-4 py-6 text-sm text-[var(--slate-soft)]">
+                        {activity.dropPrompt || "Drop matching structures here"}
+                      </div>
+                    )}
+                  </div>
+                  {category.subtitle ? (
+                    activity.revealSubtitleAsHint ? (
+                      hintRevealed ? (
+                        <div className="mt-4 rounded-2xl bg-[rgba(91,143,139,0.1)] px-4 py-3 text-sm leading-6 text-[var(--slate)]">
+                          {category.subtitle}
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRevealedCategoryHints((current) => ({
+                              ...current,
+                              [category.id]: true,
+                            }))
+                          }
+                          className="mt-4 rounded-full border border-[rgba(91,143,139,0.24)] bg-[rgba(91,143,139,0.08)] px-4 py-2 text-sm font-semibold text-[var(--teal)] transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                        >
+                          {activity.hintButtonLabel || "Reveal hint"}
+                        </button>
+                      )
+                    ) : (
+                      <p className="mt-4 text-sm leading-6 text-[var(--slate-soft)]">{category.subtitle}</p>
+                    )
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+          <div className="xl:col-start-2">
+            <p className="text-sm text-[var(--slate-soft)]" aria-live="polite">{feedback.text}</p>
+          </div>
+        </div>
+      );
+    };
+
+    const MatchingSection = ({ onRecord, resetSignal }) => {
+      const [activeActivity, setActiveActivity] = useState(matchingActivities[0].id);
+      const currentActivity = matchingActivities.find((item) => item.id === activeActivity);
+
+      useEffect(() => {
+        setActiveActivity(matchingActivities[0].id);
+      }, [resetSignal]);
+
+      return (
+        <SectionShell
+          eyebrow="Section 3"
+          title="Matching"
+          subtitle="Use native drag-and-drop to connect roots, muscle groups, and sensory territories with the correct lower-extremity nerves."
+          actions={
+            <>
+              <ScorePill value="3 boards" label="Roots, muscles, sensation" />
+              <ScorePill value="HTML5 drag" label="Native interactions" />
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-3">
+            {matchingActivities.map((activity) => (
+              <button
+                key={activity.id}
+                type="button"
+                onClick={() => setActiveActivity(activity.id)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                  activeActivity === activity.id
+                    ? "border-[rgba(184,135,28,0.45)] bg-[rgba(184,135,28,0.14)] text-[var(--slate)]"
+                    : "border-[rgba(27,46,68,0.12)] bg-white/80 text-[var(--slate-soft)] hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)]"
+                )}
+              >
+                {activity.title}
+              </button>
+            ))}
+          </div>
+          <div className="mt-6 rounded-[26px] border border-[rgba(27,46,68,0.1)] bg-[rgba(255,255,255,0.7)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--teal)]">{currentActivity.title}</p>
+            <p className="mt-2 text-base leading-7 text-[var(--slate-soft)]">{currentActivity.subtitle}</p>
+            <div className="mt-6">
+              <CategorySortBoard sectionKey="matching" activity={currentActivity} onRecord={onRecord} resetSignal={resetSignal} />
+            </div>
+          </div>
+        </SectionShell>
+      );
+    };
+
+    const CompartmentSection = ({ onRecord, resetSignal }) => (
+      <SectionShell
+        eyebrow="Section 4"
+        title="Compartment Challenge"
+        subtitle="Sort each nerve into the thigh, gluteal, leg, or plantar region it defines. The layout is arranged like a simplified lower-extremity map for quick compartment review."
+        actions={
+          <>
+            <ScorePill value="11 regions" label="Compartment map" />
+            <ScorePill value="Motor + sensory" label="Regional sorting" />
+          </>
+        }
+      >
+        <div className="mb-6 grid gap-4 rounded-[26px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5 md:grid-cols-3">
+          <div className="rounded-[22px] bg-white p-4 shadow-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Gluteal</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--slate-soft)]">Separate superior gluteal abduction from inferior gluteal extension.</p>
+          </div>
+          <div className="rounded-[22px] bg-white p-4 shadow-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Thigh + leg</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--slate-soft)]">Anterior, medial, posterior, and lateral pathways stay visually distinct.</p>
+          </div>
+          <div className="rounded-[22px] bg-white p-4 shadow-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Foot</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--slate-soft)]">Finish with medial and lateral plantar branches from the tibial nerve.</p>
+          </div>
+        </div>
+        <CategorySortBoard sectionKey="compartment" activity={compartmentActivity} onRecord={onRecord} resetSignal={resetSignal} />
+      </SectionShell>
+    );
+
+    const SpacesSection = ({ onRecord, resetSignal }) => {
+      const [activeActivity, setActiveActivity] = useState(spaceActivities[0].id);
+      const currentActivity = spaceActivities.find((item) => item.id === activeActivity);
+
+      useEffect(() => {
+        setActiveActivity(spaceActivities[0].id);
+      }, [resetSignal]);
+
+      return (
+        <SectionShell
+          eyebrow="Section 5"
+          title="Anatomical Spaces"
+          subtitle="Build the femoral triangle, adductor canal, and popliteal fossa from their borders, floor structures, contents, and landmarks."
+          actions={
+            <>
+              <ScorePill value="3 builders" label="Borders + contents" />
+              <ScorePill value="Mnemonic support" label="Toggle hints" />
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-3">
+            {spaceActivities.map((activity) => (
+              <button
+                key={activity.id}
+                type="button"
+                onClick={() => setActiveActivity(activity.id)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                  activeActivity === activity.id
+                    ? "border-[rgba(184,135,28,0.45)] bg-[rgba(184,135,28,0.14)] text-[var(--slate)]"
+                    : "border-[rgba(27,46,68,0.12)] bg-white/80 text-[var(--slate-soft)] hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)]"
+                )}
+              >
+                {activity.title}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-[26px] border border-[rgba(27,46,68,0.1)] bg-[rgba(255,255,255,0.7)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--teal)]">{currentActivity.title}</p>
+            <p className="mt-2 text-base leading-7 text-[var(--slate-soft)]">{currentActivity.subtitle}</p>
+            <div className="mt-6">
+              <CategorySortBoard
+                sectionKey="spaces"
+                activity={currentActivity}
+                onRecord={onRecord}
+                resetSignal={resetSignal}
+                showHintToggle={Boolean(currentActivity.hints)}
+              />
+            </div>
+          </div>
+        </SectionShell>
+      );
+    };
+
+    const DashboardSection = ({ scores, weakSpots, onReset }) => {
+      const overall = useMemo(() => {
+        const summary = SCORED_SECTIONS.reduce(
+          (accumulator, section) => {
+            const stats = scores[section.key];
+            return {
+              correct: accumulator.correct + stats.correct,
+              attempted: accumulator.attempted + stats.attempted,
+            };
+          },
+          { correct: 0, attempted: 0 }
+        );
+        return {
+          ...summary,
+          percent: getPercent(summary.correct, summary.attempted),
+        };
+      }, [scores]);
+
+      const nerveWeakSpots = useMemo(() => getWeakSpotList(weakSpots.nerves).slice(0, 5), [weakSpots.nerves]);
+      const spaceWeakSpots = useMemo(() => getWeakSpotList(weakSpots.spaces).slice(0, 5), [weakSpots.spaces]);
+      const sensoryWeakSpots = useMemo(() => getWeakSpotList(weakSpots.sensory).slice(0, 5), [weakSpots.sensory]);
+
+      const WeakSpotPanel = ({ title, eyebrow, items }) => (
+        <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-5 shadow-soft">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">{eyebrow}</p>
+          <h4 className="mt-2 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+            {title}
+          </h4>
+          {items.length ? (
+            <div className="mt-4 grid gap-3">
+              {items.map((item) => (
+                <div key={item.label} className="rounded-[18px] bg-[rgba(27,46,68,0.04)] px-4 py-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="font-semibold text-[var(--slate)]">{item.label}</div>
+                      <div className="mt-1 text-sm text-[var(--slate-soft)]">{item.misses} misses across {item.attempts} tracked attempts</div>
+                    </div>
+                    <div className="rounded-full bg-[rgba(166,25,46,0.12)] px-3 py-1 text-sm font-semibold text-[var(--amber)]">
+                      {item.missRate}% miss rate
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-7 text-[var(--slate-soft)]">Nothing is standing out here yet. As soon as a student starts missing related items, this panel will prioritize them for review.</p>
+          )}
+        </div>
+      );
+
+      return (
+        <SectionShell
+          eyebrow="Section 7"
+          title="Score Dashboard"
+          subtitle="Track performance across the active learning sections, identify weak areas quickly, and reset the session whenever you want a clean practice run."
+          actions={
+            <>
+              <ScorePill value={`${overall.correct}/${overall.attempted || 0}`} label="Overall correct" />
+              <button
+                type="button"
+                onClick={onReset}
+                className="rounded-full bg-[var(--slate)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+              >
+                Reset All Scores
+              </button>
+            </>
+          }
+        >
+          <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
+            <div className="rounded-[26px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--amber)]">Overall session</p>
+              <h3 className="mt-3 text-5xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                {overall.percent}%
+              </h3>
+              <p className="mt-3 text-base leading-7 text-[var(--slate-soft)]">
+                {overall.attempted
+                  ? `${overall.correct} correct answers or placements across ${overall.attempted} scored attempts.`
+                  : "No scored attempts yet. Begin with Nerve Identification, Matching, or the Clinical Scenarios to populate the dashboard."}
+              </p>
+              <div className="mt-5 h-3 rounded-full bg-[rgba(27,46,68,0.08)]">
+                <div
+                  className="h-3 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${overall.percent}%`,
+                    background: getPerformanceTone(overall.percent, overall.attempted).bar,
+                  }}
+                />
+              </div>
+              <div
+                className="mt-5 inline-flex rounded-full px-4 py-2 text-sm font-semibold"
+                style={{
+                  color: getPerformanceTone(overall.percent, overall.attempted).text,
+                  background: getPerformanceTone(overall.percent, overall.attempted).chip,
+                }}
+              >
+                {getPerformanceTone(overall.percent, overall.attempted).label}
+              </div>
+            </div>
+
+            <div className="grid gap-4">
+              {SCORED_SECTIONS.map((section) => {
+                const stats = scores[section.key];
+                const percent = getPercent(stats.correct, stats.attempted);
+                const tone = getPerformanceTone(percent, stats.attempted);
+                return (
+                  <div key={section.key} className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-5 shadow-soft">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--slate-soft)]">Section performance</p>
+                        <h4 className="mt-2 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                          {section.label}
+                        </h4>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-3xl font-semibold text-[var(--slate)]">{stats.attempted ? `${percent}%` : "--"}</div>
+                        <div className="text-sm text-[var(--slate-soft)]">{stats.correct} / {stats.attempted} correct</div>
+                      </div>
+                    </div>
+                    <div className="mt-4 h-3 rounded-full bg-[rgba(27,46,68,0.08)]">
+                      <div className="h-3 rounded-full transition-all duration-500" style={{ width: `${percent}%`, background: tone.bar }} />
+                    </div>
+                    <div
+                      className="mt-4 inline-flex rounded-full px-4 py-2 text-sm font-semibold"
+                      style={{ color: tone.text, background: tone.chip }}
+                    >
+                      {tone.label}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-6 grid gap-5 lg:grid-cols-3">
+            <WeakSpotPanel title="Most-missed nerves" eyebrow="Personal review" items={nerveWeakSpots} />
+            <WeakSpotPanel title="Most-missed spaces" eyebrow="Spatial anatomy" items={spaceWeakSpots} />
+            <WeakSpotPanel title="Sensory territories needing review" eyebrow="Cutaneous map" items={sensoryWeakSpots} />
+          </div>
+        </SectionShell>
+      );
+    };
+
+    export default function LowerExtremityNerveAtlas() {
+      const [activeSection, setActiveSection] = useState("explorer");
+      const [scores, setScores] = useState(INITIAL_SCORES);
+      const [weakSpots, setWeakSpots] = useState(createEmptyWeakSpots());
+      const [resetSignal, setResetSignal] = useState(0);
+
+      const overallStats = useMemo(() => {
+        const summary = SCORED_SECTIONS.reduce(
+          (accumulator, section) => {
+            const stats = scores[section.key];
+            return {
+              correct: accumulator.correct + stats.correct,
+              attempted: accumulator.attempted + stats.attempted,
+            };
+          },
+          { correct: 0, attempted: 0 }
+        );
+        return { ...summary, percent: getPercent(summary.correct, summary.attempted) };
+      }, [scores]);
+
+      const recordResult = useCallback((sectionKey, isCorrect, tracking = null) => {
+        setScores((current) => ({
+          ...current,
+          [sectionKey]: {
+            correct: current[sectionKey].correct + (isCorrect ? 1 : 0),
+            attempted: current[sectionKey].attempted + 1,
+          },
+        }));
+        if (tracking) {
+          setWeakSpots((current) => recordWeakSpot(current, tracking, isCorrect));
+        }
+      }, []);
+
+      const resetAll = useCallback(() => {
+        setScores({
+          explorer: { correct: 0, attempted: 0 },
+          nerveId: { correct: 0, attempted: 0 },
+          matching: { correct: 0, attempted: 0 },
+          compartment: { correct: 0, attempted: 0 },
+          spaces: { correct: 0, attempted: 0 },
+          clinical: { correct: 0, attempted: 0 },
+        });
+        setWeakSpots(createEmptyWeakSpots());
+        setResetSignal((value) => value + 1);
+        setActiveSection("dashboard");
+      }, []);
+
+      const renderSection = () => {
+        switch (activeSection) {
+          case "explorer":
+            return <ExplorerSection />;
+          case "nerveId":
+            return (
+              <QuestionDeck
+                sectionKey="nerveId"
+                title="Nerve Identification"
+                subtitle="Read the anatomical description, identify the best nerve, and get immediate explanation-rich feedback. The question order is randomized on every fresh attempt."
+                questions={nerveIdBank}
+                onRecord={recordResult}
+                resetSignal={resetSignal}
+                shuffleChoices={true}
+                trackingMap={nerveIdTrackingMap}
+              />
+            );
+          case "matching":
+            return <MatchingSection onRecord={recordResult} resetSignal={resetSignal} />;
+          case "compartment":
+            return <CompartmentSection onRecord={recordResult} resetSignal={resetSignal} />;
+          case "spaces":
+            return <SpacesSection onRecord={recordResult} resetSignal={resetSignal} />;
+          case "clinical":
+            return (
+              <QuestionDeck
+                sectionKey="clinical"
+                title="Clinical Scenarios"
+                subtitle="Apply the handout to short vignettes that connect anatomy, motor findings, sensory loss, and vulnerable anatomical locations."
+                questions={clinicalBank}
+                onRecord={recordResult}
+                resetSignal={resetSignal}
+                trackingMap={clinicalTrackingMap}
+              />
+            );
+          case "dashboard":
+            return <DashboardSection scores={scores} weakSpots={weakSpots} onReset={resetAll} />;
+          default:
+            return null;
+        }
+      };
+
+      return (
+        <div className="mx-auto max-w-[1560px] px-4 py-5 md:px-6 md:py-6">
+          <header className="overflow-hidden rounded-[30px] border border-[rgba(27,46,68,0.12)] bg-[rgba(255,253,250,0.9)] shadow-atlas backdrop-blur-sm">
+            <div className="grid gap-8 px-6 py-6 md:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--amber)]">DPTD 731 interactive review</p>
+                <h1
+                  className="mt-4 text-[2.7rem] leading-[0.94] text-[var(--slate)] md:text-[4rem]"
+                  style={{ fontFamily: '"Playfair Display", serif' }}
+                >
+                  Lower Extremity Nerve Atlas
+                </h1>
+                <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--slate-soft)]">
+                  A single-file study and review tool for lumbar plexus, sacral plexus, cluneal nerves, anatomical spaces, and clinical localization in the lower extremity.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
+                <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white/85 p-5 shadow-card">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">Learning design</p>
+                  <p className="mt-3 text-sm leading-7 text-[var(--slate-soft)]">Reference browsing, recognition questions, drag-and-drop matching, region sorting, anatomical-space builders, and clinical reasoning.</p>
+                </div>
+                <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white/85 p-5 shadow-card">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">Current session</p>
+                  <div className="mt-3 flex items-end justify-between gap-4">
+                    <span className="text-4xl font-semibold text-[var(--slate)]">{overallStats.percent}%</span>
+                    <span className="text-sm text-[var(--slate-soft)]">{overallStats.correct}/{overallStats.attempted || 0} correct</span>
+                  </div>
+                  <div className="mt-4 h-3 rounded-full bg-[rgba(27,46,68,0.08)]">
+                    <div
+                      className="h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${overallStats.percent}%`,
+                        background: getPerformanceTone(overallStats.percent, overallStats.attempted).bar,
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white/85 p-5 shadow-card">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">Coverage</p>
+                  <p className="mt-3 text-sm leading-7 text-[var(--slate-soft)]">Lumbar plexus, sacral plexus, cluneal nerves, femoral triangle, adductor canal, popliteal fossa, and lower-extremity compartment localization.</p>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <nav className="sticky top-3 z-30 mt-5 rounded-[26px] border border-[rgba(27,46,68,0.12)] bg-[rgba(255,253,250,0.9)] px-4 py-4 shadow-card backdrop-blur-md">
+            <div className="flex flex-wrap gap-3">
+              {APP_SECTIONS.map((section, sectionIndex) => (
+                <button
+                  key={section.key}
+                  type="button"
+                  onClick={() => setActiveSection(section.key)}
+                  aria-label={`Open ${section.label}`}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                    activeSection === section.key
+                      ? "border-[rgba(184,135,28,0.42)] bg-[rgba(184,135,28,0.14)] text-[var(--slate)]"
+                      : "border-[rgba(27,46,68,0.1)] bg-white text-[var(--slate-soft)] hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)]"
+                  )}
+                >
+                  <span className="mr-2 text-[var(--amber)]">{sectionIndex + 1}.</span>
+                  {section.label}
+                </button>
+              ))}
+            </div>
+          </nav>
+
+          <main className="mt-5">{renderSection()}</main>
+        </div>
+      );
+    }
+
+    const root = window.ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<LowerExtremityNerveAtlas />);
+  </script>
+</body>
+</html>
