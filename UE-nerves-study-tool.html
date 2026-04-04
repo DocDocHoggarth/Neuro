@@ -1,0 +1,3296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DPTD 731 Upper Extremity Nerve Atlas</title>
+  <script>
+    window.tailwind = {
+      config: {
+        theme: {
+          extend: {
+            boxShadow: {
+              atlas: "0 18px 42px rgba(17, 34, 51, 0.12)",
+              card: "0 10px 28px rgba(17, 34, 51, 0.09)",
+              soft: "0 6px 18px rgba(17, 34, 51, 0.06)",
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap");
+
+    :root {
+      --bg: #f5f7fa;
+      --paper: #f8fafc;
+      --paper-strong: #ffffff;
+      --slate: #0f1115;
+      --slate-soft: #586272;
+      --border: rgba(35, 42, 51, 0.12);
+      --teal: #00b7c9;
+      --teal-soft: rgba(0, 183, 201, 0.14);
+      --amber: #a6192e;
+      --amber-soft: rgba(166, 25, 46, 0.14);
+      --rose: #ef3e42;
+      --rose-soft: rgba(239, 62, 66, 0.14);
+      --success: #2850a7;
+      --success-soft: rgba(40, 80, 167, 0.14);
+      --neutral-soft: rgba(35, 42, 51, 0.06);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Source Sans 3", sans-serif;
+      color: var(--slate);
+      background:
+        radial-gradient(circle at top left, rgba(166, 25, 46, 0.1), transparent 24rem),
+        radial-gradient(circle at top right, rgba(0, 183, 201, 0.12), transparent 22rem),
+        radial-gradient(circle at bottom right, rgba(40, 80, 167, 0.08), transparent 26rem),
+        linear-gradient(180deg, #fbfcfe 0%, #eef2f6 100%);
+    }
+
+    #root {
+      min-height: 100vh;
+    }
+
+    ::selection {
+      background: rgba(166, 25, 46, 0.18);
+    }
+
+    [data-card-animation="fade"] {
+      animation: fadeIn 420ms ease;
+    }
+
+    [data-card-animation="slide"] {
+      animation: slideIn 440ms ease;
+    }
+
+    [data-dragging="true"] {
+      opacity: 0.62;
+      transform: scale(0.98);
+    }
+
+    [data-drop-state="active"] {
+      box-shadow: 0 0 0 2px rgba(91, 143, 139, 0.35), 0 16px 32px rgba(91, 143, 139, 0.12);
+      transform: translateY(-2px);
+      border-color: rgba(91, 143, 139, 0.55);
+      background: linear-gradient(180deg, rgba(91, 143, 139, 0.1), rgba(255, 255, 255, 0.96));
+    }
+
+    [data-feedback="correct"] {
+      animation: pulseGood 480ms ease;
+    }
+
+    [data-feedback="incorrect"] {
+      animation: shake 420ms ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulseGood {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.02);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes shake {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      20% {
+        transform: translateX(-6px);
+      }
+      40% {
+        transform: translateX(6px);
+      }
+      60% {
+        transform: translateX(-4px);
+      }
+      80% {
+        transform: translateX(4px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useMemo, useCallback } = window.React;
+
+    const APP_SECTIONS = [
+      { key: "explorer", label: "Nerve Explorer" },
+      { key: "nerveId", label: "Nerve Identification" },
+      { key: "matching", label: "Matching" },
+      { key: "compartment", label: "Compartment Challenge" },
+      { key: "spaces", label: "Anatomical Spaces" },
+      { key: "clinical", label: "Clinical Scenarios" },
+      { key: "dashboard", label: "Score Dashboard" },
+    ];
+
+    const SCORED_SECTIONS = APP_SECTIONS.filter((section) => section.key !== "dashboard");
+
+    const INITIAL_SCORES = {
+      explorer: { correct: 0, attempted: 0 },
+      nerveId: { correct: 0, attempted: 0 },
+      matching: { correct: 0, attempted: 0 },
+      compartment: { correct: 0, attempted: 0 },
+      spaces: { correct: 0, attempted: 0 },
+      clinical: { correct: 0, attempted: 0 },
+    };
+
+    const explorerData = {
+      plexus: [
+        {
+          id: "brachial-plexus",
+          name: "Brachial plexus",
+          roots: "C5-T1",
+          course: "Complex nerve network formed from the ventral rami of C5 through T1 as it passes from the neck into the axilla.",
+          motor: "Anterior divisions supply flexors of the upper extremity; posterior divisions supply extensors.",
+          sensory: "Its organization helps localize motor and cutaneous findings in the upper extremity.",
+          clinical: "Five regions: roots, trunks, divisions, cords, terminal branches. Mnemonic: Randy Travis Drinks Cold Beer.",
+          branches: [
+            { title: "Roots", details: "Typically C5, C6, C7, C8, and T1 spinal nerves." },
+            { title: "Trunks", details: "Superior, middle, and inferior trunks between the neck and clavicle." },
+            { title: "Divisions", details: "Each trunk splits into anterior and posterior divisions; no major nerves exit here." },
+            { title: "Cords", details: "Lateral, posterior, and medial cords lie around the 2nd part of the axillary artery." },
+            { title: "Terminal branches", details: "Musculocutaneous, axillary, radial, median, and ulnar nerves." },
+          ],
+        },
+        {
+          id: "long-thoracic",
+          name: "Long thoracic nerve",
+          roots: "C5-C7",
+          course: "Exits the brachial plexus at the root level and descends on the superficial surface of serratus anterior.",
+          motor: "Serratus anterior.",
+          sensory: "No cutaneous distribution.",
+          clinical: "Weakness produces scapular winging from loss of scapular protraction and upward rotation.",
+        },
+        {
+          id: "dorsal-scapular",
+          name: "Dorsal scapular nerve",
+          roots: "C5",
+          course: "Leaves the brachial plexus at the root level and courses to the rhomboids and levator scapulae.",
+          motor: "Rhomboid major, rhomboid minor, levator scapulae.",
+          sensory: "No cutaneous distribution.",
+          clinical: "Important for scapular retraction, elevation, and downward rotation.",
+        },
+        {
+          id: "suprascapular",
+          name: "Suprascapular nerve",
+          roots: "C5-C6",
+          course: "Branches from the trunk level and continues toward supraspinatus and infraspinatus.",
+          motor: "Supraspinatus and infraspinatus.",
+          sensory: "No cutaneous distribution.",
+          clinical: "Helps initiate abduction and supports external rotation.",
+        },
+        {
+          id: "nerve-to-subclavius",
+          name: "Nerve to subclavius",
+          roots: "C5-C6",
+          course: "Exits at the trunk level and travels to subclavius near the clavicle.",
+          motor: "Subclavius.",
+          sensory: "No cutaneous distribution.",
+          clinical: "Useful landmark when reviewing nerves that leave the plexus before the cords.",
+        },
+      ],
+      cords: [
+        {
+          id: "lateral-cord",
+          name: "Lateral cord",
+          roots: "Anterior divisions of superior + middle trunks",
+          course: "Lies lateral to the 2nd part of the axillary artery.",
+          motor: "Contributes to musculocutaneous nerve and the lateral portion of the median nerve.",
+          sensory: "No direct cutaneous territory as a cord.",
+          clinical: "Named for its position relative to the axillary artery.",
+          branches: [
+            { title: "Musculocutaneous nerve", details: "C5-C7 terminal branch." },
+            { title: "Lateral portion of median nerve", details: "C5-C7 contribution to median nerve." },
+            { title: "Lateral pectoral nerve", details: "C5-C7 to pectoralis major, primarily clavicular head." },
+          ],
+        },
+        {
+          id: "medial-cord",
+          name: "Medial cord",
+          roots: "Anterior division of inferior trunk",
+          course: "Lies medial to the 2nd part of the axillary artery.",
+          motor: "Contributes to ulnar nerve, medial portion of median nerve, and medial pectoral nerve.",
+          sensory: "Gives rise to the medial brachial and medial antebrachial cutaneous nerves.",
+          clinical: "Important source of the medial upper-limb cutaneous branches.",
+          branches: [
+            { title: "Ulnar nerve", details: "C8-T1 terminal branch used for class emphasis." },
+            { title: "Medial portion of median nerve", details: "C8-T1 contribution to the median nerve." },
+            { title: "Medial brachial cutaneous nerve", details: "T1, sometimes C8." },
+            { title: "Medial antebrachial cutaneous nerve", details: "C8-T1." },
+            { title: "Medial pectoral nerve", details: "C8-T1 to pectoralis minor and pectoralis major." },
+          ],
+        },
+        {
+          id: "posterior-cord",
+          name: "Posterior cord",
+          roots: "Posterior divisions of all three trunks",
+          course: "Lies posterior to the 2nd part of the axillary artery.",
+          motor: "Supplies the posterior/extensor side of the upper extremity through radial and subscapular branches.",
+          sensory: "No direct cutaneous territory as a cord.",
+          clinical: "Key cord for axillary and radial nerve branching.",
+          branches: [
+            { title: "Axillary nerve", details: "C5-C6." },
+            { title: "Radial nerve", details: "C5-T1." },
+            { title: "Upper subscapular nerve", details: "C5-C6 to subscapularis." },
+            { title: "Thoracodorsal nerve", details: "C6-C8 to latissimus dorsi." },
+            { title: "Lower subscapular nerve", details: "C5-C6 to subscapularis and teres major." },
+          ],
+        },
+      ],
+      major: [
+        {
+          id: "axillary",
+          name: "Axillary nerve",
+          roots: "C5-C6",
+          course: "Terminal branch of the posterior cord that wraps around the surgical neck region and enters the deltoid area.",
+          motor: "Deltoid and teres minor.",
+          sensory: "Proximal lateral arm.",
+          clinical: "Associated with the regimental badge area and vulnerable in shoulder dislocation or surgical neck trauma.",
+          branches: [{ title: "Superior lateral brachial cutaneous nerve", details: "Cutaneous branch to the lateral deltoid region." }],
+        },
+        {
+          id: "musculocutaneous",
+          name: "Musculocutaneous nerve",
+          roots: "C5-C7",
+          course: "Terminal branch of the lateral cord that supplies the anterior arm before continuing across the elbow.",
+          motor: "Coracobrachialis, biceps brachii, brachialis.",
+          sensory: "Lateral forearm via the lateral antebrachial cutaneous nerve.",
+          clinical: "Major nerve of elbow flexion and forearm supination.",
+          branches: [{ title: "Lateral antebrachial cutaneous nerve", details: "Terminal cutaneous continuation across the elbow into the lateral forearm." }],
+        },
+        {
+          id: "median",
+          name: "Median nerve",
+          roots: "C5-T1",
+          course: "Formed by lateral and medial cords and descends with the brachial artery into the forearm and hand.",
+          motor: "Most anterior forearm muscles except FCU and the medial half of FDP; most thenar muscles plus lumbricals 1-2 in the hand.",
+          sensory: "Lateral palm; palmar surface of the lateral 3.5 digits; dorsal distal phalanges and nail beds of those same digits.",
+          clinical: "Major nerve of pronation, wrist flexion, thenar function, and precision grip.",
+          branches: [
+            { title: "Anterior interosseous nerve", details: "Motor branch to the deep anterior forearm." },
+            { title: "Palmar cutaneous branch", details: "Sensory to the lateral palm / thenar region." },
+            { title: "Common and proper palmar digital nerves", details: "Sensory to the palmar lateral 3.5 digits." },
+          ],
+        },
+        {
+          id: "anterior-interosseous",
+          name: "Anterior interosseous nerve",
+          roots: "C8-T1",
+          course: "Motor branch of the median nerve that travels in the deep anterior forearm.",
+          motor: "Flexor pollicis longus, pronator quadratus, lateral half of flexor digitorum profundus.",
+          sensory: "No cutaneous distribution listed in the handout.",
+          clinical: "Produces impaired thumb IP flexion, index and middle DIP flexion, and forearm pronation weakness.",
+        },
+        {
+          id: "ulnar",
+          name: "Ulnar nerve",
+          roots: "C8-T1",
+          course: "Terminal branch of the medial cord that travels to the anteromedial forearm and medial hand.",
+          motor: "Flexor carpi ulnaris, medial half of FDP, and medial intrinsic hand musculature through terminal branches.",
+          sensory: "Medial hand; palmar and dorsal surfaces of the medial 1.5 digits.",
+          clinical: "Major nerve of intrinsic hand control, finger abduction/adduction, and ulnar-sided grip function.",
+          branches: [
+            { title: "Dorsal cutaneous branch", details: "Sensory to the dorsomedial hand and dorsal medial 1.5 digits." },
+            { title: "Palmar cutaneous branch", details: "Sensory to the medial palm / hypothenar region." },
+            { title: "Superficial branch", details: "Sensory to the palmar medial 1.5 digits." },
+            { title: "Deep branch", details: "Motor to hypothenar muscles, interossei, adductor pollicis, deep head of FPB, lumbricals 3-4, and palmaris brevis." },
+          ],
+        },
+        {
+          id: "deep-ulnar",
+          name: "Deep branch of ulnar nerve",
+          roots: "C8-T1",
+          course: "Motor branch of the ulnar nerve within the hand.",
+          motor: "Hypothenar muscles, interossei, adductor pollicis, deep head of flexor pollicis brevis, lumbricals 3-4, palmaris brevis.",
+          sensory: "No cutaneous distribution emphasized.",
+          clinical: "Supports intrinsic hand control, power grip, and thumb adduction.",
+        },
+        {
+          id: "radial",
+          name: "Radial nerve",
+          roots: "C5-T1",
+          course: "Terminal branch of the posterior cord that supplies the posterior arm and forearm and then divides into superficial and deep branches.",
+          motor: "Triceps, anconeus, brachioradialis, ECRL, and via the deep branch / PIN the remaining posterior forearm extensors.",
+          sensory: "Posterior arm, posterior forearm, and dorsolateral hand.",
+          clinical: "BEST: brachioradialis, extensors, supinator, triceps.",
+          branches: [
+            { title: "Posterior brachial cutaneous nerve", details: "Sensory to posterior arm." },
+            { title: "Inferior lateral brachial cutaneous nerve", details: "Sensory to lower lateral arm." },
+            { title: "Posterior antebrachial cutaneous nerve", details: "Sensory to posterior forearm." },
+            { title: "Superficial branch of radial nerve", details: "Sensory to the dorsolateral hand and proximal dorsal lateral 3.5 digits." },
+            { title: "Deep branch / posterior interosseous nerve", details: "Motor to the posterior forearm extensors." },
+          ],
+        },
+        {
+          id: "pin",
+          name: "Deep branch of radial nerve / Posterior interosseous nerve",
+          roots: "C7-C8",
+          course: "Motor continuation of the radial nerve through the posterior forearm.",
+          motor: "Supinator, ECRB, extensor digitorum, extensor digiti minimi, ECU, APL, EPB, EPL, extensor indicis.",
+          sensory: "No cutaneous distribution listed in the handout.",
+          clinical: "Key branch for finger and thumb extension without a major cutaneous territory.",
+        },
+      ],
+      cutaneous: [
+        {
+          id: "sup-lateral-cutaneous-arm",
+          name: "Superior lateral cutaneous nerve of arm",
+          roots: "C5-C6",
+          course: "Branch of the axillary nerve to the lateral deltoid region.",
+          motor: "None.",
+          sensory: "Skin over the inferior and lateral deltoid region.",
+          clinical: "This is the classic regimental badge area.",
+        },
+        {
+          id: "lateral-antebrachial-cutaneous",
+          name: "Lateral antebrachial cutaneous nerve",
+          roots: "C5-C7",
+          course: "Terminal cutaneous continuation of the musculocutaneous nerve as it crosses the elbow.",
+          motor: "None.",
+          sensory: "Lateral forearm.",
+          clinical: "Tracks with anterior arm weakness if the parent musculocutaneous nerve is injured proximally.",
+        },
+        {
+          id: "posterior-cutaneous-arm",
+          name: "Posterior cutaneous nerve of arm",
+          roots: "C5-T1",
+          course: "Cutaneous branch of the radial nerve.",
+          motor: "None.",
+          sensory: "Posterior arm.",
+          clinical: "Part of the radial cutaneous pattern.",
+        },
+        {
+          id: "inferior-lateral-cutaneous-arm",
+          name: "Inferior lateral cutaneous nerve of arm",
+          roots: "C5-T1",
+          course: "Cutaneous branch of the radial nerve to the lower lateral arm.",
+          motor: "None.",
+          sensory: "Lower lateral arm.",
+          clinical: "Another radial sensory branch listed in the handout summary table.",
+        },
+        {
+          id: "posterior-cutaneous-forearm",
+          name: "Posterior cutaneous nerve of forearm",
+          roots: "C5-T1",
+          course: "Cutaneous branch of the radial nerve descending through the posterior forearm.",
+          motor: "None.",
+          sensory: "Posterior forearm.",
+          clinical: "Pairs with radial motor findings when the lesion is proximal.",
+        },
+        {
+          id: "superficial-radial",
+          name: "Superficial branch of radial nerve",
+          roots: "C6-C8",
+          course: "Sensory continuation of the radial nerve toward the dorsolateral hand.",
+          motor: "None.",
+          sensory: "Dorsolateral hand and proximal dorsal portions of the lateral 3.5 digits.",
+          clinical: "Does not typically supply the nail beds.",
+        },
+        {
+          id: "median-palmar-cutaneous",
+          name: "Median nerve - palmar cutaneous branch",
+          roots: "C5-T1",
+          course: "Sensory branch arising proximal to the carpal tunnel.",
+          motor: "None.",
+          sensory: "Lateral palm / thenar region.",
+          clinical: "Important because it arises proximal to the carpal tunnel.",
+        },
+        {
+          id: "median-palmar-digital",
+          name: "Median nerve - common and proper palmar digital nerves",
+          roots: "C5-T1",
+          course: "Digital sensory branches of the median nerve into the lateral digits.",
+          motor: "None.",
+          sensory: "Palmar surface of the lateral 3.5 digits and the dorsal distal phalanges / nail beds of those same digits.",
+          clinical: "Represents the classic median digital sensory pattern.",
+        },
+        {
+          id: "ulnar-palmar-cutaneous",
+          name: "Ulnar nerve - palmar cutaneous branch",
+          roots: "C8-T1",
+          course: "Superficial sensory branch that arises proximal to the wrist.",
+          motor: "None.",
+          sensory: "Medial palm / hypothenar region.",
+          clinical: "Provides the ulnar palm territory proximal to the digital branches.",
+        },
+        {
+          id: "ulnar-dorsal-cutaneous",
+          name: "Ulnar nerve - dorsal cutaneous branch",
+          roots: "C8-T1",
+          course: "Sensory branch to the dorsomedial hand.",
+          motor: "None.",
+          sensory: "Dorsomedial hand and dorsal medial 1.5 digits.",
+          clinical: "Handles the dorsal ulnar-sided hand pattern.",
+        },
+        {
+          id: "ulnar-superficial",
+          name: "Ulnar nerve - superficial branch / palmar digital nerves",
+          roots: "C8-T1",
+          course: "Superficial sensory branch into the palmar medial digits.",
+          motor: "None.",
+          sensory: "Palmar medial 1.5 digits.",
+          clinical: "Covers the little finger and medial half of the ring finger.",
+        },
+        {
+          id: "medial-brachial-cutaneous",
+          name: "Medial brachial cutaneous nerve",
+          roots: "T1 (sometimes C8)",
+          course: "Medial cord sensory branch to the arm.",
+          motor: "None.",
+          sensory: "Medial arm.",
+          clinical: "Branch of the medial cord.",
+        },
+        {
+          id: "medial-antebrachial-cutaneous",
+          name: "Medial antebrachial cutaneous nerve",
+          roots: "C8-T1",
+          course: "Medial cord sensory branch descending into the forearm.",
+          motor: "None.",
+          sensory: "Medial forearm.",
+          clinical: "Branch of the medial cord.",
+        },
+        {
+          id: "intercostobrachial",
+          name: "Intercostobrachial nerve",
+          roots: "T2",
+          course: "Intercostal-derived sensory nerve crossing the axilla into the medial arm.",
+          motor: "None.",
+          sensory: "Axilla and upper medial arm.",
+          clinical: "Not part of the brachial plexus.",
+        },
+      ],
+      spaces: [
+        {
+          id: "axilla",
+          name: "Axilla",
+          roots: "Anatomical space",
+          course: "Armpit passageway between the upper limb and thoracic wall.",
+          motor: "Boundaries: base skin and axillary fascia; apex first rib, clavicle, superior border of scapula; anterior wall pectoralis major and minor; posterior wall subscapularis, teres major, latissimus dorsi; medial wall ribs 1-4, serratus anterior, intercostals; lateral wall intertubercular groove.",
+          sensory: "Contents: axillary artery and branches, axillary vein and tributaries, axillary lymph nodes, brachial plexus.",
+          clinical: "Compression or trauma here can affect the entire neurovascular bundle entering the upper limb.",
+        },
+        {
+          id: "quadrangular-space",
+          name: "Quadrangular Space",
+          roots: "Posterior shoulder space",
+          course: "One of the posterolateral shoulder spaces formed by the triceps and teres muscles.",
+          motor: "Borders: superior teres minor, inferior teres major, medial long head of triceps brachii, lateral humeral surgical neck.",
+          sensory: "Contents: axillary nerve, posterior circumflex humeral artery.",
+          clinical: "Important space when localizing axillary nerve injury around the surgical neck.",
+        },
+        {
+          id: "triangular-space",
+          name: "Triangular Space",
+          roots: "Posterior shoulder space",
+          course: "Medial triangular opening in the posterior shoulder.",
+          motor: "Borders: superior lower border of teres minor, inferior teres major, lateral long head of triceps.",
+          sensory: "Contents: circumflex scapular artery.",
+          clinical: "Contains an artery only, not a named peripheral nerve.",
+        },
+        {
+          id: "triangular-interval",
+          name: "Triangular Interval",
+          roots: "Posterior shoulder space",
+          course: "Inferior posterolateral passageway into the posterior arm.",
+          motor: "Borders: superior teres major, medial lateral border of long head of triceps brachii, lateral shaft of humerus / lateral head of triceps brachii.",
+          sensory: "Contents: radial nerve, profunda brachii artery.",
+          clinical: "Key space for radial nerve passage into the posterior arm.",
+        },
+        {
+          id: "cubital-fossa",
+          name: "Cubital Fossa",
+          roots: "Anterior elbow space",
+          course: "Triangular space anterior to the elbow used frequently for medical procedures.",
+          motor: "Boundaries: superior imaginary line between medial and lateral epicondyles, medial lateral boundary of pronator teres, lateral medial border of brachioradialis.",
+          sensory: "Contents: median nerve, brachial artery and vein, superficial radial nerve, biceps tendon, median cubital vein, bicipital aponeurosis.",
+          clinical: "Important clinical landmark for venipuncture, pulse palpation, and nerve localization.",
+        },
+        {
+          id: "posterior-triangle",
+          name: "Posterior Triangle (lateral cervical triangle)",
+          roots: "Neck space",
+          course: "Triangular space of the neck posterior to the SCM.",
+          motor: "Boundaries: posterior anterior border of trapezius, anterior posterior border of SCM, inferior medial third clavicle, roof superficial layer of deep cervical fascia, floor splenius capitis, levator scapulae, and scalene muscles.",
+          sensory: "Vessels: third part of subclavian artery, transverse cervical artery, suprascapular artery. Nerves: accessory nerve, ventral rami of brachial plexus, cutaneous branches of cervical plexus, suprascapular nerve, phrenic nerve.",
+          clinical: "A key neck region for brachial plexus roots and accessory nerve exposure.",
+        },
+        {
+          id: "anterior-triangle-neck",
+          name: "Anterior Triangle of the Neck",
+          roots: "Neck space",
+          course: "Anterior cervical triangle located in front of the SCM.",
+          motor: "Boundaries: lateral anterior border of SCM, anterior anterior midline of neck, superior inferior mandible.",
+          sensory: "Vessels: common carotid artery, internal carotid artery, external carotid artery, internal jugular vein, anterior jugular veins. Nerves: vagus nerve, hypoglossal nerve.",
+          clinical: "Useful when contrasting cervical spaces with the posterior triangle.",
+        },
+        {
+          id: "suboccipital-triangle",
+          name: "Suboccipital Triangle",
+          roots: "Posterior cervical space",
+          course: "Deep posterior neck triangle below the occiput.",
+          motor: "Boundaries: superomedial rectus capitis posterior major, superolateral obliquus capitis superior, inferolateral obliquus capitis inferior.",
+          sensory: "Vessels: vertebral artery. Nerves: suboccipital nerve (dorsal ramus of C1).",
+          clinical: "Important deep landmark for vertebral artery and suboccipital nerve relationships.",
+        },
+      ],
+    };
+
+    const nerveIdBank = [
+      {
+        id: "ni-1",
+        prompt: "This terminal branch of the posterior cord (C5-C6) innervates the deltoid and teres minor and provides cutaneous sensation over the regimental badge area.",
+        options: ["Axillary nerve", "Radial nerve", "Suprascapular nerve", "Musculocutaneous nerve"],
+        answer: "Axillary nerve",
+        explanation: "The axillary nerve supplies deltoid and teres minor and gives rise to the superior lateral cutaneous nerve of the arm over the deltoid region.",
+      },
+      {
+        id: "ni-2",
+        prompt: "This nerve (C5-C7) is the major motor nerve of the anterior arm and becomes the lateral antebrachial cutaneous nerve as it crosses the elbow.",
+        options: ["Musculocutaneous nerve", "Median nerve", "Radial nerve", "Ulnar nerve"],
+        answer: "Musculocutaneous nerve",
+        explanation: "The musculocutaneous nerve supplies coracobrachialis, biceps brachii, and brachialis and continues as the lateral antebrachial cutaneous nerve.",
+      },
+      {
+        id: "ni-3",
+        prompt: "This nerve supplies most muscles of the anterior forearm except FCU and the medial half of FDP, and it also innervates most thenar muscles plus lumbricals 1-2.",
+        options: ["Median nerve", "Ulnar nerve", "Anterior interosseous nerve", "Radial nerve"],
+        answer: "Median nerve",
+        explanation: "The median nerve is the major nerve of the anterolateral forearm and the lateral side of the hand.",
+      },
+      {
+        id: "ni-4",
+        prompt: "This nerve is the major nerve of the anteromedial forearm and medial hand, supplying FCU, the medial half of FDP, and sensory innervation to the medial 1.5 digits.",
+        options: ["Ulnar nerve", "Median nerve", "Musculocutaneous nerve", "Medial antebrachial cutaneous nerve"],
+        answer: "Ulnar nerve",
+        explanation: "The ulnar nerve supplies the medial forearm flexor pattern and much of the intrinsic medial hand.",
+      },
+      {
+        id: "ni-5",
+        prompt: "This nerve is remembered with the teaching cue BEST: brachioradialis, extensors, supinator, triceps.",
+        options: ["Radial nerve", "Median nerve", "Axillary nerve", "Deep branch of ulnar nerve"],
+        answer: "Radial nerve",
+        explanation: "The radial nerve powers the posterior upper-limb extensor pattern and carries several posterior cutaneous branches.",
+      },
+      {
+        id: "ni-6",
+        prompt: "This branch of the median nerve supplies flexor pollicis longus, pronator quadratus, and the lateral half of flexor digitorum profundus.",
+        options: ["Anterior interosseous nerve", "Deep branch of radial nerve", "Superficial branch of radial nerve", "Deep branch of ulnar nerve"],
+        answer: "Anterior interosseous nerve",
+        explanation: "The anterior interosseous nerve is the motor branch of the median nerve to the deep anterior forearm.",
+      },
+      {
+        id: "ni-7",
+        prompt: "This branch of the ulnar nerve supplies the hypothenar muscles, interossei, adductor pollicis, deep head of flexor pollicis brevis, and lumbricals 3-4.",
+        options: ["Deep branch of ulnar nerve", "Superficial branch of ulnar nerve", "Median nerve in hand", "Anterior interosseous nerve"],
+        answer: "Deep branch of ulnar nerve",
+        explanation: "The deep branch of the ulnar nerve is the major motor branch to the intrinsic hand muscles listed in the table.",
+      },
+      {
+        id: "ni-8",
+        prompt: "This cutaneous nerve is the terminal continuation of the musculocutaneous nerve and supplies the lateral forearm.",
+        options: ["Lateral antebrachial cutaneous nerve", "Medial antebrachial cutaneous nerve", "Posterior cutaneous nerve of forearm", "Superficial branch of radial nerve"],
+        answer: "Lateral antebrachial cutaneous nerve",
+        explanation: "The musculocutaneous nerve becomes the lateral antebrachial cutaneous nerve at the elbow.",
+      },
+      {
+        id: "ni-9",
+        prompt: "This sensory branch of the radial nerve supplies the dorsolateral hand and proximal dorsal portions of the lateral 3.5 digits but not typically the nail beds.",
+        options: ["Superficial branch of radial nerve", "Posterior cutaneous nerve of forearm", "Median palmar digital nerves", "Ulnar dorsal cutaneous branch"],
+        answer: "Superficial branch of radial nerve",
+        explanation: "The superficial radial branch is the hand-level cutaneous branch for the dorsolateral hand pattern.",
+      },
+      {
+        id: "ni-10",
+        prompt: "This nerve exits the brachial plexus at the root level (C5-C7) and supplies serratus anterior.",
+        options: ["Long thoracic nerve", "Dorsal scapular nerve", "Suprascapular nerve", "Thoracodorsal nerve"],
+        answer: "Long thoracic nerve",
+        explanation: "The long thoracic nerve comes off the roots and innervates serratus anterior for scapular protraction and upward rotation.",
+      },
+      {
+        id: "ni-11",
+        prompt: "This nerve exits at the root level from C5 and supplies rhomboid major, rhomboid minor, and levator scapulae.",
+        options: ["Dorsal scapular nerve", "Suprascapular nerve", "Axillary nerve", "Lateral pectoral nerve"],
+        answer: "Dorsal scapular nerve",
+        explanation: "The dorsal scapular nerve is the C5 root-level nerve to the rhomboids and levator scapulae.",
+      },
+      {
+        id: "ni-12",
+        prompt: "This nerve exits at the trunk level and supplies supraspinatus and infraspinatus.",
+        options: ["Suprascapular nerve", "Thoracodorsal nerve", "Axillary nerve", "Upper subscapular nerve"],
+        answer: "Suprascapular nerve",
+        explanation: "The suprascapular nerve comes off the trunk level and supports initiation of abduction plus external rotation.",
+      },
+      {
+        id: "ni-13",
+        prompt: "This posterior cord branch (C6-C8) supplies latissimus dorsi.",
+        options: ["Thoracodorsal nerve", "Lower subscapular nerve", "Lateral pectoral nerve", "Dorsal scapular nerve"],
+        answer: "Thoracodorsal nerve",
+        explanation: "The thoracodorsal nerve arises from the posterior cord and innervates latissimus dorsi.",
+      },
+      {
+        id: "ni-14",
+        prompt: "This cutaneous nerve is a branch of the axillary nerve and supplies the inferior and lateral deltoid region.",
+        options: ["Superior lateral cutaneous nerve of arm", "Inferior lateral cutaneous nerve of arm", "Medial brachial cutaneous nerve", "Posterior cutaneous nerve of arm"],
+        answer: "Superior lateral cutaneous nerve of arm",
+        explanation: "The superior lateral cutaneous nerve of the arm is the axillary cutaneous branch to the regimental badge area.",
+      },
+      {
+        id: "ni-15",
+        prompt: "This medial cord sensory branch supplies the medial forearm.",
+        options: ["Medial antebrachial cutaneous nerve", "Medial brachial cutaneous nerve", "Lateral antebrachial cutaneous nerve", "Intercostobrachial nerve"],
+        answer: "Medial antebrachial cutaneous nerve",
+        explanation: "The medial antebrachial cutaneous nerve is the medial cord sensory branch to the forearm.",
+      },
+      {
+        id: "ni-16",
+        prompt: "This sensory nerve is not part of the brachial plexus and supplies the axilla and upper medial arm.",
+        options: ["Intercostobrachial nerve", "Medial brachial cutaneous nerve", "Long thoracic nerve", "Accessory nerve"],
+        answer: "Intercostobrachial nerve",
+        explanation: "The intercostobrachial nerve is a T2-derived sensory nerve and is specifically noted as not part of the brachial plexus.",
+      },
+    ];
+
+    const matchingActivities = [
+      {
+        id: "match-roots",
+        title: "Activity 3A - Nerve to Root Levels",
+        subtitle: "Drag each UE nerve to the matching root pattern.",
+        bankLabel: "Nerve bank",
+        dropPrompt: "Drop the matching nerve here",
+        items: [
+          { id: "mra-axillary", label: "Axillary nerve" },
+          { id: "mra-musculocutaneous", label: "Musculocutaneous nerve" },
+          { id: "mra-median", label: "Median nerve" },
+          { id: "mra-ulnar", label: "Ulnar nerve" },
+          { id: "mra-radial", label: "Radial nerve" },
+          { id: "mra-suprascapular", label: "Suprascapular nerve" },
+          { id: "mra-long-thoracic", label: "Long thoracic nerve" },
+          { id: "mra-dorsal-scapular", label: "Dorsal scapular nerve" },
+          { id: "mra-thoracodorsal", label: "Thoracodorsal nerve" },
+          { id: "mra-medial-pectoral", label: "Medial pectoral nerve" },
+        ],
+        categories: [
+          { id: "roots-c56", title: "C5-C6", note: "Shared root pattern" },
+          { id: "roots-c57", title: "C5-C7", note: "Shared root pattern" },
+          { id: "roots-c5t1", title: "C5-T1", note: "Shared root pattern" },
+          { id: "roots-c8t1", title: "C8-T1", note: "Shared root pattern" },
+          { id: "roots-c5", title: "C5", note: "Shared root pattern" },
+          { id: "roots-c68", title: "C6-C8", note: "Shared root pattern" },
+        ],
+        answerMap: {
+          "mra-axillary": "roots-c56",
+          "mra-musculocutaneous": "roots-c57",
+          "mra-median": "roots-c5t1",
+          "mra-ulnar": "roots-c8t1",
+          "mra-radial": "roots-c5t1",
+          "mra-suprascapular": "roots-c56",
+          "mra-long-thoracic": "roots-c57",
+          "mra-dorsal-scapular": "roots-c5",
+          "mra-thoracodorsal": "roots-c68",
+          "mra-medial-pectoral": "roots-c8t1",
+        },
+        itemTracking: {
+          "mra-axillary": { nerves: ["Axillary nerve"] },
+          "mra-musculocutaneous": { nerves: ["Musculocutaneous nerve"] },
+          "mra-median": { nerves: ["Median nerve"] },
+          "mra-ulnar": { nerves: ["Ulnar nerve"] },
+          "mra-radial": { nerves: ["Radial nerve"] },
+          "mra-suprascapular": { nerves: ["Suprascapular nerve"] },
+          "mra-long-thoracic": { nerves: ["Long thoracic nerve"] },
+          "mra-dorsal-scapular": { nerves: ["Dorsal scapular nerve"] },
+          "mra-thoracodorsal": { nerves: ["Thoracodorsal nerve"] },
+          "mra-medial-pectoral": { nerves: ["Medial pectoral nerve"] },
+        },
+      },
+      {
+        id: "match-muscles",
+        title: "Activity 3B - Nerve to Muscles",
+        subtitle: "Place each nerve on the muscle group it primarily supplies.",
+        bankLabel: "Nerve bank",
+        dropPrompt: "Drop the matching nerve here",
+        items: [
+          { id: "mmb-axillary", label: "Axillary nerve" },
+          { id: "mmb-musculocutaneous", label: "Musculocutaneous nerve" },
+          { id: "mmb-radial", label: "Radial nerve" },
+          { id: "mmb-pin", label: "Deep branch of radial nerve / PIN" },
+          { id: "mmb-median", label: "Median nerve" },
+          { id: "mmb-ain", label: "Anterior interosseous nerve" },
+          { id: "mmb-ulnar", label: "Ulnar nerve" },
+          { id: "mmb-deep-ulnar", label: "Deep branch of ulnar nerve" },
+          { id: "mmb-suprascapular", label: "Suprascapular nerve" },
+          { id: "mmb-long-thoracic", label: "Long thoracic nerve" },
+        ],
+        categories: [
+          { id: "mm-target-1", title: "Deltoid; teres minor", note: "Principal muscles innervated" },
+          { id: "mm-target-2", title: "Coracobrachialis; biceps brachii; brachialis", note: "Principal muscles innervated" },
+          { id: "mm-target-3", title: "Triceps brachii; anconeus; brachioradialis; extensor carpi radialis longus", note: "Principal muscles innervated" },
+          { id: "mm-target-4", title: "Supinator; extensor carpi radialis brevis; extensor digitorum; extensor digiti minimi; extensor carpi ulnaris; abductor pollicis longus; extensor pollicis brevis; extensor pollicis longus; extensor indicis", note: "Principal muscles innervated" },
+          { id: "mm-target-5", title: "Pronator teres; flexor carpi radialis; palmaris longus; flexor digitorum superficialis", note: "Principal muscles innervated" },
+          { id: "mm-target-6", title: "Flexor pollicis longus; pronator quadratus; lateral half of flexor digitorum profundus", note: "Principal muscles innervated" },
+          { id: "mm-target-7", title: "Flexor carpi ulnaris; medial half of flexor digitorum profundus", note: "Principal muscles innervated" },
+          { id: "mm-target-8", title: "Hypothenar muscles; interossei; adductor pollicis; deep head of flexor pollicis brevis; lumbricals 3-4; palmaris brevis", note: "Principal muscles innervated" },
+          { id: "mm-target-9", title: "Supraspinatus; infraspinatus", note: "Principal muscles innervated" },
+          { id: "mm-target-10", title: "Serratus anterior", note: "Principal muscles innervated" },
+        ],
+        answerMap: {
+          "mmb-axillary": "mm-target-1",
+          "mmb-musculocutaneous": "mm-target-2",
+          "mmb-radial": "mm-target-3",
+          "mmb-pin": "mm-target-4",
+          "mmb-median": "mm-target-5",
+          "mmb-ain": "mm-target-6",
+          "mmb-ulnar": "mm-target-7",
+          "mmb-deep-ulnar": "mm-target-8",
+          "mmb-suprascapular": "mm-target-9",
+          "mmb-long-thoracic": "mm-target-10",
+        },
+        itemTracking: {
+          "mmb-axillary": { nerves: ["Axillary nerve"], sensory: ["Lateral deltoid region"] },
+          "mmb-musculocutaneous": { nerves: ["Musculocutaneous nerve"], sensory: ["Lateral forearm"] },
+          "mmb-radial": { nerves: ["Radial nerve"], sensory: ["Posterior arm", "Posterior forearm", "Dorsolateral hand"] },
+          "mmb-pin": { nerves: ["Deep branch of radial nerve / Posterior interosseous nerve"] },
+          "mmb-median": { nerves: ["Median nerve"], sensory: ["Lateral palm / thenar region", "Palmar lateral 3.5 digits"] },
+          "mmb-ain": { nerves: ["Anterior interosseous nerve"] },
+          "mmb-ulnar": { nerves: ["Ulnar nerve"], sensory: ["Medial palm / hypothenar region", "Palmar medial 1.5 digits"] },
+          "mmb-deep-ulnar": { nerves: ["Deep branch of ulnar nerve"] },
+          "mmb-suprascapular": { nerves: ["Suprascapular nerve"] },
+          "mmb-long-thoracic": { nerves: ["Long thoracic nerve"] },
+        },
+      },
+      {
+        id: "match-sensory",
+        title: "Activity 3C - Nerve to Sensory Distribution",
+        subtitle: "Match each nerve with its cutaneous territory.",
+        bankLabel: "Nerve bank",
+        dropPrompt: "Drop the matching nerve here",
+        items: [
+          { id: "msc-sup-lateral-arm", label: "Superior lateral cutaneous nerve of arm" },
+          { id: "msc-labc", label: "Lateral antebrachial cutaneous nerve" },
+          { id: "msc-post-arm", label: "Posterior cutaneous nerve of arm" },
+          { id: "msc-inf-lateral-arm", label: "Inferior lateral cutaneous nerve of arm" },
+          { id: "msc-post-forearm", label: "Posterior cutaneous nerve of forearm" },
+          { id: "msc-superficial-radial", label: "Superficial branch of radial nerve" },
+          { id: "msc-median-palm", label: "Median nerve - palmar cutaneous branch" },
+          { id: "msc-median-digits", label: "Median nerve - palmar digital nerves" },
+          { id: "msc-ulnar-palm", label: "Ulnar nerve - palmar cutaneous branch" },
+          { id: "msc-ulnar-dorsal", label: "Ulnar nerve - dorsal cutaneous branch" },
+          { id: "msc-ulnar-digits", label: "Ulnar nerve - superficial branch / palmar digital nerves" },
+          { id: "msc-medial-arm", label: "Medial brachial cutaneous nerve" },
+          { id: "msc-medial-forearm", label: "Medial antebrachial cutaneous nerve" },
+          { id: "msc-intercostobrachial", label: "Intercostobrachial nerve" },
+        ],
+        categories: [
+          { id: "ms-target-1", title: "Skin over the inferior and lateral deltoid region", note: "Cutaneous territory" },
+          { id: "ms-target-2", title: "Lateral forearm", note: "Cutaneous territory" },
+          { id: "ms-target-3", title: "Posterior arm", note: "Cutaneous territory" },
+          { id: "ms-target-4", title: "Lower lateral arm", note: "Cutaneous territory" },
+          { id: "ms-target-5", title: "Posterior forearm", note: "Cutaneous territory" },
+          { id: "ms-target-6", title: "Dorsolateral hand and proximal dorsal portions of the lateral 3.5 digits", note: "Cutaneous territory" },
+          { id: "ms-target-7", title: "Lateral palm / thenar region", note: "Cutaneous territory" },
+          { id: "ms-target-8", title: "Palmar surface of the lateral 3.5 digits plus the dorsal distal phalanges / nail beds of those same digits", note: "Cutaneous territory" },
+          { id: "ms-target-9", title: "Medial palm / hypothenar region", note: "Cutaneous territory" },
+          { id: "ms-target-10", title: "Dorsomedial hand and dorsal medial 1.5 digits", note: "Cutaneous territory" },
+          { id: "ms-target-11", title: "Palmar medial 1.5 digits", note: "Cutaneous territory" },
+          { id: "ms-target-12", title: "Medial arm", note: "Cutaneous territory" },
+          { id: "ms-target-13", title: "Medial forearm", note: "Cutaneous territory" },
+          { id: "ms-target-14", title: "Axilla and upper medial arm", note: "Cutaneous territory" },
+        ],
+        answerMap: {
+          "msc-sup-lateral-arm": "ms-target-1",
+          "msc-labc": "ms-target-2",
+          "msc-post-arm": "ms-target-3",
+          "msc-inf-lateral-arm": "ms-target-4",
+          "msc-post-forearm": "ms-target-5",
+          "msc-superficial-radial": "ms-target-6",
+          "msc-median-palm": "ms-target-7",
+          "msc-median-digits": "ms-target-8",
+          "msc-ulnar-palm": "ms-target-9",
+          "msc-ulnar-dorsal": "ms-target-10",
+          "msc-ulnar-digits": "ms-target-11",
+          "msc-medial-arm": "ms-target-12",
+          "msc-medial-forearm": "ms-target-13",
+          "msc-intercostobrachial": "ms-target-14",
+        },
+        itemTracking: {
+          "msc-sup-lateral-arm": { nerves: ["Axillary nerve", "Superior lateral cutaneous nerve of arm"], sensory: ["Lateral deltoid region"] },
+          "msc-labc": { nerves: ["Musculocutaneous nerve", "Lateral antebrachial cutaneous nerve"], sensory: ["Lateral forearm"] },
+          "msc-post-arm": { nerves: ["Radial nerve", "Posterior cutaneous nerve of arm"], sensory: ["Posterior arm"] },
+          "msc-inf-lateral-arm": { nerves: ["Radial nerve", "Inferior lateral cutaneous nerve of arm"], sensory: ["Lower lateral arm"] },
+          "msc-post-forearm": { nerves: ["Radial nerve", "Posterior cutaneous nerve of forearm"], sensory: ["Posterior forearm"] },
+          "msc-superficial-radial": { nerves: ["Superficial branch of radial nerve"], sensory: ["Dorsolateral hand"] },
+          "msc-median-palm": { nerves: ["Median nerve"], sensory: ["Lateral palm / thenar region"] },
+          "msc-median-digits": { nerves: ["Median nerve"], sensory: ["Palmar lateral 3.5 digits"] },
+          "msc-ulnar-palm": { nerves: ["Ulnar nerve"], sensory: ["Medial palm / hypothenar region"] },
+          "msc-ulnar-dorsal": { nerves: ["Ulnar nerve"], sensory: ["Dorsomedial hand"] },
+          "msc-ulnar-digits": { nerves: ["Ulnar nerve"], sensory: ["Palmar medial 1.5 digits"] },
+          "msc-medial-arm": { nerves: ["Medial brachial cutaneous nerve"], sensory: ["Medial arm"] },
+          "msc-medial-forearm": { nerves: ["Medial antebrachial cutaneous nerve"], sensory: ["Medial forearm"] },
+          "msc-intercostobrachial": { nerves: ["Intercostobrachial nerve"], sensory: ["Axilla and upper medial arm"] },
+        },
+      },
+    ];
+
+    const compartmentActivity = {
+      id: "compartment-sort",
+      title: "Upper Extremity Region Sort",
+      subtitle: "Drag each nerve to the UE region where it primarily operates.",
+      bankLabel: "Nerve bank",
+      dropPrompt: "Drop the region's primary nerve here",
+      revealSubtitleAsHint: true,
+      hintButtonLabel: "Reveal nerve hint",
+      items: [
+        { id: "c-axillary", label: "Axillary nerve" },
+        { id: "c-musculocutaneous", label: "Musculocutaneous nerve" },
+        { id: "c-radial", label: "Radial nerve" },
+        { id: "c-median", label: "Median nerve" },
+        { id: "c-ain", label: "Anterior interosseous nerve" },
+        { id: "c-ulnar", label: "Ulnar nerve" },
+        { id: "c-pin", label: "Deep branch of radial nerve / PIN" },
+        { id: "c-dorsal-scapular", label: "Dorsal scapular nerve" },
+        { id: "c-long-thoracic", label: "Long thoracic nerve" },
+        { id: "c-suprascapular", label: "Suprascapular nerve" },
+        { id: "c-deep-ulnar", label: "Deep branch of ulnar nerve" },
+      ],
+      categories: [
+        { id: "deltoid-region", title: "Deltoid region", subtitle: "Axillary nerve (C5-C6)", note: "Deltoid; teres minor" },
+        { id: "anterior-arm", title: "Anterior arm", subtitle: "Musculocutaneous nerve (C5-C7)", note: "Coracobrachialis; biceps brachii; brachialis" },
+        { id: "posterior-arm", title: "Posterior arm", subtitle: "Radial nerve (C5-T1)", note: "Triceps brachii; anconeus; brachioradialis; ECRL" },
+        { id: "anterior-forearm", title: "Anterior forearm (superficial/anterior)", subtitle: "Median nerve (C5-T1)", note: "Pronator teres; FCR; palmaris longus; FDS" },
+        { id: "deep-anterior-forearm", title: "Deep anterior forearm", subtitle: "Anterior interosseous nerve (C8-T1)", note: "FPL; pronator quadratus; lateral half of FDP" },
+        { id: "anteromedial-forearm", title: "Anteromedial forearm", subtitle: "Ulnar nerve (C8-T1)", note: "FCU; medial half of FDP" },
+        { id: "posterior-forearm", title: "Posterior forearm", subtitle: "Deep branch of radial nerve / PIN (C7-C8)", note: "Supinator and remaining posterior forearm extensors" },
+        { id: "scapular-retraction", title: "Scapular stabilizers", subtitle: "Dorsal scapular nerve (C5)", note: "Rhomboids; levator scapulae" },
+        { id: "lateral-thoracic-wall", title: "Lateral thoracic wall", subtitle: "Long thoracic nerve (C5-C7)", note: "Serratus anterior" },
+        { id: "supra-infra-spinous", title: "Supraspinous / infraspinous fossae", subtitle: "Suprascapular nerve (C5-C6)", note: "Supraspinatus; infraspinatus" },
+        { id: "intrinsic-hand", title: "Intrinsic medial hand", subtitle: "Deep branch of ulnar nerve (C8-T1)", note: "Interossei; adductor pollicis; hypothenar muscles; lumbricals 3-4" },
+      ],
+      answerMap: {
+        "c-axillary": "deltoid-region",
+        "c-musculocutaneous": "anterior-arm",
+        "c-radial": "posterior-arm",
+        "c-median": "anterior-forearm",
+        "c-ain": "deep-anterior-forearm",
+        "c-ulnar": "anteromedial-forearm",
+        "c-pin": "posterior-forearm",
+        "c-dorsal-scapular": "scapular-retraction",
+        "c-long-thoracic": "lateral-thoracic-wall",
+        "c-suprascapular": "supra-infra-spinous",
+        "c-deep-ulnar": "intrinsic-hand",
+      },
+      itemTracking: {
+        "c-axillary": { nerves: ["Axillary nerve"], sensory: ["Lateral deltoid region"] },
+        "c-musculocutaneous": { nerves: ["Musculocutaneous nerve"], sensory: ["Lateral forearm"] },
+        "c-radial": { nerves: ["Radial nerve"], sensory: ["Posterior arm", "Posterior forearm", "Dorsolateral hand"] },
+        "c-median": { nerves: ["Median nerve"], sensory: ["Lateral palm / thenar region", "Palmar lateral 3.5 digits"] },
+        "c-ain": { nerves: ["Anterior interosseous nerve"] },
+        "c-ulnar": { nerves: ["Ulnar nerve"], sensory: ["Medial palm / hypothenar region", "Palmar medial 1.5 digits"] },
+        "c-pin": { nerves: ["Deep branch of radial nerve / Posterior interosseous nerve"] },
+        "c-dorsal-scapular": { nerves: ["Dorsal scapular nerve"] },
+        "c-long-thoracic": { nerves: ["Long thoracic nerve"] },
+        "c-suprascapular": { nerves: ["Suprascapular nerve"] },
+        "c-deep-ulnar": { nerves: ["Deep branch of ulnar nerve"] },
+      },
+    };
+
+    const spaceActivities = [
+      {
+        id: "space-axilla",
+        title: "Activity 5A - Axilla Builder",
+        subtitle: "Sort the walls, apex, base, and contents of the axilla.",
+        categories: [
+          { id: "ax-apex", title: "Apex", note: "Superior opening" },
+          { id: "ax-base", title: "Base", note: "Inferior floor" },
+          { id: "ax-anterior", title: "Anterior Wall", note: "Anterior axillary fold" },
+          { id: "ax-posterior", title: "Posterior Wall", note: "Posterior axillary fold" },
+          { id: "ax-medial", title: "Medial Wall", note: "Thoracic wall side" },
+          { id: "ax-lateral", title: "Lateral Wall", note: "Humeral side" },
+          { id: "ax-contents", title: "Contents", note: "Neurovascular bundle and nodes" },
+        ],
+        items: [
+          { id: "ax-item-1", label: "1st rib" },
+          { id: "ax-item-2", label: "Clavicle" },
+          { id: "ax-item-3", label: "Superior border of scapula" },
+          { id: "ax-item-4", label: "Skin of armpit and axillary fascia" },
+          { id: "ax-item-5", label: "Pectoralis major" },
+          { id: "ax-item-6", label: "Pectoralis minor" },
+          { id: "ax-item-7", label: "Subscapularis" },
+          { id: "ax-item-8", label: "Teres major" },
+          { id: "ax-item-9", label: "Latissimus dorsi" },
+          { id: "ax-item-10", label: "1st through 4th ribs" },
+          { id: "ax-item-11", label: "Serratus anterior" },
+          { id: "ax-item-12", label: "Intercostal muscles" },
+          { id: "ax-item-13", label: "Intertubercular groove of humerus" },
+          { id: "ax-item-14", label: "Axillary artery and branches" },
+          { id: "ax-item-15", label: "Axillary vein and tributaries" },
+          { id: "ax-item-16", label: "Axillary lymph nodes" },
+          { id: "ax-item-17", label: "Brachial plexus" },
+        ],
+        answerMap: {
+          "ax-item-1": "ax-apex",
+          "ax-item-2": "ax-apex",
+          "ax-item-3": "ax-apex",
+          "ax-item-4": "ax-base",
+          "ax-item-5": "ax-anterior",
+          "ax-item-6": "ax-anterior",
+          "ax-item-7": "ax-posterior",
+          "ax-item-8": "ax-posterior",
+          "ax-item-9": "ax-posterior",
+          "ax-item-10": "ax-medial",
+          "ax-item-11": "ax-medial",
+          "ax-item-12": "ax-medial",
+          "ax-item-13": "ax-lateral",
+          "ax-item-14": "ax-contents",
+          "ax-item-15": "ax-contents",
+          "ax-item-16": "ax-contents",
+          "ax-item-17": "ax-contents",
+        },
+        tracking: { spaces: ["Axilla"] },
+      },
+      {
+        id: "space-quadrangular",
+        title: "Activity 5B - Quadrangular Space",
+        subtitle: "Build the quadrangular space from its borders and contents.",
+        categories: [
+          { id: "qs-superior", title: "Superior Border", note: "Upper boundary" },
+          { id: "qs-inferior", title: "Inferior Border", note: "Lower boundary" },
+          { id: "qs-medial", title: "Medial Border", note: "Triceps side" },
+          { id: "qs-lateral", title: "Lateral Border", note: "Humeral side" },
+          { id: "qs-contents", title: "Contents", note: "Nerve + artery" },
+        ],
+        items: [
+          { id: "qs-item-1", label: "Teres minor" },
+          { id: "qs-item-2", label: "Teres major" },
+          { id: "qs-item-3", label: "Long head of triceps brachii" },
+          { id: "qs-item-4", label: "Humeral surgical neck" },
+          { id: "qs-item-5", label: "Axillary nerve" },
+          { id: "qs-item-6", label: "Posterior circumflex humeral artery" },
+        ],
+        answerMap: {
+          "qs-item-1": "qs-superior",
+          "qs-item-2": "qs-inferior",
+          "qs-item-3": "qs-medial",
+          "qs-item-4": "qs-lateral",
+          "qs-item-5": "qs-contents",
+          "qs-item-6": "qs-contents",
+        },
+        tracking: { spaces: ["Quadrangular Space"] },
+      },
+      {
+        id: "space-triangular",
+        title: "Activity 5C - Triangular Space",
+        subtitle: "Sort the borders and content of the triangular space.",
+        categories: [
+          { id: "ts-superior", title: "Superior Border", note: "Upper border" },
+          { id: "ts-inferior", title: "Inferior Border", note: "Lower border" },
+          { id: "ts-lateral", title: "Lateral Border", note: "Triceps side" },
+          { id: "ts-contents", title: "Contents", note: "Named artery" },
+        ],
+        items: [
+          { id: "ts-item-1", label: "Lower border of teres minor" },
+          { id: "ts-item-2", label: "Teres major" },
+          { id: "ts-item-3", label: "Long head of triceps" },
+          { id: "ts-item-4", label: "Circumflex scapular artery" },
+        ],
+        answerMap: {
+          "ts-item-1": "ts-superior",
+          "ts-item-2": "ts-inferior",
+          "ts-item-3": "ts-lateral",
+          "ts-item-4": "ts-contents",
+        },
+        tracking: { spaces: ["Triangular Space"] },
+      },
+      {
+        id: "space-triangular-interval",
+        title: "Activity 5D - Triangular Interval",
+        subtitle: "Place the borders and contents of the triangular interval.",
+        categories: [
+          { id: "ti-superior", title: "Superior Border", note: "Upper border" },
+          { id: "ti-medial", title: "Medial Border", note: "Long head side" },
+          { id: "ti-lateral", title: "Lateral Border", note: "Humerus / lateral head side" },
+          { id: "ti-contents", title: "Contents", note: "Nerve + artery" },
+        ],
+        items: [
+          { id: "ti-item-1", label: "Teres major" },
+          { id: "ti-item-2", label: "Lateral border of the long head of triceps brachii" },
+          { id: "ti-item-3", label: "Shaft of the humerus / lateral head of triceps brachii" },
+          { id: "ti-item-4", label: "Radial nerve" },
+          { id: "ti-item-5", label: "Profunda brachii artery" },
+        ],
+        answerMap: {
+          "ti-item-1": "ti-superior",
+          "ti-item-2": "ti-medial",
+          "ti-item-3": "ti-lateral",
+          "ti-item-4": "ti-contents",
+          "ti-item-5": "ti-contents",
+        },
+        tracking: { spaces: ["Triangular Interval"] },
+      },
+      {
+        id: "space-cubital-fossa",
+        title: "Activity 5E - Cubital Fossa",
+        subtitle: "Organize the boundaries and contents of the cubital fossa.",
+        categories: [
+          { id: "cf-superior", title: "Superior Boundary", note: "Base" },
+          { id: "cf-medial", title: "Medial Boundary", note: "Pronator teres side" },
+          { id: "cf-lateral", title: "Lateral Boundary", note: "Brachioradialis side" },
+          { id: "cf-contents", title: "Contents / Related Structures", note: "Structures crossing the fossa" },
+        ],
+        items: [
+          { id: "cf-item-1", label: "Imaginary line between the medial and lateral epicondyles of the humerus" },
+          { id: "cf-item-2", label: "Lateral boundary of pronator teres" },
+          { id: "cf-item-3", label: "Medial border of brachioradialis" },
+          { id: "cf-item-4", label: "Median nerve" },
+          { id: "cf-item-5", label: "Brachial artery and vein" },
+          { id: "cf-item-6", label: "Radial nerve (superficial)" },
+          { id: "cf-item-7", label: "Biceps tendon" },
+          { id: "cf-item-8", label: "Median cubital vein" },
+          { id: "cf-item-9", label: "Bicipital aponeurosis" },
+        ],
+        answerMap: {
+          "cf-item-1": "cf-superior",
+          "cf-item-2": "cf-medial",
+          "cf-item-3": "cf-lateral",
+          "cf-item-4": "cf-contents",
+          "cf-item-5": "cf-contents",
+          "cf-item-6": "cf-contents",
+          "cf-item-7": "cf-contents",
+          "cf-item-8": "cf-contents",
+          "cf-item-9": "cf-contents",
+        },
+        tracking: { spaces: ["Cubital Fossa"] },
+      },
+      {
+        id: "space-posterior-triangle",
+        title: "Activity 5F - Posterior Triangle",
+        subtitle: "Sort the boundaries, floor, vessels, and nerves of the posterior triangle of the neck.",
+        categories: [
+          { id: "pt-posterior", title: "Posterior Boundary", note: "Trapezius side" },
+          { id: "pt-anterior", title: "Anterior Boundary", note: "SCM side" },
+          { id: "pt-inferior", title: "Inferior Boundary", note: "Clavicular side" },
+          { id: "pt-roof", title: "Roof", note: "Fascial roof" },
+          { id: "pt-floor", title: "Floor", note: "Muscular floor" },
+          { id: "pt-vessels", title: "Vessels", note: "Named vessels" },
+          { id: "pt-nerves", title: "Nerves", note: "Neural structures" },
+        ],
+        items: [
+          { id: "pt-item-1", label: "Anterior border of trapezius muscle" },
+          { id: "pt-item-2", label: "Posterior border of SCM" },
+          { id: "pt-item-3", label: "Medial third clavicle" },
+          { id: "pt-item-4", label: "Superficial layer of deep cervical fascia" },
+          { id: "pt-item-5", label: "Splenius capitis" },
+          { id: "pt-item-6", label: "Levator scapulae" },
+          { id: "pt-item-7", label: "Scalene muscles" },
+          { id: "pt-item-8", label: "Third part of subclavian artery" },
+          { id: "pt-item-9", label: "Transverse cervical artery" },
+          { id: "pt-item-10", label: "Suprascapular artery" },
+          { id: "pt-item-11", label: "Accessory nerve (CN XI)" },
+          { id: "pt-item-12", label: "Ventral rami (roots) of brachial plexus" },
+          { id: "pt-item-13", label: "Cutaneous branches of cervical plexus" },
+          { id: "pt-item-14", label: "Suprascapular nerve" },
+          { id: "pt-item-15", label: "Phrenic nerve" },
+        ],
+        answerMap: {
+          "pt-item-1": "pt-posterior",
+          "pt-item-2": "pt-anterior",
+          "pt-item-3": "pt-inferior",
+          "pt-item-4": "pt-roof",
+          "pt-item-5": "pt-floor",
+          "pt-item-6": "pt-floor",
+          "pt-item-7": "pt-floor",
+          "pt-item-8": "pt-vessels",
+          "pt-item-9": "pt-vessels",
+          "pt-item-10": "pt-vessels",
+          "pt-item-11": "pt-nerves",
+          "pt-item-12": "pt-nerves",
+          "pt-item-13": "pt-nerves",
+          "pt-item-14": "pt-nerves",
+          "pt-item-15": "pt-nerves",
+        },
+        tracking: { spaces: ["Posterior Triangle"] },
+      },
+      {
+        id: "space-anterior-neck",
+        title: "Activity 5G - Anterior Triangle of the Neck",
+        subtitle: "Place the boundaries, vessels, and nerves of the anterior triangle.",
+        categories: [
+          { id: "at-lateral", title: "Lateral Boundary", note: "SCM side" },
+          { id: "at-anterior", title: "Anterior Boundary", note: "Neck midline" },
+          { id: "at-superior", title: "Superior Boundary", note: "Mandible side" },
+          { id: "at-vessels", title: "Vessels", note: "Named vessels" },
+          { id: "at-nerves", title: "Nerves", note: "Neural structures" },
+        ],
+        items: [
+          { id: "at-item-1", label: "Anterior border of SCM" },
+          { id: "at-item-2", label: "Anterior midline of neck" },
+          { id: "at-item-3", label: "Inferior mandible" },
+          { id: "at-item-4", label: "Common carotid artery" },
+          { id: "at-item-5", label: "Internal carotid artery" },
+          { id: "at-item-6", label: "External carotid artery" },
+          { id: "at-item-7", label: "Internal jugular vein" },
+          { id: "at-item-8", label: "Anterior jugular veins" },
+          { id: "at-item-9", label: "Vagus nerve (CN X)" },
+          { id: "at-item-10", label: "Hypoglossal nerve (CN XII)" },
+        ],
+        answerMap: {
+          "at-item-1": "at-lateral",
+          "at-item-2": "at-anterior",
+          "at-item-3": "at-superior",
+          "at-item-4": "at-vessels",
+          "at-item-5": "at-vessels",
+          "at-item-6": "at-vessels",
+          "at-item-7": "at-vessels",
+          "at-item-8": "at-vessels",
+          "at-item-9": "at-nerves",
+          "at-item-10": "at-nerves",
+        },
+        tracking: { spaces: ["Anterior Triangle of the Neck"] },
+      },
+      {
+        id: "space-suboccipital",
+        title: "Activity 5H - Suboccipital Triangle",
+        subtitle: "Organize the boundaries, vessel, and nerve of the suboccipital triangle.",
+        categories: [
+          { id: "so-superomedial", title: "Superomedial Border", note: "Medial border" },
+          { id: "so-superolateral", title: "Superolateral Border", note: "Lateral superior border" },
+          { id: "so-inferolateral", title: "Inferolateral Border", note: "Lateral inferior border" },
+          { id: "so-vessels", title: "Vessels", note: "Named vessel" },
+          { id: "so-nerves", title: "Nerves", note: "Named nerve" },
+        ],
+        items: [
+          { id: "so-item-1", label: "Rectus capitis posterior major" },
+          { id: "so-item-2", label: "Obliquus capitis superior" },
+          { id: "so-item-3", label: "Obliquus capitis inferior" },
+          { id: "so-item-4", label: "Vertebral artery" },
+          { id: "so-item-5", label: "Suboccipital nerve (dorsal ramus of C1)" },
+        ],
+        answerMap: {
+          "so-item-1": "so-superomedial",
+          "so-item-2": "so-superolateral",
+          "so-item-3": "so-inferolateral",
+          "so-item-4": "so-vessels",
+          "so-item-5": "so-nerves",
+        },
+        tracking: { spaces: ["Suboccipital Triangle"] },
+      },
+    ];
+
+    const clinicalBank = [
+      {
+        id: "cl-1",
+        prompt: "After an anterior shoulder dislocation, a patient has weakness of shoulder abduction beyond the first 15 degrees and numbness over the lateral deltoid region. Which nerve is most likely injured?",
+        options: ["Axillary nerve", "Suprascapular nerve", "Radial nerve", "Long thoracic nerve"],
+        answer: "Axillary nerve",
+        explanation: "The axillary nerve supplies deltoid and teres minor and gives sensation to the lateral deltoid / regimental badge area.",
+      },
+      {
+        id: "cl-2",
+        prompt: "A patient has weak elbow flexion and forearm supination after trauma to the lateral cord. Sensation is also reduced along the lateral forearm. Which nerve is affected?",
+        options: ["Musculocutaneous nerve", "Median nerve", "Radial nerve", "Ulnar nerve"],
+        answer: "Musculocutaneous nerve",
+        explanation: "The musculocutaneous nerve powers the anterior arm and continues as the lateral antebrachial cutaneous nerve.",
+      },
+      {
+        id: "cl-3",
+        prompt: "A patient cannot flex the thumb IP joint or the DIP of the index finger during a pinch test, but has no major cutaneous deficit. Which nerve is most likely involved?",
+        options: ["Anterior interosseous nerve", "Median nerve", "Deep branch of ulnar nerve", "Posterior interosseous nerve"],
+        answer: "Anterior interosseous nerve",
+        explanation: "The anterior interosseous nerve is a motor branch of the median nerve supplying FPL, PQ, and the lateral half of FDP.",
+      },
+      {
+        id: "cl-4",
+        prompt: "A patient has numbness in the palmar and dorsal surfaces of the medial 1.5 digits and difficulty with finger abduction and adduction. Which nerve is most likely affected?",
+        options: ["Ulnar nerve", "Median nerve", "Radial nerve", "Musculocutaneous nerve"],
+        answer: "Ulnar nerve",
+        explanation: "The ulnar nerve provides the medial 1.5 digit sensory distribution and powers the interossei through its deep branch.",
+      },
+      {
+        id: "cl-5",
+        prompt: "A patient wakes after prolonged compression with wrist drop and weakness of finger extension. Sensation is reduced over the dorsolateral hand. Which nerve is most likely injured?",
+        options: ["Radial nerve", "Median nerve", "Deep branch of radial nerve / PIN", "Ulnar nerve"],
+        answer: "Radial nerve",
+        explanation: "A proximal radial nerve lesion produces the classic extensor weakness pattern with dorsolateral hand sensory change.",
+      },
+      {
+        id: "cl-6",
+        prompt: "After a radial tunnel lesion, a patient has finger and thumb extension weakness but little to no cutaneous sensory loss. Which nerve is most likely affected?",
+        options: ["Deep branch of radial nerve / Posterior interosseous nerve", "Superficial branch of radial nerve", "Median nerve", "Anterior interosseous nerve"],
+        answer: "Deep branch of radial nerve / Posterior interosseous nerve",
+        explanation: "The deep branch / PIN is the motor radial branch to the posterior forearm extensors and has no major cutaneous territory in the handout.",
+      },
+      {
+        id: "cl-7",
+        prompt: "Following an axillary lymph node procedure, a patient shows scapular winging and has difficulty with scapular protraction and upward rotation. Which nerve was likely injured?",
+        options: ["Long thoracic nerve", "Dorsal scapular nerve", "Suprascapular nerve", "Accessory nerve"],
+        answer: "Long thoracic nerve",
+        explanation: "The long thoracic nerve supplies serratus anterior, which stabilizes the scapula and supports upward rotation.",
+      },
+      {
+        id: "cl-8",
+        prompt: "An overhead athlete has weakness initiating shoulder abduction and weakness in external rotation. Which nerve best matches this pattern?",
+        options: ["Suprascapular nerve", "Axillary nerve", "Thoracodorsal nerve", "Musculocutaneous nerve"],
+        answer: "Suprascapular nerve",
+        explanation: "The suprascapular nerve innervates supraspinatus and infraspinatus, so it affects initiation of abduction and external rotation.",
+      },
+      {
+        id: "cl-9",
+        prompt: "A patient has numbness over the thenar region and palmar surface of the lateral 3.5 digits with weakness of thenar opposition. Which nerve is most likely involved?",
+        options: ["Median nerve", "Ulnar nerve", "Musculocutaneous nerve", "Superficial branch of radial nerve"],
+        answer: "Median nerve",
+        explanation: "The median nerve supplies most thenar muscles, lumbricals 1-2, the lateral palm, and the palmar lateral 3.5 digits.",
+      },
+      {
+        id: "cl-10",
+        prompt: "A surgical neck injury with concern for the nerve and artery in the quadrangular space should make you review which nerve first?",
+        options: ["Axillary nerve", "Radial nerve", "Ulnar nerve", "Accessory nerve"],
+        answer: "Axillary nerve",
+        explanation: "The quadrangular space contains the axillary nerve and posterior circumflex humeral artery.",
+      },
+    ];
+
+    const nerveIdTrackingMap = {
+      "ni-1": { nerves: ["Axillary nerve"], sensory: ["Lateral deltoid region"] },
+      "ni-2": { nerves: ["Musculocutaneous nerve", "Lateral antebrachial cutaneous nerve"], sensory: ["Lateral forearm"] },
+      "ni-3": { nerves: ["Median nerve"], sensory: ["Lateral palm / thenar region", "Palmar lateral 3.5 digits"] },
+      "ni-4": { nerves: ["Ulnar nerve"], sensory: ["Medial palm / hypothenar region", "Palmar medial 1.5 digits", "Dorsomedial hand"] },
+      "ni-5": { nerves: ["Radial nerve"], sensory: ["Posterior arm", "Posterior forearm", "Dorsolateral hand"] },
+      "ni-6": { nerves: ["Anterior interosseous nerve"] },
+      "ni-7": { nerves: ["Deep branch of ulnar nerve"] },
+      "ni-8": { nerves: ["Lateral antebrachial cutaneous nerve"], sensory: ["Lateral forearm"] },
+      "ni-9": { nerves: ["Superficial branch of radial nerve"], sensory: ["Dorsolateral hand"] },
+      "ni-10": { nerves: ["Long thoracic nerve"] },
+      "ni-11": { nerves: ["Dorsal scapular nerve"] },
+      "ni-12": { nerves: ["Suprascapular nerve"] },
+      "ni-13": { nerves: ["Thoracodorsal nerve"] },
+      "ni-14": { nerves: ["Superior lateral cutaneous nerve of arm", "Axillary nerve"], sensory: ["Lateral deltoid region"] },
+      "ni-15": { nerves: ["Medial antebrachial cutaneous nerve"], sensory: ["Medial forearm"] },
+      "ni-16": { nerves: ["Intercostobrachial nerve"], sensory: ["Axilla and upper medial arm"] },
+    };
+
+    const clinicalTrackingMap = {
+      "cl-1": { nerves: ["Axillary nerve"], sensory: ["Lateral deltoid region"], spaces: ["Quadrangular Space"] },
+      "cl-2": { nerves: ["Musculocutaneous nerve", "Lateral antebrachial cutaneous nerve"], sensory: ["Lateral forearm"] },
+      "cl-3": { nerves: ["Anterior interosseous nerve"] },
+      "cl-4": { nerves: ["Ulnar nerve", "Deep branch of ulnar nerve"], sensory: ["Medial palm / hypothenar region", "Palmar medial 1.5 digits", "Dorsomedial hand"] },
+      "cl-5": { nerves: ["Radial nerve"], sensory: ["Dorsolateral hand", "Posterior forearm"] },
+      "cl-6": { nerves: ["Deep branch of radial nerve / Posterior interosseous nerve"] },
+      "cl-7": { nerves: ["Long thoracic nerve"] },
+      "cl-8": { nerves: ["Suprascapular nerve"] },
+      "cl-9": { nerves: ["Median nerve"], sensory: ["Lateral palm / thenar region", "Palmar lateral 3.5 digits"] },
+      "cl-10": { nerves: ["Axillary nerve"], spaces: ["Quadrangular Space"] },
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ARM MAP — complete rebuild
+    // ViewBox: "0 0 320 640" for each panel
+    // Coordinate system: shoulder at top (~y=40), fingertips at bottom (~y=610)
+    // ANTERIOR: thumb on LEFT (patient's right arm, anatomical position)
+    // POSTERIOR: thumb on RIGHT
+    //
+    // ARM OUTLINE (shared geometry):
+    //   Shoulder/deltoid cap:  x≈80–240, y≈30–110
+    //   Upper arm:             x≈95–215, y≈110–250
+    //   Elbow:                 x≈100–210, y≈250–280
+    //   Forearm:               x≈105–205, y≈280–420
+    //   Wrist:                 x≈110–200, y≈420–445
+    //   Palm:                  x≈95–215,  y≈445–510
+    //   Fingers (5):           y≈510–610
+    //     Thumb (lat front/med back): x≈75–115, y≈490–575
+    //     Index:   x≈110–140, y≈510–605
+    //     Middle:  x≈140–170, y≈510–615
+    //     Ring:    x≈168–196, y≈510–608
+    //     Little:  x≈194–218, y≈510–595
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    // ── Complete arm outline paths (used for clipPath and silhouette stroke) ──
+
+    // ANTERIOR outline — thumb on left
+    const ARM_FRONT_OUTLINE = `
+      M 160 22
+      C 104 17 54 35 64 44
+      C 59 67 112.0 87 109.0 99
+      C 109.0 127 114.0 198 114.0 220
+      C 111.0 230 114.0 240 116.0 245
+      C 118.0 283 123.0 383 123.0 405
+      L 127.0 430
+      C 127.0 446 128.8 415 126.8 429
+      C 124.8 455.0 116.0 509.0 102.0 528.0
+      Q 102.0 544.0 91 544.0
+      Q 80.0 544.0 80.0 528.0
+      C 72.0 509.0 101.8 453.0 104.8 431.0
+      C 108.8 461.0 114.0 497.0 118.0 483
+      L 118.0 483
+      L 120.0 578.0
+      Q 120.0 587 127.5 587
+      Q 135.0 587 135.0 578.0
+      L 137.0 483
+      Q 137.0 492 138.0 492 Q 139.0 492 139.0 483
+      L 139.0 483
+      L 141.0 596.0
+      Q 141.0 605 149.0 605
+      Q 157.0 605 157.0 596.0
+      L 159.0 483
+      Q 159.0 492 160.0 492 Q 161.0 492 161.0 483
+      L 161.0 483
+      L 163.0 579.0
+      Q 163.0 587 170.0 587
+      Q 177.0 587 177.0 579.0
+      L 179.0 483
+      Q 179.0 492 180.0 492 Q 181.0 492 181.0 483
+      L 181.0 483
+      L 183.0 544.0
+      Q 183.0 551 188.5 551
+      Q 194.0 551 194.0 544.0
+      L 196.0 483
+      L 202.0 483
+      L 193.0 430
+      C 195.0 413 197.0 391 197.0 405
+      C 197.0 283 206.0 250 204.0 245
+      C 202.0 232 206.0 208 206.0 220
+      C 203.0 127 208.0 87 211.0 99
+      C 261.0 67 266.0 44 256 44
+      C 259.0 32 216 17 160 22 Z
+    `;
+
+    // POSTERIOR: thumb on RIGHT
+    const ARM_BACK_OUTLINE = `
+      M 160.0 22.0 C 216.0 17.0 266.0 35.0 256.0 44.0 C 261.0 67.0 208.0 87.0 211.0 99.0 C 211.0 127.0 206.0 198.0 206.0 220.0 C 209.0 230.0 206.0 240.0 204.0 245.0 C 202.0 283.0 197.0 383.0 197.0 405.0 L 193.0 430.0 C 193.0 446.0 191.2 415.0 193.2 429.0 C 195.2 455.0 204.0 509.0 218.0 528.0 Q 218.0 544.0 229.0 544.0 Q 240.0 544.0 240.0 528.0 C 248.0 509.0 218.2 453.0 215.2 431.0 C 211.2 461.0 206.0 497.0 202.0 483.0 L 202.0 483.0 L 200.0 578.0 Q 200.0 587.0 192.5 587.0 Q 185.0 587.0 185.0 578.0 L 183.0 483.0 Q 183.0 492.0 182.0 492.0 Q 181.0 492.0 181.0 483.0 L 181.0 483.0 L 179.0 596.0 Q 179.0 605.0 171.0 605.0 Q 163.0 605.0 163.0 596.0 L 161.0 483.0 Q 161.0 492.0 160.0 492.0 Q 159.0 492.0 159.0 483.0 L 159.0 483.0 L 157.0 579.0 Q 157.0 587.0 150.0 587.0 Q 143.0 587.0 143.0 579.0 L 141.0 483.0 Q 141.0 492.0 140.0 492.0 Q 139.0 492.0 139.0 483.0 L 139.0 483.0 L 137.0 544.0 Q 137.0 551.0 131.5 551.0 Q 126.0 551.0 126.0 544.0 L 124.0 483.0 L 118.0 483.0 L 127.0 430.0 C 125.0 413.0 123.0 391.0 123.0 405.0 C 123.0 283.0 114.0 250.0 116.0 245.0 C 118.0 232.0 114.0 208.0 114.0 220.0 C 117.0 127.0 112.0 87.0 109.0 99.0 C 59.0 67.0 54.0 44.0 64.0 44.0 C 61.0 32.0 104.0 17.0 160.0 22.0 Z
+    `;
+
+    // ── Territory definitions ─────────────────────────────────────────────────
+    // Each entry has: front overlay path, back overlay path (null = none),
+    // label for front, label for back, label positions (lx,ly = label anchor outside arm)
+    // Leader line goes from (ax,ay) inside region to (lx,ly) label
+
+    // ── NERVE TERRITORIES ────────────────────────────────────────────────────
+    // All paths use the same 320×640 viewBox as the arm outlines.
+    // ARM GEOMETRY REFERENCE (from outline paths):
+    //   Shoulder cap:    x≈78–236,  y≈32–118
+    //   Medial arm:      x≈78–108,  y≈118–270   (left side of arm going down)
+    //   Lateral arm:     x≈200–216, y≈118–270   (right side of arm going down)
+    //   Anterior arm:    x≈108–200, y≈118–270   (central anterior)
+    //   Elbow:           x≈100–216, y≈262–295
+    //   Med. forearm:    x≈106–130, y≈292–445   (medial/left forearm)
+    //   Central forearm: x≈128–180, y≈292–445
+    //   Lat. forearm:    x≈180–216, y≈292–445   (lateral/right forearm)
+    //   Wrist:           x≈112–212, y≈430–450
+    //   Palm:            x≈116–210, y≈447–510
+    //   FRONT fingers (left=lateral=thumb side):
+    //     Thumb:   x≈82–120,  y≈450–580
+    //     Index:   x≈116–136, y≈510–595
+    //     Middle:  x≈136–166, y≈510–595
+    //     Ring:    x≈166–184, y≈510–592
+    //     Little:  x≈184–210, y≈510–582
+    //   BACK fingers (right=lateral=thumb side):
+    //     Little:  x≈118–144, y≈510–592
+    //     Ring:    x≈144–162, y≈510–595
+    //     Middle:  x≈162–192, y≈510–595
+    //     Index:   x≈192–210, y≈510–595
+    //     Thumb:   x≈210–246, y≈450–576
+    //
+    // Label positions: lx < 60 = left side label, lx > 260 = right side label
+    // ax,ay = anchor point INSIDE the colored region for the leader line dot
+
+    const NERVE_TERRITORIES = {
+      "axillary-map": {
+        name: "Axillary nerve",
+        motor: {
+          front: { path: "M 160 22 C 104 17 54 35 64 44 C 116 72 160 88 204 80 C 256 60 258 44 248 36 C 236 26 192 18 160 22 Z", label: "Deltoid + teres minor", ax: 160, ay: 60, lx: 268, ly: 48 },
+          back:  { path: "M 160 22 C 116 17 76 35 86 44 C 126 72 160 88 196 80 C 244 60 256 44 246 36 C 234 26 196 18 160 22 Z", label: "Deltoid + teres minor", ax: 160, ay: 60, lx: 52, ly: 48 },
+        },
+        sensory: {
+          front: { path: "M 109 106 C 104 118 104 136 108 150 C 116 154 126 152 132 144 C 136 132 134 116 128 106 Z", label: "Lat. deltoid badge", ax: 118, ay: 128, lx: 52, ly: 128 },
+          back:  { path: "M 211 106 C 216 118 216 136 212 150 C 204 154 194 152 188 144 C 184 132 186 116 192 106 Z", label: "Lat. deltoid badge", ax: 202, ay: 128, lx: 268, ly: 128 },
+        },
+      },
+      "musculocutaneous-map": {
+        name: "Musculocutaneous nerve",
+        motor: {
+          front: { path: "M 116 106 C 112 124 110 150 110 178 C 110 204 112 222 114 238 C 122 240 134 240 142 238 C 144 220 144 198 142 172 C 140 148 138 122 136 106 Z", label: "Biceps · brachialis", ax: 128, ay: 172, lx: 268, ly: 172 },
+          back: null,
+        },
+        sensory: {
+          front: { path: "M 196 252 C 200 272 202 300 202 328 C 202 356 200 384 198 406 C 192 410 184 412 176 412 C 174 388 174 360 176 334 C 178 306 180 276 180 252 Z", label: "Lat. forearm", ax: 190, ay: 330, lx: 268, ly: 330 },
+          back:  { path: "M 196 252 C 200 272 202 300 202 328 C 202 356 200 384 198 406 C 192 410 184 412 176 412 C 174 388 174 360 176 334 C 178 306 180 276 180 252 Z", label: "Lat. forearm", ax: 190, ay: 330, lx: 268, ly: 330 },
+        },
+      },
+      "median-map": {
+        name: "Median nerve",
+        motor: {
+          front: { path: "M 144 252 C 144 274 144 300 144 328 C 144 356 144 384 144 408 C 148 412 154 414 160 414 C 166 414 172 412 176 408 C 176 384 174 356 172 328 C 170 300 168 274 166 252 Z M 118 436 C 118 448 120 462 126 474 C 132 486 142 494 152 494 C 162 494 170 486 174 474 C 178 462 178 448 176 436 Z", label: "Ant. forearm + thenar", ax: 160, ay: 330, lx: 268, ly: 310 },
+          back: null,
+        },
+        sensory: {
+          front: { path: "M 118 436 C 118 450 120 464 126 476 C 132 488 142 496 152 496 C 162 496 170 488 174 476 C 178 464 178 450 176 436 Z M 118 487 L 118 577 C 120 586 128 590 137 588 L 137 487 Z M 139 487 L 139 595 C 141 604 149 608 158 606 C 167 604 171 596 171 586 L 171 487 Z M 173 487 L 173 577 C 175 586 183 590 191 588 L 191 487 Z", label: "Lat. 3½ digits + palm", ax: 144, ay: 536, lx: 52, ly: 536 },
+          back: null,
+        },
+      },
+      "ain-map": {
+        name: "Anterior interosseous nerve",
+        motor: {
+          front: { path: "M 152 252 C 152 274 152 300 152 328 C 152 356 152 384 152 408 C 156 412 162 414 168 414 C 172 410 174 400 174 386 C 174 360 172 330 170 304 C 168 278 166 258 164 252 Z", label: "FPL · PQ · lat. FDP", ax: 162, ay: 330, lx: 268, ly: 360 },
+          back: null,
+        },
+        sensory: { front: null, back: null },
+      },
+      "ulnar-map": {
+        name: "Ulnar nerve",
+        motor: {
+          front: { path: "M 120 252 C 120 274 120 300 120 328 C 120 356 120 384 120 408 C 126 412 134 414 142 414 C 142 390 140 362 138 336 C 136 308 134 278 132 252 Z M 176 436 C 178 448 180 462 184 474 C 188 484 196 492 206 494 C 216 496 224 488 226 476 C 228 464 226 450 224 438 Z", label: "Med. forearm + hypoth.", ax: 130, ay: 330, lx: 52, ly: 310 },
+          back: null,
+        },
+        sensory: {
+          front: { path: "M 176 436 C 178 450 180 464 184 476 C 188 488 196 496 206 498 C 216 500 224 490 226 478 C 228 464 226 450 224 438 Z M 183 487 L 183 541 C 185 550 193 554 201 552 C 209 550 213 542 213 532 L 213 487 Z M 215 487 L 215 536 C 216 543 220 548 226 548 C 232 548 236 543 236 536 L 236 487 Z", label: "Med. 1½ digits", ax: 206, ay: 518, lx: 268, ly: 518 },
+          back:  { path: "M 94 436 C 92 450 90 464 86 476 C 82 488 74 496 64 498 C 54 500 46 490 44 478 C 42 464 44 450 46 438 Z M 84 487 L 84 541 C 82 550 74 554 66 552 C 58 550 54 542 54 532 L 54 487 Z M 107 487 L 107 541 C 105 550 97 554 89 552 C 81 550 77 542 77 532 L 77 487 Z", label: "Dorsomedial hand", ax: 84, ay: 514, lx: 52, ly: 514 },
+        },
+      },
+      "deep-ulnar-map": {
+        name: "Deep branch of ulnar nerve",
+        motor: {
+          front: { path: "M 176 436 C 178 450 180 464 184 476 C 188 488 196 496 206 498 C 216 500 224 490 226 478 C 228 464 226 450 224 438 Z", label: "Hypoth. + interossei", ax: 200, ay: 468, lx: 268, ly: 448 },
+          back: null,
+        },
+        sensory: { front: null, back: null },
+      },
+      "radial-map": {
+        name: "Radial nerve",
+        motor: {
+          front: null,
+          back:  { path: "M 211 106 C 216 124 218 152 218 180 C 218 206 216 228 214 244 C 206 242 196 238 192 228 C 190 210 192 180 194 156 C 196 132 198 110 200 106 Z", label: "Post. arm extensors", ax: 205, ay: 176, lx: 268, ly: 176 },
+        },
+        sensory: {
+          front: null,
+          back:  { path: "M 188 106 C 192 128 196 158 196 188 C 196 216 194 240 192 252 C 184 250 174 248 170 240 C 168 218 170 186 172 158 C 174 132 176 110 180 106 Z M 170 252 C 168 276 166 306 166 334 C 166 360 166 386 168 410 C 174 412 184 414 192 412 C 192 386 190 360 188 334 C 186 306 182 276 178 252 Z M 162 436 C 160 450 160 466 164 480 C 168 492 178 500 188 500 C 198 502 208 492 210 480 C 212 466 210 452 208 440 Z", label: "Post. arm + forearm + hand", ax: 180, ay: 330, lx: 52, ly: 280 },
+        },
+      },
+      "pin-map": {
+        name: "Deep branch of radial / PIN",
+        motor: {
+          front: null,
+          back:  { path: "M 158 252 C 156 276 154 306 154 334 C 154 360 154 386 156 410 C 162 412 172 414 180 412 C 180 386 178 360 176 334 C 174 306 170 276 166 252 Z", label: "Post. forearm", ax: 168, ay: 330, lx: 268, ly: 310 },
+        },
+        sensory: { front: null, back: null },
+      },
+      "superficial-radial-map": {
+        name: "Superficial branch of radial nerve",
+        motor: { front: null, back: null },
+        sensory: {
+          front: null,
+          back:  { path: "M 162 436 C 160 450 160 466 164 480 C 168 492 178 500 188 500 C 198 502 208 492 210 480 C 212 466 210 452 208 440 Z M 161 487 L 161 577 C 163 586 171 590 180 588 L 180 487 Z M 182 487 L 182 577 C 184 586 192 590 201 588 L 201 487 Z M 140 487 L 140 551 C 142 560 150 564 158 562 L 158 487 Z", label: "Dorsolat. hand", ax: 172, ay: 514, lx: 268, ly: 514 },
+        },
+      },
+      "suprascapular-map": {
+        name: "Suprascapular nerve",
+        motor: {
+          front: null,
+          back:  { path: "M 160 22 C 116 17 76 35 86 44 C 126 72 160 88 196 80 C 244 60 256 44 246 36 C 234 26 196 18 160 22 Z M 109 86 C 116 98 126 108 138 114 C 152 120 168 122 182 118 C 194 114 204 104 208 92 C 190 84 174 80 160 80 C 144 80 126 82 109 86 Z", label: "Supra/infraspinatus", ax: 160, ay: 78, lx: 268, ly: 66 },
+        },
+        sensory: { front: null, back: null },
+      },
+      "long-thoracic-map": {
+        name: "Long thoracic nerve",
+        motor: {
+          front: { path: "M 258 106 C 266 122 270 148 268 174 C 268 196 264 216 258 228 C 250 224 244 212 242 196 C 240 172 244 142 250 116 Z", label: "Serratus anterior", ax: 256, ay: 168, lx: 268, ly: 168 },
+          back: null,
+        },
+        sensory: { front: null, back: null },
+      },
+      "dorsal-scapular-map": {
+        name: "Dorsal scapular nerve",
+        motor: {
+          front: null,
+          back:  { path: "M 60 98 C 56 116 54 142 56 170 C 58 194 60 214 62 228 C 70 224 76 210 78 192 C 80 166 78 136 74 110 Z", label: "Rhomboids", ax: 66, ay: 164, lx: 52, ly: 164 },
+        },
+        sensory: { front: null, back: null },
+      },
+      "labc-map": {
+        name: "Lateral antebrachial cutaneous nerve",
+        motor: { front: null, back: null },
+        sensory: {
+          front: { path: "M 196 252 C 200 272 202 300 202 328 C 202 356 200 384 198 406 C 192 410 184 412 176 412 C 174 388 174 360 176 334 C 178 306 180 276 180 252 Z", label: "Lat. forearm", ax: 190, ay: 330, lx: 268, ly: 330 },
+          back:  { path: "M 196 252 C 200 272 202 300 202 328 C 202 356 200 384 198 406 C 192 410 184 412 176 412 C 174 388 174 360 176 334 C 178 306 180 276 180 252 Z", label: "Lat. forearm", ax: 190, ay: 330, lx: 268, ly: 330 },
+        },
+      },
+      "mabc-map": {
+        name: "Medial antebrachial cutaneous nerve",
+        motor: { front: null, back: null },
+        sensory: {
+          front: { path: "M 122 252 C 120 272 118 300 118 328 C 118 356 120 384 122 406 C 130 410 138 412 144 408 C 144 384 142 356 140 328 C 138 300 136 272 134 252 Z", label: "Med. forearm", ax: 132, ay: 330, lx: 52, ly: 330 },
+          back:  { path: "M 122 252 C 120 272 118 300 118 328 C 118 356 120 384 122 406 C 130 410 138 412 144 408 C 144 384 142 356 140 328 C 138 300 136 272 134 252 Z", label: "Med. forearm", ax: 132, ay: 330, lx: 52, ly: 330 },
+        },
+      },
+      "mbc-map": {
+        name: "Medial brachial cutaneous nerve",
+        motor: { front: null, back: null },
+        sensory: {
+          front: { path: "M 204 106 C 208 124 210 150 210 178 C 210 202 208 224 206 240 C 198 238 190 232 188 220 C 186 198 188 166 190 140 C 192 118 196 106 200 106 Z", label: "Med. arm", ax: 200, ay: 174, lx: 268, ly: 174 },
+          back:  { path: "M 116 106 C 112 124 110 150 110 178 C 110 202 112 224 114 240 C 122 238 130 232 132 220 C 134 198 132 166 130 140 C 128 118 124 106 120 106 Z", label: "Med. arm", ax: 120, ay: 174, lx: 52, ly: 174 },
+        },
+      },
+      "intercostobrachial-map": {
+        name: "Intercostobrachial nerve",
+        motor: { front: null, back: null },
+        sensory: {
+          front: { path: "M 250 112 C 256 122 260 136 258 152 C 256 164 248 172 238 172 C 232 162 230 148 232 134 C 234 120 242 110 250 112 Z M 204 106 C 208 120 210 140 210 162 C 210 180 208 196 204 208 C 196 206 188 198 186 186 C 184 168 186 142 190 120 Z", label: "Axilla + med. arm", ax: 200, ay: 156, lx: 268, ly: 136 },
+          back:  { path: "M 70 112 C 64 122 60 136 62 152 C 64 164 72 172 82 172 C 88 162 90 148 88 134 C 86 120 78 110 70 112 Z M 116 106 C 112 120 110 140 110 162 C 110 180 112 196 116 208 C 124 206 132 198 134 186 C 136 168 134 142 130 120 Z", label: "Axilla + med. arm", ax: 120, ay: 156, lx: 52, ly: 136 },
+        },
+      },
+    };
+
+    const anatomyMapNerves = [
+      { id: "axillary-map",           roots: "C5-C6",            modeSummary: { motor: "Deltoid (shoulder abduction) and teres minor (external rotation).", sensory: "Superior lateral brachial cutaneous nerve — the regimental badge area over the lateral deltoid." } },
+      { id: "musculocutaneous-map",   roots: "C5-C7",            modeSummary: { motor: "Coracobrachialis, biceps brachii, and brachialis — elbow flexion and forearm supination.", sensory: "Lateral antebrachial cutaneous nerve — lateral forearm, both anterior and posterior surfaces." } },
+      { id: "median-map",             roots: "C5-T1",            modeSummary: { motor: "Most anterior forearm muscles (except FCU and medial FDP); most thenar muscles; lumbricals 1–2.", sensory: "Lateral palm (palmar cutaneous branch), palmar surfaces of the lateral 3.5 digits, dorsal distal phalanges and nail beds of those digits." } },
+      { id: "ain-map",                roots: "C8-T1",            modeSummary: { motor: "Flexor pollicis longus, pronator quadratus, and the lateral half of flexor digitorum profundus.", sensory: "No cutaneous territory." } },
+      { id: "ulnar-map",              roots: "C8-T1",            modeSummary: { motor: "Flexor carpi ulnaris, medial half of FDP, and intrinsic medial hand via terminal branches.", sensory: "Medial palm (palmar branch), palmar medial 1.5 digits, and dorsomedial hand (dorsal cutaneous branch)." } },
+      { id: "deep-ulnar-map",         roots: "C8-T1",            modeSummary: { motor: "Hypothenar muscles, all interossei, adductor pollicis, deep head of FPB, lumbricals 3–4, and palmaris brevis.", sensory: "No cutaneous territory." } },
+      { id: "radial-map",             roots: "C5-T1",            modeSummary: { motor: "Triceps, anconeus, brachioradialis, ECRL — via posterior cord before dividing.", sensory: "Posterior arm, posterior forearm, and dorsolateral hand via multiple cutaneous branches." } },
+      { id: "pin-map",                roots: "C7-C8",            modeSummary: { motor: "Supinator, ECRB, extensor digitorum, EDM, ECU, APL, EPB, EPL, extensor indicis.", sensory: "No cutaneous territory." } },
+      { id: "superficial-radial-map", roots: "C6-C8",            modeSummary: { motor: "No motor territory.", sensory: "Dorsolateral hand and proximal dorsal portions of the lateral 3.5 digits. Does not typically supply nail beds." } },
+      { id: "suprascapular-map",      roots: "C5-C6",            modeSummary: { motor: "Supraspinatus (initiates abduction) and infraspinatus (external rotation).", sensory: "No cutaneous territory." } },
+      { id: "long-thoracic-map",      roots: "C5-C7",            modeSummary: { motor: "Serratus anterior — scapular protraction and upward rotation.", sensory: "No cutaneous territory." } },
+      { id: "dorsal-scapular-map",    roots: "C5",               modeSummary: { motor: "Rhomboid major, rhomboid minor, and levator scapulae — scapular retraction and downward rotation.", sensory: "No cutaneous territory." } },
+      { id: "labc-map",               roots: "C5-C7",            modeSummary: { motor: "No motor territory.", sensory: "Terminal continuation of the musculocutaneous nerve — lateral forearm, anterior and posterior surfaces." } },
+      { id: "mabc-map",               roots: "C8-T1",            modeSummary: { motor: "No motor territory.", sensory: "Medial cord branch — medial forearm, anterior and posterior surfaces." } },
+      { id: "mbc-map",                roots: "T1 (sometimes C8)", modeSummary: { motor: "No motor territory.", sensory: "Medial cord branch — medial arm." } },
+      { id: "intercostobrachial-map", roots: "T2",               modeSummary: { motor: "No motor territory. Not part of the brachial plexus.", sensory: "T2 intercostal cutaneous branch — axilla and upper medial arm." } },
+    ];
+
+    // ── AnatomyMapOverlay ────────────────────────────────────────────────────
+    const AnatomyMapOverlay = () => {
+      const [mapMode, setMapMode] = useState("motor");
+      const [selectedId, setSelectedId] = useState("axillary-map");
+      const [hoveredId, setHoveredId] = useState(null);
+
+      const activeId = hoveredId || selectedId;
+      const territory = NERVE_TERRITORIES[activeId];
+      const activeNerve = anatomyMapNerves.find(n => n.id === activeId) || anatomyMapNerves[0];
+
+      const MOTOR_FILL   = "rgba(40,80,167,0.48)";
+      const MOTOR_STROKE = "rgba(28,58,130,0.95)";
+      const SENS_FILL    = "rgba(180,30,50,0.48)";
+      const SENS_STROKE  = "rgba(150,20,40,0.95)";
+
+      const ovFill   = mapMode === "motor" ? MOTOR_FILL   : SENS_FILL;
+      const ovStroke = mapMode === "motor" ? MOTOR_STROKE : SENS_STROKE;
+
+      const ArmPanel = ({ title, view }) => {
+        const frontOutline = ARM_FRONT_OUTLINE;
+        const backOutline  = ARM_BACK_OUTLINE;
+        const outline = view === "front" ? frontOutline : backOutline;
+        const clipId  = view === "front" ? "armclip-front" : "armclip-back";
+        const data    = territory ? territory[mapMode]?.[view] : null;
+        const hasZone = !!(data?.path);
+
+        // Label chip — stays within 0-320 viewBox, compact font
+        const LabelOverlay = () => {
+          if (!hasZone) return null;
+          const { label, ax, ay, lx, ly } = data;
+          const FONT = 8.5;
+          const PAD  = 10;
+          const chipW = Math.min(label.length * 5.2 + PAD * 2, 136);
+          const chipH = 18;
+          const rawChipX = lx < 160 ? lx - chipW : lx;
+          const chipX = Math.max(2, Math.min(318 - chipW, rawChipX));
+          const chipY = Math.max(2, Math.min(610, ly - chipH / 2));
+          const chipMidX = chipX + chipW / 2;
+          const leaderX = ax < chipMidX ? chipX : chipX + chipW;
+          return (
+            <g>
+              <line x1={ax} y1={ay} x2={leaderX} y2={chipY + chipH / 2}
+                stroke={ovStroke} strokeWidth="1.2" strokeDasharray="3,2" opacity="0.75" />
+              <circle cx={ax} cy={ay} r="3" fill={ovStroke} opacity="0.85" />
+              <rect x={chipX} y={chipY} width={chipW} height={chipH} rx="9"
+                fill="rgba(255,255,255,0.97)" stroke={ovStroke} strokeWidth="1.1"
+                filter="url(#labelshadow)" />
+              <text x={chipX + chipW / 2} y={chipY + 12}
+                textAnchor="middle" fontSize={FONT} fontWeight="700"
+                fill="rgba(10,20,40,0.88)">
+                {label}
+              </text>
+            </g>
+          );
+        };
+
+        // Anatomical surface markings differ front vs back
+        const SurfaceMarks = () => view === "front" ? (
+          <g opacity="0.18" stroke="rgba(100,65,40,1)" fill="none">
+            {/* Bicipital groove */}
+            <path d="M 128 130 C 130 160 132 194 130 226" strokeWidth="2.2" strokeLinecap="round" />
+            {/* Antecubital fossa crease */}
+            <path d="M 106 268 C 125 278 160 280 206 270" strokeWidth="1.8" strokeLinecap="round" />
+            {/* Wrist crease */}
+            <path d="M 114 434 C 135 440 182 440 208 434" strokeWidth="1.8" strokeLinecap="round" />
+            {/* Thenar crease */}
+            <path d="M 120 462 C 114 476 110 494 112 512" strokeWidth="1.6" strokeLinecap="round" />
+            {/* Palmar flexion creases */}
+            <path d="M 120 490 C 140 494 166 494 172 490" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Knuckle hints */}
+            <ellipse cx="124" cy="512" rx="5" ry="3.5" fill="rgba(100,65,40,0.18)" />
+            <ellipse cx="151" cy="512" rx="5" ry="3.5" fill="rgba(100,65,40,0.18)" />
+            <ellipse cx="175" cy="512" rx="5" ry="3.5" fill="rgba(100,65,40,0.18)" />
+            <ellipse cx="197" cy="512" rx="5" ry="3.5" fill="rgba(100,65,40,0.18)" />
+          </g>
+        ) : (
+          <g opacity="0.18" stroke="rgba(100,65,40,1)" fill="none">
+            {/* Triceps tendon line */}
+            <path d="M 160 130 C 160 164 160 200 158 230" strokeWidth="2.2" strokeLinecap="round" />
+            {/* Olecranon crease */}
+            <path d="M 110 268 C 130 278 164 280 210 270" strokeWidth="1.8" strokeLinecap="round" />
+            {/* Wrist crease */}
+            <path d="M 118 434 C 140 440 186 440 212 434" strokeWidth="1.8" strokeLinecap="round" />
+            {/* Knuckle hints */}
+            <ellipse cx="130" cy="512" rx="5" ry="3.5" fill="rgba(100,65,40,0.18)" />
+            <ellipse cx="153" cy="512" rx="5" ry="3.5" fill="rgba(100,65,40,0.18)" />
+            <ellipse cx="177" cy="512" rx="5" ry="3.5" fill="rgba(100,65,40,0.18)" />
+            <ellipse cx="201" cy="512" rx="5" ry="3.5" fill="rgba(100,65,40,0.18)" />
+          </g>
+        );
+
+        // View label at bottom
+        const viewLabel = view === "front" ? "ANTERIOR" : "POSTERIOR";
+
+        return (
+          <div className="flex flex-col rounded-[20px] border border-[rgba(27,46,68,0.1)] bg-white overflow-hidden shadow-soft">
+            <div className="px-4 pt-3 pb-0.5 border-b border-[rgba(27,46,68,0.06)]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--slate-soft)]">{title}</p>
+            </div>
+            <svg viewBox="0 0 320 650" className="w-full flex-1">
+              <defs>
+                {/* Drop shadow for label chips */}
+                <filter id="labelshadow" x="-10%" y="-20%" width="120%" height="140%">
+                  <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.14" />
+                </filter>
+                {/* Clip path — zone overlay never escapes arm boundary */}
+                <clipPath id={clipId}>
+                  <path d={outline} />
+                </clipPath>
+                {/* Subtle skin gradient */}
+                <linearGradient id={`skin-${view}`} x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%"   stopColor="rgba(210,175,140,1)" />
+                  <stop offset="45%"  stopColor="rgba(232,200,165,1)" />
+                  <stop offset="100%" stopColor="rgba(215,180,148,1)" />
+                </linearGradient>
+              </defs>
+
+              {/* Arm fill */}
+              <path d={outline} fill={`url(#skin-${view})`} />
+
+              {/* Highlighted zone — clipped to arm */}
+              {hasZone && (
+                <path
+                  d={data.path}
+                  fill={ovFill}
+                  stroke={ovStroke}
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                  clipPath={`url(#${clipId})`}
+                />
+              )}
+
+              {/* Arm outline on top for crisp border */}
+              <path d={outline}
+                fill="none"
+                stroke="rgba(120,80,50,0.5)"
+                strokeWidth="1.8" />
+
+              {/* Anatomical surface markings */}
+              <SurfaceMarks />
+
+              {/* View label */}
+              <text x="160" y="638" textAnchor="middle" fontSize="10" fontWeight="700"
+                letterSpacing="2.5" fill="rgba(80,60,40,0.4)">
+                {viewLabel}
+              </text>
+
+              {/* Label chip + leader — drawn OUTSIDE clipPath so it's never cut off */}
+              <LabelOverlay />
+
+              {/* No-territory notice */}
+              {!hasZone && (
+                <g>
+                  <rect x="68" y="295" width="184" height="30" rx="15"
+                    fill="rgba(255,255,255,0.9)" stroke="rgba(35,42,51,0.1)" />
+                  <text x="160" y="315" textAnchor="middle" fontSize="10.5"
+                    fontWeight="600" fill="rgba(88,98,114,0.7)">
+                    No {mapMode} territory here
+                  </text>
+                </g>
+              )}
+            </svg>
+          </div>
+        );
+      };
+
+      return (
+        <div className="grid gap-5 xl:grid-cols-[0.88fr_1.12fr]">
+          {/* ── Nerve selector panel ── */}
+          <div className="rounded-[22px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.035)] p-4">
+            {/* Mode toggle */}
+            <div className="flex gap-2 mb-4">
+              {[
+                { id: "motor",   label: "Motor",   color: MOTOR_STROKE },
+                { id: "sensory", label: "Sensory",  color: SENS_STROKE  },
+              ].map(opt => (
+                <button key={opt.id} type="button" onClick={() => setMapMode(opt.id)}
+                  className="rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none"
+                  style={mapMode === opt.id
+                    ? { borderColor: opt.color + "66", background: opt.color + "18", color: "var(--slate)" }
+                    : { borderColor: "rgba(27,46,68,0.12)", background: "white", color: "var(--slate-soft)" }}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Nerve list */}
+            <div className="grid gap-1 overflow-y-auto" style={{ maxHeight: "540px" }}>
+              {Object.entries(NERVE_TERRITORIES).map(([id, terr]) => {
+                const nerve = anatomyMapNerves.find(n => n.id === id);
+                const isActive = activeId === id;
+                const hasFront = !!(terr[mapMode]?.front);
+                const hasBack  = !!(terr[mapMode]?.back);
+                return (
+                  <button key={id} type="button"
+                    onMouseEnter={() => setHoveredId(id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    onClick={() => setSelectedId(id)}
+                    className="rounded-[14px] border px-3 py-2.5 text-left transition focus-visible:outline-none w-full"
+                    style={isActive
+                      ? { borderColor: "rgba(166,25,46,0.32)", background: "rgba(166,25,46,0.09)" }
+                      : { borderColor: "rgba(27,46,68,0.08)", background: "white" }}>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-[var(--slate)] leading-tight">{terr.name}</span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {/* Dot indicators: show if this nerve has a territory in each view for current mode */}
+                        <span title="Anterior" style={{ width: 7, height: 7, borderRadius: "50%", display: "inline-block",
+                          background: hasFront ? (mapMode==="motor" ? MOTOR_STROKE : SENS_STROKE) : "rgba(27,46,68,0.15)" }} />
+                        <span title="Posterior" style={{ width: 7, height: 7, borderRadius: "50%", display: "inline-block",
+                          background: hasBack  ? (mapMode==="motor" ? MOTOR_STROKE : SENS_STROKE) : "rgba(27,46,68,0.15)" }} />
+                        <span className="text-[9px] uppercase tracking-[0.1em] text-[var(--slate-soft)] ml-1">{nerve?.roots ?? ""}</span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-3 text-[10px] text-[var(--slate-soft)] leading-5 opacity-70">
+              Dots = territory exists in anterior · posterior view for selected mode.
+            </p>
+          </div>
+
+          {/* ── Map + info ── */}
+          <div className="grid gap-4">
+            {/* Info card */}
+            <div className="rounded-[20px] border border-[rgba(27,46,68,0.1)] bg-white p-4 shadow-soft">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full shrink-0" style={{ background: mapMode === "motor" ? MOTOR_STROKE : SENS_STROKE }} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]"
+                  style={{ color: mapMode === "motor" ? MOTOR_STROKE : SENS_STROKE }}>
+                  {mapMode === "motor" ? "Motor territory" : "Sensory territory"}
+                </span>
+              </div>
+              <h3 className="mt-1.5 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                {territory?.name ?? ""}
+              </h3>
+              <p className="mt-1.5 text-sm leading-6 text-[var(--slate-soft)]">
+                {activeNerve?.modeSummary?.[mapMode] ?? "No territory listed."}
+              </p>
+            </div>
+
+            {/* Arm panels side by side */}
+            <div className="grid grid-cols-2 gap-3">
+              <ArmPanel title="Anterior view" view="front" />
+              <ArmPanel title="Posterior view" view="back" />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const comparisonSets = [
+      {
+        id: "median-ulnar",
+        title: "Median vs Ulnar",
+        focus: "Lateral hand precision and pronation pattern vs medial hand intrinsic and ulnar-sided grip pattern.",
+        left: {
+          name: "Median nerve",
+          roots: "C5-T1",
+          motor: "Most anterior forearm muscles; most thenar muscles; lumbricals 1-2.",
+          sensory: "Lateral palm and palmar lateral 3.5 digits, plus dorsal distal phalanges / nail beds of those digits.",
+          hallmark: "Thenar weakness and sensory loss in the lateral digits.",
+          clue: "Formed by lateral and medial cords; gives off the anterior interosseous nerve.",
+        },
+        right: {
+          name: "Ulnar nerve",
+          roots: "C8-T1",
+          motor: "FCU, medial half of FDP, and intrinsic medial hand via terminal branches.",
+          sensory: "Medial hand plus palmar and dorsal medial 1.5 digits.",
+          hallmark: "Weak finger abduction / adduction and impaired intrinsic hand control.",
+          clue: "Branch of the medial cord with superficial and deep hand branches.",
+        },
+      },
+      {
+        id: "radial-pin",
+        title: "Radial vs Posterior Interosseous",
+        focus: "Proximal extensor lesion with sensory findings vs distal motor-only posterior forearm lesion.",
+        left: {
+          name: "Radial nerve",
+          roots: "C5-T1",
+          motor: "Triceps, anconeus, brachioradialis, ECRL, and via its deep branch the rest of the posterior forearm extensors.",
+          sensory: "Posterior arm, posterior forearm, and dorsolateral hand.",
+          hallmark: "Wrist drop with radial sensory loss if the lesion is proximal enough.",
+          clue: "Carries both superficial sensory and deep motor branches.",
+        },
+        right: {
+          name: "Deep branch of radial nerve / Posterior interosseous nerve",
+          roots: "C7-C8",
+          motor: "Supinator and the posterior forearm extensors listed in Table 1.",
+          sensory: "No major cutaneous territory listed in the handout.",
+          hallmark: "Finger and thumb extension weakness with minimal cutaneous loss.",
+          clue: "Motor continuation of the radial nerve in the posterior forearm.",
+        },
+      },
+      {
+        id: "axillary-musculocutaneous",
+        title: "Axillary vs Musculocutaneous",
+        focus: "Proximal shoulder abduction pattern vs anterior arm elbow-flexion pattern.",
+        left: {
+          name: "Axillary nerve",
+          roots: "C5-C6",
+          motor: "Deltoid and teres minor.",
+          sensory: "Lateral deltoid region.",
+          hallmark: "Weak shoulder abduction with regimental badge sensory loss.",
+          clue: "Runs with the posterior circumflex humeral artery in the quadrangular space.",
+        },
+        right: {
+          name: "Musculocutaneous nerve",
+          roots: "C5-C7",
+          motor: "Coracobrachialis, biceps brachii, brachialis.",
+          sensory: "Lateral forearm via the lateral antebrachial cutaneous nerve.",
+          hallmark: "Weak elbow flexion and supination with lateral forearm sensory loss.",
+          clue: "Terminal branch of the lateral cord that continues across the elbow.",
+        },
+      },
+      {
+        id: "long-thoracic-dorsal-scapular",
+        title: "Long Thoracic vs Dorsal Scapular",
+        focus: "Scapular protraction / upward rotation pattern vs retraction / downward rotation pattern.",
+        left: {
+          name: "Long thoracic nerve",
+          roots: "C5-C7",
+          motor: "Serratus anterior.",
+          sensory: "No cutaneous territory.",
+          hallmark: "Scapular winging with poor upward rotation.",
+          clue: "Exits the plexus at the root level and runs on serratus anterior.",
+        },
+        right: {
+          name: "Dorsal scapular nerve",
+          roots: "C5",
+          motor: "Rhomboid major, rhomboid minor, levator scapulae.",
+          sensory: "No cutaneous territory.",
+          hallmark: "Weak scapular retraction and downward rotation.",
+          clue: "Root-level C5 branch to the medial scapular stabilizers.",
+        },
+      },
+    ];
+
+    const lesionProfiles = [
+      {
+        id: "lesion-axillary",
+        nerve: "Axillary nerve",
+        roots: "C5-C6",
+        vulnerableSite: "Surgical neck of the humerus or quadrangular space.",
+        motorLoss: "Weak deltoid and teres minor function with impaired shoulder abduction and external rotation support.",
+        sensoryLoss: "Lateral deltoid / regimental badge area.",
+        reflex: "No hallmark deep tendon reflex emphasized in this handout.",
+        presentation: "Difficulty abducting the shoulder beyond the initial range with lateral shoulder numbness.",
+      },
+      {
+        id: "lesion-musculocutaneous",
+        nerve: "Musculocutaneous nerve",
+        roots: "C5-C7",
+        vulnerableSite: "Lateral cord or anterior arm trauma.",
+        motorLoss: "Weak elbow flexion and forearm supination from biceps and brachialis involvement.",
+        sensoryLoss: "Lateral forearm via the lateral antebrachial cutaneous nerve.",
+        reflex: "Biceps reflex may be diminished.",
+        presentation: "Weak elbow flexion with lateral forearm sensory symptoms.",
+      },
+      {
+        id: "lesion-median",
+        nerve: "Median nerve",
+        roots: "C5-T1",
+        vulnerableSite: "Forearm, carpal tunnel region, or median nerve compression sites.",
+        motorLoss: "Weak forearm pronation, wrist flexion pattern, thenar opposition, and precision grip.",
+        sensoryLoss: "Lateral palm and palmar lateral 3.5 digits; also dorsal distal phalanges / nail beds of those digits.",
+        reflex: "No hallmark reflex emphasized in this handout.",
+        presentation: "Thenar weakness with lateral hand numbness and impaired precision grip.",
+      },
+      {
+        id: "lesion-ain",
+        nerve: "Anterior interosseous nerve",
+        roots: "C8-T1",
+        vulnerableSite: "Deep anterior forearm.",
+        motorLoss: "Weak FPL, PQ, and lateral FDP with impaired thumb IP and index / middle DIP flexion.",
+        sensoryLoss: "None.",
+        reflex: "No reflex change.",
+        presentation: "Abnormal pinch sign with a motor-only pattern.",
+      },
+      {
+        id: "lesion-ulnar",
+        nerve: "Ulnar nerve",
+        roots: "C8-T1",
+        vulnerableSite: "Medial elbow, forearm, or hand-level compression / trauma.",
+        motorLoss: "Weak FCU, medial FDP, and intrinsic hand function via terminal branches.",
+        sensoryLoss: "Medial hand and palmar / dorsal medial 1.5 digits.",
+        reflex: "No hallmark reflex emphasized in this handout.",
+        presentation: "Intrinsic hand weakness with loss of finger abduction/adduction and medial hand numbness.",
+      },
+      {
+        id: "lesion-deep-ulnar",
+        nerve: "Deep branch of ulnar nerve",
+        roots: "C8-T1",
+        vulnerableSite: "Within the hand after the ulnar nerve divides.",
+        motorLoss: "Weak hypothenar muscles, interossei, adductor pollicis, deep head of FPB, and lumbricals 3-4.",
+        sensoryLoss: "Minimal to none because the branch is primarily motor.",
+        reflex: "No reflex change.",
+        presentation: "Marked intrinsic hand weakness with impaired pinch and interosseous function.",
+      },
+      {
+        id: "lesion-radial",
+        nerve: "Radial nerve",
+        roots: "C5-T1",
+        vulnerableSite: "Posterior arm / spiral groove region or proximal radial trauma.",
+        motorLoss: "Weak wrist and finger extension plus posterior forearm extensor weakness.",
+        sensoryLoss: "Posterior arm, posterior forearm, and dorsolateral hand.",
+        reflex: "Triceps reflex may be reduced if the lesion is proximal enough.",
+        presentation: "Wrist drop with dorsolateral hand sensory symptoms.",
+      },
+      {
+        id: "lesion-pin",
+        nerve: "Deep branch of radial nerve / Posterior interosseous nerve",
+        roots: "C7-C8",
+        vulnerableSite: "Posterior forearm / radial tunnel region.",
+        motorLoss: "Weak finger and thumb extension with posterior forearm extensor deficits.",
+        sensoryLoss: "None or minimal because no major cutaneous field is listed.",
+        reflex: "No major reflex change.",
+        presentation: "Finger drop without the broader radial sensory pattern.",
+      },
+      {
+        id: "lesion-suprascapular",
+        nerve: "Suprascapular nerve",
+        roots: "C5-C6",
+        vulnerableSite: "Suprascapular course to the rotator cuff.",
+        motorLoss: "Weak supraspinatus and infraspinatus function.",
+        sensoryLoss: "None.",
+        reflex: "No major reflex change.",
+        presentation: "Difficulty initiating abduction and weak external rotation.",
+      },
+      {
+        id: "lesion-long-thoracic",
+        nerve: "Long thoracic nerve",
+        roots: "C5-C7",
+        vulnerableSite: "Along serratus anterior or after axillary region procedures.",
+        motorLoss: "Weak serratus anterior with loss of normal scapular protraction and upward rotation.",
+        sensoryLoss: "None.",
+        reflex: "No reflex change.",
+        presentation: "Scapular winging and trouble elevating the arm efficiently.",
+      },
+      {
+        id: "lesion-dorsal-scapular",
+        nerve: "Dorsal scapular nerve",
+        roots: "C5",
+        vulnerableSite: "Root-level or medial scapular region irritation.",
+        motorLoss: "Weak rhomboids and levator scapulae with poor scapular retraction and downward rotation.",
+        sensoryLoss: "None.",
+        reflex: "No reflex change.",
+        presentation: "Scapular stabilizer weakness along the medial border of the scapula.",
+      },
+      {
+        id: "lesion-superficial-radial",
+        nerve: "Superficial branch of radial nerve",
+        roots: "C6-C8",
+        vulnerableSite: "Distal radial sensory branch at the wrist / dorsolateral hand.",
+        motorLoss: "None.",
+        sensoryLoss: "Dorsolateral hand and proximal dorsal lateral 3.5 digits.",
+        reflex: "No reflex change.",
+        presentation: "Pure sensory dorsolateral hand symptoms without extensor weakness.",
+      },
+    ];
+
+    const cn = (...values) => values.filter(Boolean).join(" ");
+
+    const shuffleArray = (items, seed = 0) => {
+      const copy = [...items];
+      let currentSeed = seed + items.length * 17 + 9;
+      for (let index = copy.length - 1; index > 0; index -= 1) {
+        currentSeed = (currentSeed * 9301 + 49297) % 233280;
+        const swapIndex = Math.floor((currentSeed / 233280) * (index + 1));
+        [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+      }
+      return copy;
+    };
+
+    const getPercent = (correct, attempted) => {
+      if (!attempted) return 0;
+      return Math.round((correct / attempted) * 100);
+    };
+
+    const getPerformanceTone = (percent, attempted) => {
+      if (!attempted) {
+        return {
+          bar: "rgba(91, 143, 139, 0.24)",
+          chip: "rgba(91, 143, 139, 0.12)",
+          text: "var(--teal)",
+          label: "No attempts yet",
+        };
+      }
+      if (percent > 80) {
+        return {
+          bar: "var(--success)",
+          chip: "var(--success-soft)",
+          text: "var(--success)",
+          label: "Strong retention",
+        };
+      }
+      if (percent >= 60) {
+        return {
+          bar: "var(--amber)",
+          chip: "var(--amber-soft)",
+          text: "var(--amber)",
+          label: "Building consistency",
+        };
+      }
+      return {
+        bar: "var(--rose)",
+        chip: "var(--rose-soft)",
+        text: "var(--rose)",
+        label: "Needs review",
+      };
+    };
+
+    const createEmptyWeakSpots = () => ({
+      nerves: {},
+      spaces: {},
+      sensory: {},
+    });
+
+    const updateWeakSpotBucket = (bucket, labels = [], isCorrect) => {
+      const nextBucket = { ...bucket };
+      labels.forEach((label) => {
+        nextBucket[label] = {
+          attempts: (nextBucket[label]?.attempts || 0) + 1,
+          misses: (nextBucket[label]?.misses || 0) + (isCorrect ? 0 : 1),
+        };
+      });
+      return nextBucket;
+    };
+
+    const recordWeakSpot = (currentWeakSpots, tracking, isCorrect) => {
+      if (!tracking) return currentWeakSpots;
+      return {
+        nerves: updateWeakSpotBucket(currentWeakSpots.nerves, tracking.nerves, isCorrect),
+        spaces: updateWeakSpotBucket(currentWeakSpots.spaces, tracking.spaces, isCorrect),
+        sensory: updateWeakSpotBucket(currentWeakSpots.sensory, tracking.sensory, isCorrect),
+      };
+    };
+
+    const getWeakSpotList = (bucket) =>
+      Object.entries(bucket)
+        .map(([label, stats]) => ({
+          label,
+          attempts: stats.attempts,
+          misses: stats.misses,
+          missRate: stats.attempts ? Math.round((stats.misses / stats.attempts) * 100) : 0,
+        }))
+        .filter((item) => item.misses > 0)
+        .sort((left, right) => {
+          if (right.misses !== left.misses) return right.misses - left.misses;
+          if (right.missRate !== left.missRate) return right.missRate - left.missRate;
+          return left.label.localeCompare(right.label);
+        });
+
+    const SectionShell = ({ eyebrow, title, subtitle, children, actions }) => (
+      <section
+        className="rounded-[28px] border border-[rgba(27,46,68,0.12)] bg-[rgba(255,253,250,0.94)] shadow-atlas backdrop-blur-sm"
+        data-card-animation="fade"
+      >
+        <div className="flex flex-col gap-5 border-b border-[rgba(27,46,68,0.08)] px-6 py-6 md:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-4xl">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--amber)]">{eyebrow}</p>
+              <h2
+                className="text-[2rem] leading-none text-[var(--slate)] md:text-[2.5rem]"
+                style={{ fontFamily: '"Playfair Display", serif' }}
+              >
+                {title}
+              </h2>
+              <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--slate-soft)] md:text-lg">{subtitle}</p>
+            </div>
+            {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
+          </div>
+        </div>
+        <div className="px-6 py-6 md:px-8 md:py-8">{children}</div>
+      </section>
+    );
+
+    const ScorePill = ({ value, label }) => (
+      <div className="rounded-full border border-[rgba(27,46,68,0.12)] bg-white/80 px-4 py-2 shadow-soft">
+        <div className="text-sm font-semibold text-[var(--slate)]">{value}</div>
+        <div className="text-xs uppercase tracking-[0.16em] text-[var(--slate-soft)]">{label}</div>
+      </div>
+    );
+
+    const CompareNervesView = () => {
+      const [activeComparison, setActiveComparison] = useState(comparisonSets[0].id);
+      const comparison = comparisonSets.find((item) => item.id === activeComparison) || comparisonSets[0];
+
+      const CompareCard = ({ side, tone }) => (
+        <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-5 shadow-soft">
+          <div className="inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]" style={{ background: tone.bg, color: tone.text }}>
+            {side.roots}
+          </div>
+          <h3 className="mt-3 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+            {side.name}
+          </h3>
+          <div className="mt-4 grid gap-3 text-sm leading-6 text-[var(--slate)]">
+            <div className="rounded-[18px] bg-[rgba(27,46,68,0.04)] p-4"><strong>Motor:</strong> {side.motor}</div>
+            <div className="rounded-[18px] bg-[rgba(0,183,201,0.08)] p-4"><strong>Sensory:</strong> {side.sensory}</div>
+            <div className="rounded-[18px] bg-[rgba(166,25,46,0.08)] p-4"><strong>Hallmark lesion clue:</strong> {side.hallmark}</div>
+            <div className="rounded-[18px] bg-[rgba(40,80,167,0.08)] p-4"><strong>Distinguishing path:</strong> {side.clue}</div>
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="grid gap-6">
+          <div className="flex flex-wrap gap-3">
+            {comparisonSets.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveComparison(item.id)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                  activeComparison === item.id
+                    ? "border-[rgba(166,25,46,0.4)] bg-[rgba(166,25,46,0.14)] text-[var(--slate)]"
+                    : "border-[rgba(27,46,68,0.12)] bg-white text-[var(--slate-soft)]"
+                )}
+              >
+                {item.title}
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Fast distinction</p>
+            <p className="mt-2 text-base leading-7 text-[var(--slate-soft)]">{comparison.focus}</p>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <CompareCard side={comparison.left} tone={{ bg: "rgba(0,183,201,0.12)", text: "var(--teal)" }} />
+            <CompareCard side={comparison.right} tone={{ bg: "rgba(166,25,46,0.12)", text: "var(--amber)" }} />
+          </div>
+        </div>
+      );
+    };
+
+    const LesionBuilderView = () => {
+      const [selectedProfileId, setSelectedProfileId] = useState(lesionProfiles[0].id);
+      const profile = lesionProfiles.find((item) => item.id === selectedProfileId) || lesionProfiles[0];
+
+      return (
+        <div className="grid gap-6 lg:grid-cols-[0.72fr_1.28fr]">
+          <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Choose an injured nerve</p>
+            <div className="mt-4 grid gap-2">
+              {lesionProfiles.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setSelectedProfileId(item.id)}
+                  className={cn(
+                    "rounded-[18px] border px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                    selectedProfileId === item.id
+                      ? "border-[rgba(166,25,46,0.28)] bg-[rgba(166,25,46,0.1)]"
+                      : "border-[rgba(27,46,68,0.08)] bg-white hover:border-[rgba(0,183,201,0.28)]"
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold text-[var(--slate)]">{item.nerve}</span>
+                    <span className="text-xs uppercase tracking-[0.16em] text-[var(--slate-soft)]">{item.roots}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-6 shadow-card" data-card-animation="fade">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">Predicted lesion pattern</p>
+            <h3 className="mt-2 text-3xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+              {profile.nerve}
+            </h3>
+            <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--slate-soft)]">{profile.roots}</p>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="rounded-[18px] bg-[rgba(166,25,46,0.08)] p-4"><strong>Vulnerable site:</strong> {profile.vulnerableSite}</div>
+              <div className="rounded-[18px] bg-[rgba(40,80,167,0.08)] p-4"><strong>Classic presentation:</strong> {profile.presentation}</div>
+              <div className="rounded-[18px] bg-[rgba(27,46,68,0.05)] p-4"><strong>Motor loss:</strong> {profile.motorLoss}</div>
+              <div className="rounded-[18px] bg-[rgba(0,183,201,0.08)] p-4"><strong>Sensory loss:</strong> {profile.sensoryLoss}</div>
+              <div className="rounded-[18px] bg-[rgba(239,62,66,0.08)] p-4 md:col-span-2"><strong>Reflex changes:</strong> {profile.reflex}</div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const ExplorerSection = () => {
+      const [activeView, setActiveView] = useState("atlas");
+      const [activeTab, setActiveTab] = useState("plexus");
+      const [expandedCards, setExpandedCards] = useState(["brachial-plexus", "median", "radial"]);
+
+      const toggleCard = useCallback((cardId) => {
+        setExpandedCards((current) =>
+          current.includes(cardId) ? current.filter((id) => id !== cardId) : [...current, cardId]
+        );
+      }, []);
+
+      const tabMeta = [
+        { id: "plexus", label: "Plexus Overview" },
+        { id: "cords", label: "Cords" },
+        { id: "major", label: "Major Nerves" },
+        { id: "cutaneous", label: "Cutaneous Nerves" },
+        { id: "spaces", label: "Anatomical Spaces" },
+      ];
+
+      const viewTabs = [
+        { id: "atlas", label: "Reference Atlas" },
+        { id: "compare", label: "Compare Nerves" },
+        { id: "lesion", label: "Lesion Builder" },
+      ];
+
+      return (
+        <SectionShell
+          eyebrow="Section 1"
+          title="Nerve Explorer"
+          subtitle="Browse brachial-plexus organization, major UE nerves, cutaneous territories, neck and shoulder spaces, then use compare cards and lesion predictions from the DPTD 731 handout."
+          actions={
+            <>
+              <ScorePill value="Reference Mode" label="Scoring not required" />
+              <ScorePill value="3 learning views" label="Atlas + tools" />
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-3" role="tablist" aria-label="Nerve explorer views">
+            {viewTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={activeView === tab.id}
+                aria-label={`Open ${tab.label}`}
+                onClick={() => setActiveView(tab.id)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                  activeView === tab.id
+                    ? "border-[rgba(166,25,46,0.45)] bg-[rgba(166,25,46,0.14)] text-[var(--slate)]"
+                    : "border-[rgba(27,46,68,0.12)] bg-white/80 text-[var(--slate-soft)] hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)]"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {activeView === "atlas" ? (
+            <>
+              <div className="mt-6 flex flex-wrap gap-3" role="tablist" aria-label="Reference atlas tabs">
+                {tabMeta.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
+                    aria-label={`Open ${tab.label}`}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                      activeTab === tab.id
+                        ? "border-[rgba(166,25,46,0.45)] bg-[rgba(166,25,46,0.14)] text-[var(--slate)]"
+                        : "border-[rgba(27,46,68,0.12)] bg-white/80 text-[var(--slate-soft)] hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)]"
+                    )}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-6 grid gap-4 xl:grid-cols-2">
+                {explorerData[activeTab].map((entry) => {
+                  const expanded = expandedCards.includes(entry.id);
+                  return (
+                    <article
+                      key={entry.id}
+                      className="overflow-hidden rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[var(--paper-strong)] shadow-card"
+                      data-card-animation="slide"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleCard(entry.id)}
+                        aria-expanded={expanded}
+                        aria-label={`${expanded ? "Collapse" : "Expand"} ${entry.name}`}
+                        className="flex w-full items-start justify-between gap-4 px-5 py-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                      >
+                        <div>
+                          <div className="mb-2 flex flex-wrap gap-2">
+                            <span className="rounded-full bg-[rgba(0,183,201,0.13)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--teal)]">
+                              {entry.roots}
+                            </span>
+                            {activeTab === "spaces" ? (
+                              <span className="rounded-full bg-[rgba(166,25,46,0.13)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--amber)]">
+                                Atlas space
+                              </span>
+                            ) : null}
+                          </div>
+                          <h3 className="text-2xl leading-tight text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                            {entry.name}
+                          </h3>
+                          <p className="mt-2 text-sm leading-6 text-[var(--slate-soft)]">{entry.course}</p>
+                        </div>
+                        <span className="rounded-full border border-[rgba(27,46,68,0.1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--slate-soft)]">
+                          {expanded ? "Hide" : "Open"}
+                        </span>
+                      </button>
+
+                      {expanded ? (
+                        <div className="grid gap-4 border-t border-[rgba(27,46,68,0.08)] px-5 py-5 md:grid-cols-2" data-card-animation="fade">
+                          <div className="rounded-[18px] bg-[rgba(27,46,68,0.04)] p-4">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Motor</p>
+                            <p className="mt-2 text-sm leading-6 text-[var(--slate)]">{entry.motor}</p>
+                          </div>
+                          <div className="rounded-[18px] bg-[rgba(0,183,201,0.08)] p-4">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">Sensory / Spatial</p>
+                            <p className="mt-2 text-sm leading-6 text-[var(--slate)]">{entry.sensory}</p>
+                          </div>
+                          <div className="rounded-[18px] bg-[rgba(166,25,46,0.08)] p-4 md:col-span-2">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Key Clinical Point</p>
+                            <p className="mt-2 text-sm leading-6 text-[var(--slate)]">{entry.clinical}</p>
+                          </div>
+
+                          {entry.branches ? (
+                            <div className="md:col-span-2">
+                              <div className="mb-3 flex items-center gap-3">
+                                <div className="h-px flex-1 bg-[rgba(27,46,68,0.08)]"></div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--slate-soft)]">Branch Detail</p>
+                                <div className="h-px flex-1 bg-[rgba(27,46,68,0.08)]"></div>
+                              </div>
+                              <div className="grid gap-3 md:grid-cols-2">
+                                {entry.branches.map((branch) => (
+                                  <div key={branch.title} className="rounded-[18px] border border-[rgba(27,46,68,0.1)] bg-white px-4 py-4 shadow-soft">
+                                    <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--teal)]">{branch.title}</p>
+                                    <p className="mt-2 text-sm leading-6 text-[var(--slate)]">{branch.details}</p>
+                                    {branch.children ? (
+                                      <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--slate-soft)]">
+                                        {branch.children.map((child) => (
+                                          <li key={child} className="rounded-2xl bg-[rgba(27,46,68,0.04)] px-3 py-2">
+                                            {child}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    ) : null}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })}
+              </div>
+            </>
+          ) : null}
+
+          {activeView === "compare" ? <div className="mt-6"><CompareNervesView /></div> : null}
+          {activeView === "lesion" ? <div className="mt-6"><LesionBuilderView /></div> : null}
+        </SectionShell>
+      );
+    };
+
+    const QuestionDeck = ({ sectionKey, title, subtitle, questions, onRecord, resetSignal, shuffleChoices = false, trackingMap = null }) => {
+      const [seed, setSeed] = useState(1);
+      const [index, setIndex] = useState(0);
+      const [answers, setAnswers] = useState({});
+
+      const deck = useMemo(
+        () =>
+          shuffleArray(questions, seed).map((question, questionIndex) => ({
+            ...question,
+            displayOptions: shuffleChoices
+              ? shuffleArray(question.options, seed + (questionIndex + 1) * 37 + question.id.length)
+              : question.options,
+          })),
+        [questions, seed, shuffleChoices]
+      );
+      const current = deck[index];
+      const answeredCurrent = current ? answers[current.id] : null;
+      const completed = index >= deck.length;
+
+      useEffect(() => {
+        setSeed(resetSignal + 1);
+        setIndex(0);
+        setAnswers({});
+      }, [resetSignal]);
+
+      const restartDeck = useCallback(() => {
+        setSeed((value) => value + 1);
+        setIndex(0);
+        setAnswers({});
+      }, []);
+
+      const handleAnswer = useCallback(
+        (choice) => {
+          if (!current || answers[current.id]) return;
+          const isCorrect = choice === current.answer;
+          setAnswers((existing) => ({
+            ...existing,
+            [current.id]: {
+              choice,
+              isCorrect,
+            },
+          }));
+          onRecord(sectionKey, isCorrect, trackingMap?.[current.id] || null);
+        },
+        [answers, current, onRecord, sectionKey, trackingMap]
+      );
+
+      const correctCount = Object.values(answers).filter((item) => item.isCorrect).length;
+      const percent = getPercent(correctCount, Object.keys(answers).length);
+
+      return (
+        <SectionShell
+          eyebrow={sectionKey === "nerveId" ? "Section 2" : "Section 6"}
+          title={title}
+          subtitle={subtitle}
+          actions={
+            <>
+              <ScorePill value={`${Math.min(index + (answeredCurrent ? 1 : 0), deck.length)} / ${deck.length}`} label="Current progress" />
+              <ScorePill value={`${correctCount}/${Object.keys(answers).length || 0}`} label="This attempt" />
+            </>
+          }
+        >
+          {completed ? (
+            <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white px-6 py-8 shadow-card" data-card-animation="fade">
+              <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr] md:items-center">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--amber)]">Attempt complete</p>
+                  <h3 className="mt-2 text-3xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                    {correctCount} correct out of {deck.length}
+                  </h3>
+                  <p className="mt-3 max-w-2xl text-base leading-7 text-[var(--slate-soft)]">
+                    Review the explanations and start a fresh randomized attempt whenever you want another pass.
+                  </p>
+                </div>
+                <div className="rounded-[22px] bg-[rgba(27,46,68,0.05)] p-5">
+                  <div className="flex items-end justify-between">
+                    <span className="text-sm uppercase tracking-[0.14em] text-[var(--slate-soft)]">Attempt score</span>
+                    <span className="text-4xl font-semibold text-[var(--slate)]">{percent}%</span>
+                  </div>
+                  <div className="mt-4 h-3 rounded-full bg-[rgba(27,46,68,0.08)]">
+                    <div
+                      className="h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${percent}%`,
+                        background: getPerformanceTone(percent, deck.length).bar,
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={restartDeck}
+                    className="mt-5 w-full rounded-2xl bg-[var(--slate)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                  >
+                    New randomized attempt
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
+              <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--teal)]">Question set</p>
+                <h3 className="mt-2 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                  Immediate feedback
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--slate-soft)]">
+                  Answer one prompt at a time. Correct answers pulse in amber-green, incorrect answers shake and reveal the best answer immediately.
+                </p>
+                <div className="mt-5 space-y-3">
+                  {deck.map((question, questionIndex) => {
+                    const status = answers[question.id];
+                    return (
+                      <div
+                        key={question.id}
+                        className={cn(
+                          "rounded-2xl border px-4 py-3 text-sm transition",
+                          questionIndex === index
+                            ? "border-[rgba(184,135,28,0.35)] bg-[rgba(184,135,28,0.12)]"
+                            : status?.isCorrect
+                              ? "border-[rgba(63,124,83,0.22)] bg-[rgba(63,124,83,0.08)]"
+                              : status && !status.isCorrect
+                                ? "border-[rgba(184,92,111,0.24)] bg-[rgba(184,92,111,0.08)]"
+                                : "border-[rgba(27,46,68,0.08)] bg-white"
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-semibold text-[var(--slate)]">Question {questionIndex + 1}</span>
+                          <span className="text-xs uppercase tracking-[0.18em] text-[var(--slate-soft)]">
+                            {status ? (status.isCorrect ? "Correct" : "Review") : questionIndex === index ? "Active" : "Pending"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-6 shadow-card" data-card-animation="fade">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--amber)]">
+                    Question {index + 1} of {deck.length}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={restartDeck}
+                    className="rounded-full border border-[rgba(27,46,68,0.12)] px-4 py-2 text-sm font-semibold text-[var(--slate-soft)] transition hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                  >
+                    Restart deck
+                  </button>
+                </div>
+                <h3 className="mt-4 text-[1.9rem] leading-tight text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                  {current.prompt}
+                </h3>
+                <div className="mt-6 grid gap-3">
+                  {current.displayOptions.map((option) => {
+                    const selected = answeredCurrent?.choice === option;
+                    const isCorrect = option === current.answer;
+                    const answered = Boolean(answeredCurrent);
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => handleAnswer(option)}
+                        disabled={answered}
+                        aria-label={`Choose ${option}`}
+                        data-feedback={selected ? (answeredCurrent.isCorrect ? "correct" : "incorrect") : undefined}
+                        className={cn(
+                          "rounded-[20px] border px-5 py-4 text-left text-base transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                          !answered && "hover:-translate-y-[1px] hover:border-[rgba(91,143,139,0.35)] hover:bg-[rgba(91,143,139,0.05)]",
+                          answered && isCorrect && "border-[rgba(63,124,83,0.32)] bg-[rgba(63,124,83,0.09)] text-[var(--slate)]",
+                          answered && selected && !isCorrect && "border-[rgba(184,92,111,0.35)] bg-[rgba(184,92,111,0.1)] text-[var(--slate)]",
+                          answered && !selected && !isCorrect && "border-[rgba(27,46,68,0.08)] bg-white text-[var(--slate-soft)]",
+                          !answered && "border-[rgba(27,46,68,0.1)] bg-white text-[var(--slate)]"
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <span>{option}</span>
+                          {answered && isCorrect ? <span className="text-lg text-[var(--success)]">✓</span> : null}
+                          {answered && selected && !isCorrect ? <span className="text-lg text-[var(--rose)]">!</span> : null}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {answeredCurrent ? (
+                  <div
+                    className={cn(
+                      "mt-6 rounded-[22px] border px-5 py-5",
+                      answeredCurrent.isCorrect
+                        ? "border-[rgba(63,124,83,0.24)] bg-[rgba(63,124,83,0.08)]"
+                        : "border-[rgba(184,92,111,0.24)] bg-[rgba(184,92,111,0.08)]"
+                    )}
+                    aria-live="polite"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--slate-soft)]">
+                      {answeredCurrent.isCorrect ? "Correct" : `Incorrect - correct answer: ${current.answer}`}
+                    </p>
+                    <p className="mt-2 text-sm leading-7 text-[var(--slate)]">{current.explanation}</p>
+                    <button
+                      type="button"
+                      onClick={() => setIndex((value) => value + 1)}
+                      className="mt-4 rounded-2xl bg-[var(--slate)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                    >
+                      {index === deck.length - 1 ? "Finish section" : "Next question"}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          )}
+        </SectionShell>
+      );
+    };
+
+    const CategorySortBoard = ({ sectionKey, activity, onRecord, resetSignal, showHintToggle = false }) => {
+      const [placements, setPlacements] = useState({});
+      const [draggedId, setDraggedId] = useState(null);
+      const [activeTarget, setActiveTarget] = useState(null);
+      const [feedback, setFeedback] = useState({ categoryId: null, tone: null, text: "" });
+      const [showHints, setShowHints] = useState(false);
+      const [revealedCategoryHints, setRevealedCategoryHints] = useState({});
+
+      useEffect(() => {
+        setPlacements({});
+        setDraggedId(null);
+        setActiveTarget(null);
+        setFeedback({ categoryId: null, tone: null, text: "" });
+        setShowHints(false);
+        setRevealedCategoryHints({});
+      }, [activity.id, resetSignal]);
+
+      const remainingItems = activity.items.filter((item) => !placements[item.id]);
+
+      const handleDrop = useCallback(
+        (categoryId, itemId) => {
+          const isCorrect = activity.answerMap[itemId] === categoryId;
+          onRecord(sectionKey, isCorrect, activity.itemTracking?.[itemId] || activity.tracking || null);
+
+          if (isCorrect) {
+            setPlacements((current) => ({ ...current, [itemId]: categoryId }));
+            setFeedback({ categoryId, tone: "correct", text: activity.successText || "Placed correctly." });
+          } else {
+            setFeedback({ categoryId, tone: "incorrect", text: activity.errorText || "That item belongs in a different category." });
+          }
+
+          setDraggedId(null);
+          setActiveTarget(null);
+        },
+        [activity.answerMap, activity.itemTracking, activity.tracking, onRecord, sectionKey]
+      );
+
+      const getPlacedItems = useCallback(
+        (categoryId) =>
+          activity.items.filter((item) => placements[item.id] === categoryId),
+        [activity.items, placements]
+      );
+
+      return (
+        <div className="grid gap-6 xl:grid-cols-[0.68fr_1.32fr]" data-card-animation="fade">
+          <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--amber)]">
+                  {activity.bankLabel || "Structure bank"}
+                </p>
+                <h3 className="mt-2 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                  {remainingItems.length ? "Drag into place" : "Board complete"}
+                </h3>
+              </div>
+              {showHintToggle && activity.hints ? (
+                <button
+                  type="button"
+                  onClick={() => setShowHints((current) => !current)}
+                  className="rounded-full border border-[rgba(184,135,28,0.24)] bg-[rgba(184,135,28,0.12)] px-4 py-2 text-sm font-semibold text-[var(--amber)] transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                >
+                  {showHints ? "Hide hints" : "Show hints"}
+                </button>
+              ) : null}
+            </div>
+
+            {showHints && activity.hints ? (
+              <div className="mt-4 space-y-3">
+                {activity.hints.map((hint) => (
+                  <div key={hint} className="rounded-[18px] bg-[rgba(184,135,28,0.1)] px-4 py-3 text-sm leading-6 text-[var(--slate)]">
+                    {hint}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            <div className="mt-5 grid gap-3">
+              {remainingItems.map((item) => (
+                <div
+                  key={item.id}
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.setData("text/plain", item.id);
+                    setDraggedId(item.id);
+                  }}
+                  onDragEnd={() => {
+                    setDraggedId(null);
+                    setActiveTarget(null);
+                  }}
+                  aria-label={`Drag ${item.label}`}
+                  data-dragging={draggedId === item.id ? "true" : "false"}
+                  className="cursor-grab rounded-[20px] border border-[rgba(27,46,68,0.1)] bg-white px-4 py-4 text-sm font-semibold text-[var(--slate)] shadow-soft transition active:cursor-grabbing"
+                >
+                  {item.label}
+                </div>
+              ))}
+              {!remainingItems.length ? (
+                <div className="rounded-[20px] border border-[rgba(63,124,83,0.24)] bg-[rgba(63,124,83,0.08)] px-4 py-4 text-sm leading-6 text-[var(--slate)]">
+                  Every item has been sorted correctly on this activity.
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {activity.categories.map((category) => {
+              const placed = getPlacedItems(category.id);
+              const isActive = activeTarget === category.id;
+              const categoryFeedback = feedback.categoryId === category.id ? feedback.tone : null;
+              const hintRevealed = revealedCategoryHints[category.id];
+              return (
+                <div
+                  key={category.id}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    setActiveTarget(category.id);
+                  }}
+                  onDragLeave={() => setActiveTarget((current) => (current === category.id ? null : current))}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const itemId = event.dataTransfer.getData("text/plain") || draggedId;
+                    if (itemId) handleDrop(category.id, itemId);
+                  }}
+                  aria-label={`${category.title} drop zone`}
+                  data-drop-state={isActive ? "active" : undefined}
+                  data-feedback={categoryFeedback || undefined}
+                  className="min-h-[220px] rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-4 shadow-soft transition"
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--slate-soft)]">{category.note}</p>
+                  <h4 className="mt-2 text-xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                    {category.title}
+                  </h4>
+                  <div className="mt-4 space-y-2">
+                    {placed.length ? (
+                      placed.map((item) => (
+                        <div key={item.id} className="rounded-2xl bg-[rgba(184,135,28,0.12)] px-3 py-2 text-sm font-semibold text-[var(--slate)]">
+                          {item.label}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-[rgba(27,46,68,0.16)] px-4 py-6 text-sm text-[var(--slate-soft)]">
+                        {activity.dropPrompt || "Drop matching structures here"}
+                      </div>
+                    )}
+                  </div>
+                  {category.subtitle ? (
+                    activity.revealSubtitleAsHint ? (
+                      hintRevealed ? (
+                        <div className="mt-4 rounded-2xl bg-[rgba(91,143,139,0.1)] px-4 py-3 text-sm leading-6 text-[var(--slate)]">
+                          {category.subtitle}
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRevealedCategoryHints((current) => ({
+                              ...current,
+                              [category.id]: true,
+                            }))
+                          }
+                          className="mt-4 rounded-full border border-[rgba(91,143,139,0.24)] bg-[rgba(91,143,139,0.08)] px-4 py-2 text-sm font-semibold text-[var(--teal)] transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+                        >
+                          {activity.hintButtonLabel || "Reveal hint"}
+                        </button>
+                      )
+                    ) : (
+                      <p className="mt-4 text-sm leading-6 text-[var(--slate-soft)]">{category.subtitle}</p>
+                    )
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+          <div className="xl:col-start-2">
+            <p className="text-sm text-[var(--slate-soft)]" aria-live="polite">{feedback.text}</p>
+          </div>
+        </div>
+      );
+    };
+
+    const MatchingSection = ({ onRecord, resetSignal }) => {
+      const [activeActivity, setActiveActivity] = useState(matchingActivities[0].id);
+      const currentActivity = matchingActivities.find((item) => item.id === activeActivity);
+
+      useEffect(() => {
+        setActiveActivity(matchingActivities[0].id);
+      }, [resetSignal]);
+
+      return (
+        <SectionShell
+          eyebrow="Section 3"
+          title="Matching"
+          subtitle="Use native drag-and-drop to connect roots, muscle groups, and sensory territories with the correct upper-extremity nerves."
+          actions={
+            <>
+              <ScorePill value="3 boards" label="Roots, muscles, sensation" />
+              <ScorePill value="HTML5 drag" label="Native interactions" />
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-3">
+            {matchingActivities.map((activity) => (
+              <button
+                key={activity.id}
+                type="button"
+                onClick={() => setActiveActivity(activity.id)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                  activeActivity === activity.id
+                    ? "border-[rgba(184,135,28,0.45)] bg-[rgba(184,135,28,0.14)] text-[var(--slate)]"
+                    : "border-[rgba(27,46,68,0.12)] bg-white/80 text-[var(--slate-soft)] hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)]"
+                )}
+              >
+                {activity.title}
+              </button>
+            ))}
+          </div>
+          <div className="mt-6 rounded-[26px] border border-[rgba(27,46,68,0.1)] bg-[rgba(255,255,255,0.7)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--teal)]">{currentActivity.title}</p>
+            <p className="mt-2 text-base leading-7 text-[var(--slate-soft)]">{currentActivity.subtitle}</p>
+            <div className="mt-6">
+              <CategorySortBoard sectionKey="matching" activity={currentActivity} onRecord={onRecord} resetSignal={resetSignal} />
+            </div>
+          </div>
+        </SectionShell>
+      );
+    };
+
+    const CompartmentSection = ({ onRecord, resetSignal }) => (
+      <SectionShell
+        eyebrow="Section 4"
+        title="Compartment Challenge"
+        subtitle="Sort each nerve into the shoulder, arm, forearm, hand, thoracic-wall, or scapular region it defines. The layout is arranged like a simplified upper-extremity map for fast regional review."
+        actions={
+          <>
+            <ScorePill value="11 regions" label="Compartment map" />
+            <ScorePill value="Motor + sensory" label="Regional sorting" />
+          </>
+        }
+      >
+        <div className="mb-6 grid gap-4 rounded-[26px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-5 md:grid-cols-3">
+          <div className="rounded-[22px] bg-white p-4 shadow-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Shoulder + scapula</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--slate-soft)]">Keep deltoid, scapular, and thoracic-wall motor patterns separate.</p>
+          </div>
+          <div className="rounded-[22px] bg-white p-4 shadow-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Arm + forearm</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--slate-soft)]">Anterior arm, forearm, and posterior forearm pathways stay visually distinct.</p>
+          </div>
+          <div className="rounded-[22px] bg-white p-4 shadow-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">Hand</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--slate-soft)]">Finish with intrinsic hand and cutaneous branch patterns across the palm and dorsum.</p>
+          </div>
+        </div>
+        <CategorySortBoard sectionKey="compartment" activity={compartmentActivity} onRecord={onRecord} resetSignal={resetSignal} />
+      </SectionShell>
+    );
+
+    const SpacesSection = ({ onRecord, resetSignal }) => {
+      const [activeActivity, setActiveActivity] = useState(spaceActivities[0].id);
+      const currentActivity = spaceActivities.find((item) => item.id === activeActivity);
+
+      useEffect(() => {
+        setActiveActivity(spaceActivities[0].id);
+      }, [resetSignal]);
+
+      return (
+        <SectionShell
+          eyebrow="Section 5"
+          title="Anatomical Spaces"
+          subtitle="Build the axilla, posterior shoulder spaces, cubital fossa, and the major neck triangles from their borders, contents, vessels, and nerves."
+          actions={
+            <>
+              <ScorePill value="8 builders" label="Borders + contents" />
+              <ScorePill value="Mnemonic support" label="Toggle hints" />
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-3">
+            {spaceActivities.map((activity) => (
+              <button
+                key={activity.id}
+                type="button"
+                onClick={() => setActiveActivity(activity.id)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                  activeActivity === activity.id
+                    ? "border-[rgba(184,135,28,0.45)] bg-[rgba(184,135,28,0.14)] text-[var(--slate)]"
+                    : "border-[rgba(27,46,68,0.12)] bg-white/80 text-[var(--slate-soft)] hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)]"
+                )}
+              >
+                {activity.title}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-[26px] border border-[rgba(27,46,68,0.1)] bg-[rgba(255,255,255,0.7)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--teal)]">{currentActivity.title}</p>
+            <p className="mt-2 text-base leading-7 text-[var(--slate-soft)]">{currentActivity.subtitle}</p>
+            <div className="mt-6">
+              <CategorySortBoard
+                sectionKey="spaces"
+                activity={currentActivity}
+                onRecord={onRecord}
+                resetSignal={resetSignal}
+                showHintToggle={Boolean(currentActivity.hints)}
+              />
+            </div>
+          </div>
+        </SectionShell>
+      );
+    };
+
+    const DashboardSection = ({ scores, weakSpots, onReset }) => {
+      const overall = useMemo(() => {
+        const summary = SCORED_SECTIONS.reduce(
+          (accumulator, section) => {
+            const stats = scores[section.key];
+            return {
+              correct: accumulator.correct + stats.correct,
+              attempted: accumulator.attempted + stats.attempted,
+            };
+          },
+          { correct: 0, attempted: 0 }
+        );
+        return {
+          ...summary,
+          percent: getPercent(summary.correct, summary.attempted),
+        };
+      }, [scores]);
+
+      const nerveWeakSpots = useMemo(() => getWeakSpotList(weakSpots.nerves).slice(0, 5), [weakSpots.nerves]);
+      const spaceWeakSpots = useMemo(() => getWeakSpotList(weakSpots.spaces).slice(0, 5), [weakSpots.spaces]);
+      const sensoryWeakSpots = useMemo(() => getWeakSpotList(weakSpots.sensory).slice(0, 5), [weakSpots.sensory]);
+
+      const WeakSpotPanel = ({ title, eyebrow, items }) => (
+        <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-5 shadow-soft">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber)]">{eyebrow}</p>
+          <h4 className="mt-2 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+            {title}
+          </h4>
+          {items.length ? (
+            <div className="mt-4 grid gap-3">
+              {items.map((item) => (
+                <div key={item.label} className="rounded-[18px] bg-[rgba(27,46,68,0.04)] px-4 py-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="font-semibold text-[var(--slate)]">{item.label}</div>
+                      <div className="mt-1 text-sm text-[var(--slate-soft)]">{item.misses} misses across {item.attempts} tracked attempts</div>
+                    </div>
+                    <div className="rounded-full bg-[rgba(166,25,46,0.12)] px-3 py-1 text-sm font-semibold text-[var(--amber)]">
+                      {item.missRate}% miss rate
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-7 text-[var(--slate-soft)]">Nothing is standing out here yet. As soon as a student starts missing related items, this panel will prioritize them for review.</p>
+          )}
+        </div>
+      );
+
+      return (
+        <SectionShell
+          eyebrow="Section 7"
+          title="Score Dashboard"
+          subtitle="Track performance across the active learning sections, identify weak areas quickly, and reset the session whenever you want a clean practice run."
+          actions={
+            <>
+              <ScorePill value={`${overall.correct}/${overall.attempted || 0}`} label="Overall correct" />
+              <button
+                type="button"
+                onClick={onReset}
+                className="rounded-full bg-[var(--slate)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]"
+              >
+                Reset All Scores
+              </button>
+            </>
+          }
+        >
+          <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
+            <div className="rounded-[26px] border border-[rgba(27,46,68,0.1)] bg-[rgba(27,46,68,0.04)] p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--amber)]">Overall session</p>
+              <h3 className="mt-3 text-5xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                {overall.percent}%
+              </h3>
+              <p className="mt-3 text-base leading-7 text-[var(--slate-soft)]">
+                {overall.attempted
+                  ? `${overall.correct} correct answers or placements across ${overall.attempted} scored attempts.`
+                  : "No scored attempts yet. Begin with Nerve Identification, Matching, or the Clinical Scenarios to populate the dashboard."}
+              </p>
+              <div className="mt-5 h-3 rounded-full bg-[rgba(27,46,68,0.08)]">
+                <div
+                  className="h-3 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${overall.percent}%`,
+                    background: getPerformanceTone(overall.percent, overall.attempted).bar,
+                  }}
+                />
+              </div>
+              <div
+                className="mt-5 inline-flex rounded-full px-4 py-2 text-sm font-semibold"
+                style={{
+                  color: getPerformanceTone(overall.percent, overall.attempted).text,
+                  background: getPerformanceTone(overall.percent, overall.attempted).chip,
+                }}
+              >
+                {getPerformanceTone(overall.percent, overall.attempted).label}
+              </div>
+            </div>
+
+            <div className="grid gap-4">
+              {SCORED_SECTIONS.map((section) => {
+                const stats = scores[section.key];
+                const percent = getPercent(stats.correct, stats.attempted);
+                const tone = getPerformanceTone(percent, stats.attempted);
+                return (
+                  <div key={section.key} className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white p-5 shadow-soft">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--slate-soft)]">Section performance</p>
+                        <h4 className="mt-2 text-2xl text-[var(--slate)]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                          {section.label}
+                        </h4>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-3xl font-semibold text-[var(--slate)]">{stats.attempted ? `${percent}%` : "--"}</div>
+                        <div className="text-sm text-[var(--slate-soft)]">{stats.correct} / {stats.attempted} correct</div>
+                      </div>
+                    </div>
+                    <div className="mt-4 h-3 rounded-full bg-[rgba(27,46,68,0.08)]">
+                      <div className="h-3 rounded-full transition-all duration-500" style={{ width: `${percent}%`, background: tone.bar }} />
+                    </div>
+                    <div
+                      className="mt-4 inline-flex rounded-full px-4 py-2 text-sm font-semibold"
+                      style={{ color: tone.text, background: tone.chip }}
+                    >
+                      {tone.label}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-6 grid gap-5 lg:grid-cols-3">
+            <WeakSpotPanel title="Most-missed nerves" eyebrow="Personal review" items={nerveWeakSpots} />
+            <WeakSpotPanel title="Most-missed spaces" eyebrow="Spatial anatomy" items={spaceWeakSpots} />
+            <WeakSpotPanel title="Sensory territories needing review" eyebrow="Cutaneous map" items={sensoryWeakSpots} />
+          </div>
+        </SectionShell>
+      );
+    };
+
+    function UpperExtremityNerveAtlas() {
+      const [activeSection, setActiveSection] = useState("explorer");
+      const [scores, setScores] = useState(INITIAL_SCORES);
+      const [weakSpots, setWeakSpots] = useState(createEmptyWeakSpots());
+      const [resetSignal, setResetSignal] = useState(0);
+
+      const overallStats = useMemo(() => {
+        const summary = SCORED_SECTIONS.reduce(
+          (accumulator, section) => {
+            const stats = scores[section.key];
+            return {
+              correct: accumulator.correct + stats.correct,
+              attempted: accumulator.attempted + stats.attempted,
+            };
+          },
+          { correct: 0, attempted: 0 }
+        );
+        return { ...summary, percent: getPercent(summary.correct, summary.attempted) };
+      }, [scores]);
+
+      const recordResult = useCallback((sectionKey, isCorrect, tracking = null) => {
+        setScores((current) => ({
+          ...current,
+          [sectionKey]: {
+            correct: current[sectionKey].correct + (isCorrect ? 1 : 0),
+            attempted: current[sectionKey].attempted + 1,
+          },
+        }));
+        if (tracking) {
+          setWeakSpots((current) => recordWeakSpot(current, tracking, isCorrect));
+        }
+      }, []);
+
+      const resetAll = useCallback(() => {
+        setScores({
+          explorer: { correct: 0, attempted: 0 },
+          nerveId: { correct: 0, attempted: 0 },
+          matching: { correct: 0, attempted: 0 },
+          compartment: { correct: 0, attempted: 0 },
+          spaces: { correct: 0, attempted: 0 },
+          clinical: { correct: 0, attempted: 0 },
+        });
+        setWeakSpots(createEmptyWeakSpots());
+        setResetSignal((value) => value + 1);
+        setActiveSection("dashboard");
+      }, []);
+
+      const renderSection = () => {
+        switch (activeSection) {
+          case "explorer":
+            return <ExplorerSection />;
+          case "nerveId":
+            return (
+              <QuestionDeck
+                sectionKey="nerveId"
+                title="Nerve Identification"
+                subtitle="Read the anatomical description, identify the best nerve, and get immediate explanation-rich feedback. The question order is randomized on every fresh attempt."
+                questions={nerveIdBank}
+                onRecord={recordResult}
+                resetSignal={resetSignal}
+                shuffleChoices={true}
+                trackingMap={nerveIdTrackingMap}
+              />
+            );
+          case "matching":
+            return <MatchingSection onRecord={recordResult} resetSignal={resetSignal} />;
+          case "compartment":
+            return <CompartmentSection onRecord={recordResult} resetSignal={resetSignal} />;
+          case "spaces":
+            return <SpacesSection onRecord={recordResult} resetSignal={resetSignal} />;
+          case "clinical":
+            return (
+              <QuestionDeck
+                sectionKey="clinical"
+                title="Clinical Scenarios"
+                subtitle="Apply the handout to short vignettes that connect anatomy, motor findings, sensory loss, and vulnerable anatomical locations."
+                questions={clinicalBank}
+                onRecord={recordResult}
+                resetSignal={resetSignal}
+                trackingMap={clinicalTrackingMap}
+              />
+            );
+          case "dashboard":
+            return <DashboardSection scores={scores} weakSpots={weakSpots} onReset={resetAll} />;
+          default:
+            return null;
+        }
+      };
+
+      return (
+        <div className="mx-auto max-w-[1560px] px-4 py-5 md:px-6 md:py-6">
+          <header className="overflow-hidden rounded-[30px] border border-[rgba(27,46,68,0.12)] bg-[rgba(255,253,250,0.9)] shadow-atlas backdrop-blur-sm">
+            <div className="grid gap-8 px-6 py-6 md:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--amber)]">DPTD 731 interactive review</p>
+                <h1
+                  className="mt-4 text-[2.7rem] leading-[0.94] text-[var(--slate)] md:text-[4rem]"
+                  style={{ fontFamily: '"Playfair Display", serif' }}
+                >
+                  Upper Extremity Nerve Atlas
+                </h1>
+                <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--slate-soft)]">
+                  A single-file study and review tool for the brachial plexus, upper-extremity peripheral nerves, cutaneous territories, anatomical spaces of the upper extremity and neck, and clinical localization.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
+                <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white/85 p-5 shadow-card">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">Learning design</p>
+                  <p className="mt-3 text-sm leading-7 text-[var(--slate-soft)]">Reference browsing, recognition questions, drag-and-drop matching, region sorting, anatomical-space builders, and clinical reasoning.</p>
+                </div>
+                <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white/85 p-5 shadow-card">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">Current session</p>
+                  <div className="mt-3 flex items-end justify-between gap-4">
+                    <span className="text-4xl font-semibold text-[var(--slate)]">{overallStats.percent}%</span>
+                    <span className="text-sm text-[var(--slate-soft)]">{overallStats.correct}/{overallStats.attempted || 0} correct</span>
+                  </div>
+                  <div className="mt-4 h-3 rounded-full bg-[rgba(27,46,68,0.08)]">
+                    <div
+                      className="h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${overallStats.percent}%`,
+                        background: getPerformanceTone(overallStats.percent, overallStats.attempted).bar,
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="rounded-[24px] border border-[rgba(27,46,68,0.1)] bg-white/85 p-5 shadow-card">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal)]">Coverage</p>
+                  <p className="mt-3 text-sm leading-7 text-[var(--slate-soft)]">Brachial plexus roots, trunks, cords, major branches, UE cutaneous maps, axilla, posterior shoulder spaces, cubital fossa, neck triangles, and upper-extremity regional localization.</p>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <nav className="sticky top-3 z-30 mt-5 rounded-[26px] border border-[rgba(27,46,68,0.12)] bg-[rgba(255,253,250,0.9)] px-4 py-4 shadow-card backdrop-blur-md">
+            <div className="flex flex-wrap gap-3">
+              {APP_SECTIONS.map((section, sectionIndex) => (
+                <button
+                  key={section.key}
+                  type="button"
+                  onClick={() => setActiveSection(section.key)}
+                  aria-label={`Open ${section.label}`}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal)]",
+                    activeSection === section.key
+                      ? "border-[rgba(184,135,28,0.42)] bg-[rgba(184,135,28,0.14)] text-[var(--slate)]"
+                      : "border-[rgba(27,46,68,0.1)] bg-white text-[var(--slate-soft)] hover:border-[rgba(91,143,139,0.35)] hover:text-[var(--slate)]"
+                  )}
+                >
+                  <span className="mr-2 text-[var(--amber)]">{sectionIndex + 1}.</span>
+                  {section.label}
+                </button>
+              ))}
+            </div>
+          </nav>
+
+          <main className="mt-5">{renderSection()}</main>
+        </div>
+      );
+    }
+
+    const root = window.ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<UpperExtremityNerveAtlas />);
+  </script>
+</body>
+</html>
