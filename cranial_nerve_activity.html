@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cranial Nerves — DPTD 731</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --ink-faint: #8888aa;
+    --surface: #f7f6f2;
+    --white: #ffffff;
+    --rule: #e2e0da;
+    --lo1: #1a6b9a; --lo1-bg: #e8f4fc; --lo1-mid: #b3d8ef;
+    --lo2: #2a7a4f; --lo2-bg: #e6f5ed; --lo2-mid: #a8dcc0;
+    --lo3: #8a5a00; --lo3-bg: #fdf3e0; --lo3-mid: #f0d090;
+    --lo4: #9a2525; --lo4-bg: #fce8e8; --lo4-mid: #f0aaaa;
+    --lo5: #5a2d8a; --lo5-bg: #f2ecfb; --lo5-mid: #cdb0e8;
+    --s-color: #1a6b9a; --s-bg: #e8f4fc;
+    --m-color: #2a7a4f; --m-bg: #e6f5ed;
+    --b-color: #8a5a00; --b-bg: #fdf3e0;
+    --ps-color: #5a2d8a; --ps-bg: #f2ecfb;
+    --radius: 6px;
+    --reveal-correct: #d4edda;
+    --reveal-border: #2a7a4f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    background: var(--surface);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* Header */
+  .header {
+    background: var(--ink);
+    color: var(--white);
+    padding: 36px 40px 28px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid #2d2d50;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .course-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9090c0;
+    margin-bottom: 6px;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--white);
+  }
+  .header h1 span { color: #9090c0; }
+
+  /* Progress */
+  .progress-block { text-align: right; min-width: 160px; }
+  .progress-label {
+    font-size: 11px;
+    color: #9090c0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .progress-fraction {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .progress-fraction span { font-size: 16px; color: #6060a0; }
+  .progress-bar-wrap {
+    height: 4px;
+    background: #3a3a60;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6060d0, #a060e0);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* Controls bar */
+  .controls {
+    background: var(--white);
+    border-bottom: 1px solid var(--rule);
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .controls-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-right: 4px;
+  }
+  .lo-toggle {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .lo-toggle[data-lo="1"] { color: var(--lo1); border-color: var(--lo1-mid); background: var(--lo1-bg); }
+  .lo-toggle[data-lo="2"] { color: var(--lo2); border-color: var(--lo2-mid); background: var(--lo2-bg); }
+  .lo-toggle[data-lo="3"] { color: var(--lo3); border-color: var(--lo3-mid); background: var(--lo3-bg); }
+  .lo-toggle[data-lo="4"] { color: var(--lo4); border-color: var(--lo4-mid); background: var(--lo4-bg); }
+  .lo-toggle[data-lo="5"] { color: var(--lo5); border-color: var(--lo5-mid); background: var(--lo5-bg); }
+  .lo-toggle.off { opacity: 0.3; filter: grayscale(0.6); }
+  .divider { width: 1px; height: 20px; background: var(--rule); margin: 0 4px; }
+  .reveal-all-btn {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    color: var(--ink-light);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .reveal-all-btn:hover { background: var(--ink); color: var(--white); border-color: var(--ink); }
+
+  /* LO legend */
+  .lo-legend {
+    padding: 16px 40px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .lo-card {
+    flex: 1;
+    min-width: 180px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .lo-card .lo-num { font-weight: 500; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; }
+  .lo-card[data-lo="1"] { background: var(--lo1-bg); border-color: var(--lo1-mid); color: var(--lo1); }
+  .lo-card[data-lo="2"] { background: var(--lo2-bg); border-color: var(--lo2-mid); color: var(--lo2); }
+  .lo-card[data-lo="3"] { background: var(--lo3-bg); border-color: var(--lo3-mid); color: var(--lo3); }
+  .lo-card[data-lo="4"] { background: var(--lo4-bg); border-color: var(--lo4-mid); color: var(--lo4); }
+  .lo-card[data-lo="5"] { background: var(--lo5-bg); border-color: var(--lo5-mid); color: var(--lo5); }
+
+  /* Table */
+  .table-wrap {
+    padding: 0 40px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    min-width: 900px;
+  }
+  thead tr {
+    background: var(--ink);
+  }
+  th {
+    padding: 10px 12px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    color: #9090c0;
+    border-right: 1px solid #2d2d50;
+    white-space: nowrap;
+  }
+  th:last-child { border-right: none; }
+  th .lo-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
+  /* Column show/hide */
+  .col-lo-1, .col-lo-2a, .col-lo-2b, .col-lo-3a, .col-lo-3b, .col-lo-4, .col-lo-5 {
+    transition: opacity 0.2s;
+  }
+  .col-hidden { display: none; }
+
+  td {
+    border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    vertical-align: top;
+    padding: 0;
+  }
+  td:last-child { border-right: none; }
+  tr:last-child td { border-bottom: none; }
+
+  .cn-num {
+    padding: 14px 12px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--ink);
+    white-space: nowrap;
+    vertical-align: middle;
+    width: 52px;
+  }
+  .cn-name {
+    padding: 14px 12px;
+    font-size: 12px;
+    color: var(--ink-light);
+    white-space: nowrap;
+    vertical-align: middle;
+    width: 130px;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin: 2px 2px 0 0;
+  }
+  .badge-S { background: var(--s-bg); color: var(--s-color); }
+  .badge-M { background: var(--m-bg); color: var(--m-color); }
+  .badge-B { background: var(--b-bg); color: var(--b-color); }
+  .badge-PS { background: var(--ps-bg); color: var(--ps-color); }
+
+  .type-cell {
+    padding: 14px 12px;
+    vertical-align: middle;
+    width: 100px;
+  }
+
+  /* Fill cells */
+  .fill-cell {
+    position: relative;
+    padding: 0;
+    min-width: 140px;
+  }
+  .fill-cell textarea {
+    width: 100%;
+    min-height: 64px;
+    padding: 10px 10px 10px 10px;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    line-height: 1.5;
+    display: block;
+    transition: background 0.15s;
+  }
+  .fill-cell textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+  .fill-cell textarea:focus { background: #f0f4ff; }
+  .fill-cell.has-content textarea { background: #fafafa; }
+
+  /* Reveal overlay */
+  .reveal-btn {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+    background: var(--white);
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 2;
+  }
+  .fill-cell:hover .reveal-btn { opacity: 1; }
+  .fill-cell.revealed textarea {
+    background: var(--reveal-correct) !important;
+    color: #1a4a2a;
+  }
+  .fill-cell.revealed .reveal-btn {
+    opacity: 1;
+    background: var(--reveal-correct);
+    color: #1a4a2a;
+    border-color: var(--reveal-border);
+  }
+  .answer-text {
+    display: none;
+    padding: 10px;
+    font-size: 12px;
+    color: #1a4a2a;
+    background: var(--reveal-correct);
+    border-top: 1px solid #a8dcc0;
+    line-height: 1.5;
+  }
+  .fill-cell.revealed .answer-text { display: block; }
+  .fill-cell.revealed textarea { display: none; }
+
+  /* Row hover */
+  tr:hover td { background-color: #fafaf8; }
+  tr:hover td.type-cell { background-color: #fafaf8; }
+
+  /* Footer */
+  .footer {
+    padding: 24px 40px;
+    color: var(--ink-faint);
+    font-size: 11px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+
+  /* Mobile */
+  @media (max-width: 700px) {
+    .header { padding: 20px; }
+    .controls { padding: 10px 16px; }
+    .lo-legend { padding: 12px 16px; }
+    .table-wrap { padding: 0 16px; }
+    .footer { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="course-label">DPTD 731 &nbsp;·&nbsp; Foundational Movement Science</div>
+      <h1>Cranial Nerves <span>&amp; Special Senses</span></h1>
+    </div>
+    <div class="progress-block">
+      <div class="progress-label">Cells completed</div>
+      <div class="progress-fraction"><span id="prog-done">0</span> <span>/ <span id="prog-total">0</span></span></div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="prog-bar"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <span class="controls-label">Focus</span>
+  <button class="lo-toggle" data-lo="1">LO 1 — Names &amp; Functions</button>
+  <button class="lo-toggle" data-lo="2">LO 2 — Origins &amp; Pathways</button>
+  <button class="lo-toggle" data-lo="3">LO 3 — Nerve Types</button>
+  <button class="lo-toggle" data-lo="4">LO 4 — Clinical Signs</button>
+  <button class="lo-toggle" data-lo="5">LO 5 — Autonomic Roles</button>
+  <div class="divider"></div>
+  <button class="reveal-all-btn" id="reveal-all-btn">Reveal all answers</button>
+</div>
+
+<div class="lo-legend">
+  <div class="lo-card" data-lo="1"><div class="lo-num">LO 1</div>Identify all 12 cranial nerves and their primary functions</div>
+  <div class="lo-card" data-lo="2"><div class="lo-num">LO 2</div>Describe structure, origin, and pathway of each nerve</div>
+  <div class="lo-card" data-lo="3"><div class="lo-num">LO 3</div>Distinguish sensory, motor, and mixed nerves and their roles</div>
+  <div class="lo-card" data-lo="4"><div class="lo-num">LO 4</div>Recognize clinical significance and dysfunction disorders</div>
+  <div class="lo-card" data-lo="5"><div class="lo-num">LO 5</div>Discuss cranial nerve roles in autonomic functions</div>
+</div>
+
+<div class="table-wrap">
+<table id="main-table">
+  <thead>
+    <tr>
+      <th>CN</th>
+      <th>Name</th>
+      <th class="col-lo-1"><span class="lo-dot" style="background:#4a9fd4;"></span>LO 1 — Primary function</th>
+      <th class="col-lo-2a"><span class="lo-dot" style="background:#4aad78;"></span>LO 2 — Origin / exit point</th>
+      <th class="col-lo-2b"><span class="lo-dot" style="background:#4aad78;"></span>LO 2 — Target / termination</th>
+      <th class="col-lo-3a">LO 3 — Type</th>
+      <th class="col-lo-3b"><span class="lo-dot" style="background:#d4a030;"></span>LO 3 — Role of each fiber type</th>
+      <th class="col-lo-4"><span class="lo-dot" style="background:#d45050;"></span>LO 4 — Clinical disorder / sign</th>
+      <th class="col-lo-5"><span class="lo-dot" style="background:#9060d0;"></span>LO 5 — Autonomic function</th>
+    </tr>
+  </thead>
+  <tbody id="table-body"></tbody>
+</table>
+</div>
+
+<div class="footer">
+  <div class="legend-item"><span class="badge badge-S">S</span> Sensory</div>
+  <div class="legend-item"><span class="badge badge-M">M</span> Motor</div>
+  <div class="legend-item"><span class="badge badge-B">B</span> Both (mixed)</div>
+  <div class="legend-item"><span class="badge badge-PS">PS</span> Parasympathetic fibers</div>
+  <span style="margin-left:auto;">Hover a cell to reveal the answer · Your typed entries are saved locally</span>
+</div>
+
+<script>
+const CNS = [
+  {
+    n: "I", name: "Olfactory", type: "S", ps: false,
+    lo1: "Smell (olfaction) — transmits sensory information about odors from nasal epithelium to the brain.",
+    lo2o: "Olfactory receptor neurons in nasal mucosa; passes through cribriform plate of ethmoid bone.",
+    lo2t: "Olfactory bulb → olfactory tract → primary olfactory cortex (piriform cortex).",
+    lo3r: "Purely sensory: afferent signals from olfactory receptor neurons to cerebral cortex.",
+    lo4: "Anosmia (loss of smell); often the first sign in head trauma or early Parkinson's disease.",
+    lo5: "No autonomic function."
+  },
+  {
+    n: "II", name: "Optic", type: "S", ps: false,
+    lo1: "Vision — transmits visual information from the retina to the brain.",
+    lo2o: "Retinal ganglion cells; exits orbit via optic canal in sphenoid bone.",
+    lo2t: "Optic chiasm → optic tract → lateral geniculate nucleus → primary visual cortex (V1, occipital lobe).",
+    lo3r: "Purely sensory: afferent signals from photoreceptors (rods and cones) to visual cortex.",
+    lo4: "Visual field defects; optic neuritis (associated with MS); papilledema visible on fundoscopy.",
+    lo5: "No direct autonomic function (pupillary reflex afferent limb travels with CN II but efferent is CN III)."
+  },
+  {
+    n: "III", name: "Oculomotor", type: "M", ps: true,
+    lo1: "Controls most extraocular eye movements, eyelid elevation, and pupil constriction/accommodation.",
+    lo2o: "Oculomotor nucleus (midbrain); exits through superior orbital fissure.",
+    lo2t: "Superior, inferior, and medial rectus; inferior oblique; levator palpebrae superioris; pupillary sphincter.",
+    lo3r: "Motor (somatic): eye movement and eyelid elevation. Parasympathetic: pupil constriction and lens accommodation.",
+    lo4: "CN III palsy: ptosis, 'down-and-out' eye, mydriasis (blown pupil) — classic sign of posterior communicating artery aneurysm.",
+    lo5: "Parasympathetic via ciliary ganglion → sphincter pupillae (constriction) and ciliary muscle (accommodation). PSNS!"
+  },
+  {
+    n: "IV", name: "Trochlear", type: "M", ps: false,
+    lo1: "Controls the superior oblique muscle — depresses, abducts, and internally rotates the eyeball.",
+    lo2o: "Trochlear nucleus (midbrain, dorsal); only CN to exit posteriorly; enters orbit via superior orbital fissure.",
+    lo2t: "Superior oblique muscle of the eye.",
+    lo3r: "Purely motor (somatic): innervates superior oblique for downward-inward gaze.",
+    lo4: "CN IV palsy: vertical diplopia; patient tilts head away from lesion to compensate ('head tilt test').",
+    lo5: "No autonomic function."
+  },
+  {
+    n: "V", name: "Trigeminal", type: "B", ps: false,
+    lo1: "Facial sensation (touch, pain, temperature) across three divisions (V1/V2/V3); motor to muscles of mastication.",
+    lo2o: "Trigeminal ganglion (Gasserian); motor nucleus in pons. Three divisions exit via superior orbital fissure (V1), foramen rotundum (V2), foramen ovale (V3).",
+    lo2t: "V1: forehead/eye. V2: cheek/upper lip/nose. V3: lower face/jaw + muscles of mastication, tensor tympani, tensor veli palatini.",
+    lo3r: "Sensory (general): facial and oral sensation. Motor (branchial): jaw movement and mastication.",
+    lo4: "Trigeminal neuralgia (tic douloureux): severe lancinating facial pain. Loss of corneal reflex (afferent limb is V1).",
+    lo5: "No direct autonomic function (parasympathetic fibers from CN VII and IX travel with V branches to targets)."
+  },
+  {
+    n: "VI", name: "Abducens", type: "M", ps: false,
+    lo1: "Abduction of the eye — controls the lateral rectus muscle.",
+    lo2o: "Abducens nucleus (pons); exits via superior orbital fissure.",
+    lo2t: "Lateral rectus muscle.",
+    lo3r: "Purely motor (somatic): abducts the eyeball.",
+    lo4: "CN VI palsy: inability to abduct the eye; horizontal diplopia on lateral gaze; convergent strabismus. Long intracranial course makes it vulnerable in raised ICP.",
+    lo5: "No autonomic function."
+  },
+  {
+    n: "VII", name: "Facial", type: "B", ps: true,
+    lo1: "Motor to muscles of facial expression; taste from anterior 2/3 of tongue; parasympathetic to lacrimal and salivary glands.",
+    lo2o: "Facial nucleus (pons); exits via internal acoustic meatus → stylomastoid foramen.",
+    lo2t: "Muscles of facial expression; lacrimal gland, submandibular and sublingual glands; taste buds (anterior 2/3 tongue via chorda tympani).",
+    lo3r: "Motor (branchial): facial expression. Sensory (special): taste anterior 2/3 tongue. Parasympathetic: lacrimation and salivation.",
+    lo4: "Bell's palsy: LMN lesion causing unilateral complete facial paralysis (forehead involved). UMN lesion spares forehead.",
+    lo5: "Parasympathetic via pterygopalatine ganglion → lacrimal gland (tears); submandibular ganglion → submandibular and sublingual glands (saliva). PSNS!"
+  },
+  {
+    n: "VIII", name: "Vestibulocochlear", type: "S", ps: false,
+    lo1: "Hearing (cochlear branch) and balance/spatial orientation (vestibular branch).",
+    lo2o: "Spiral ganglion (cochlear) and vestibular ganglion (Scarpa's); enters brainstem via internal acoustic meatus.",
+    lo2t: "Cochlear: cochlear nuclei in brainstem → auditory cortex. Vestibular: vestibular nuclei, cerebellum.",
+    lo3r: "Purely sensory: cochlear branch carries auditory signals; vestibular branch carries balance and head-position signals.",
+    lo4: "Sensorineural hearing loss; vestibular neuritis (vertigo, nystagmus); acoustic neuroma (schwannoma of CN VIII).",
+    lo5: "No autonomic function."
+  },
+  {
+    n: "IX", name: "Glossopharyngeal", type: "B", ps: true,
+    lo1: "Sensory from pharynx and posterior 1/3 tongue (including taste); motor to stylopharyngeus; parasympathetic to parotid gland.",
+    lo2o: "Nucleus ambiguus and inferior salivatory nucleus (medulla); exits via jugular foramen.",
+    lo2t: "Stylopharyngeus muscle; pharyngeal mucosa; taste buds posterior 1/3 tongue; parotid gland (via otic ganglion).",
+    lo3r: "Sensory: taste and general sensation posterior tongue/pharynx; afferent limb of gag reflex. Motor: stylopharyngeus (swallowing). Parasympathetic: parotid salivation.",
+    lo4: "Loss of gag reflex (afferent limb); glossopharyngeal neuralgia (throat/ear pain on swallowing); dysphagia.",
+    lo5: "Parasympathetic via otic ganglion → parotid gland (saliva production). Also carries carotid body/sinus afferents for BP regulation. PSNS!"
+  },
+  {
+    n: "X", name: "Vagus", type: "B", ps: true,
+    lo1: "Parasympathetic to thoracic and abdominal viscera; motor to pharynx/larynx; sensory from viscera; efferent limb of gag reflex.",
+    lo2o: "Dorsal motor nucleus and nucleus ambiguus (medulla); exits via jugular foramen; descends in carotid sheath.",
+    lo2t: "Pharynx, larynx, trachea, esophagus, heart, lungs, abdominal organs (to splenic flexure of colon).",
+    lo3r: "Motor (branchial): soft palate, pharynx, larynx (voice). Parasympathetic: visceral organ regulation. Sensory: visceral afferents (pain, stretch).",
+    lo4: "Hoarseness (recurrent laryngeal nerve damage); dysphagia; uvular deviation away from lesion. Bilateral injury is life-threatening.",
+    lo5: "Largest parasympathetic nerve: slows heart rate, stimulates digestion, bronchoconstriction, increases GI motility. PSNS!"
+  },
+  {
+    n: "XI", name: "Spinal Accessory", type: "M", ps: false,
+    lo1: "Motor innervation to sternocleidomastoid (SCM) and trapezius muscles.",
+    lo2o: "Cranial root (nucleus ambiguus, medulla) + spinal root (C1–C5 anterior horn); exits via jugular foramen.",
+    lo2t: "SCM (ipsilateral head rotation to opposite side); trapezius (shoulder elevation and scapular retraction).",
+    lo3r: "Purely motor (somatic): head rotation and shoulder girdle movement.",
+    lo4: "Shoulder drop, weakness of shoulder elevation (trapezius); difficulty turning head against resistance (SCM). Commonly injured during cervical lymph node biopsy.",
+    lo5: "No autonomic function."
+  },
+  {
+    n: "XII", name: "Hypoglossal", type: "M", ps: false,
+    lo1: "Motor to intrinsic and extrinsic tongue muscles (all 'glossus' muscles except palatoglossus).",
+    lo2o: "Hypoglossal nucleus (medulla); exits via hypoglossal canal.",
+    lo2t: "Intrinsic tongue muscles + genioglossus, hyoglossus, styloglossus. (Palatoglossus = CN X.)",
+    lo3r: "Purely motor (somatic): tongue movement for speech, chewing, and swallowing.",
+    lo4: "Tongue deviates toward the side of the lesion (LMN); fasciculations and atrophy in LMN lesions. Dysarthria, dysphagia.",
+    lo5: "No autonomic function."
+  }
+];
+
+const COLS = {
+  lo1:  ['col-lo-1'],
+  lo2:  ['col-lo-2a','col-lo-2b'],
+  lo3:  ['col-lo-3a','col-lo-3b'],
+  lo4:  ['col-lo-4'],
+  lo5:  ['col-lo-5']
+};
+
+const loState = { 1: true, 2: true, 3: true, 4: true, 5: true };
+let totalCells = 0;
+
+function buildTable() {
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  let fillCount = 0;
+
+  CNS.forEach(cn => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="cn-num">${cn.n}</td>
+      <td class="cn-name">${cn.name}</td>
+      ${fillCell('lo1', cn.lo1, cn.n, 'col-lo-1')}
+      ${fillCell('lo2o', cn.lo2o, cn.n, 'col-lo-2a')}
+      ${fillCell('lo2t', cn.lo2t, cn.n, 'col-lo-2b')}
+      <td class="type-cell col-lo-3a">
+        <span class="badge badge-${cn.type}">${cn.type === 'S' ? 'Sensory' : cn.type === 'M' ? 'Motor' : 'Both'}</span>
+        ${cn.ps ? '<span class="badge badge-PS">PS</span>' : ''}
+      </td>
+      ${fillCell('lo3r', cn.lo3r, cn.n, 'col-lo-3b')}
+      ${fillCell('lo4', cn.lo4, cn.n, 'col-lo-4')}
+      ${fillCell('lo5', cn.lo5, cn.n, 'col-lo-5')}
+    `;
+    tbody.appendChild(tr);
+    fillCount += 6;
+  });
+
+  totalCells = fillCount;
+  document.getElementById('prog-total').textContent = totalCells;
+
+  // Wire up textareas
+  tbody.querySelectorAll('textarea').forEach(ta => {
+    const key = ta.dataset.key;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      ta.value = saved;
+      ta.closest('.fill-cell').classList.add('has-content');
+    }
+    ta.addEventListener('input', () => {
+      localStorage.setItem(key, ta.value);
+      ta.closest('.fill-cell').classList.toggle('has-content', ta.value.trim().length > 0);
+      updateProgress();
+    });
+  });
+
+  // Wire up reveal buttons
+  tbody.querySelectorAll('.reveal-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cell = btn.closest('.fill-cell');
+      const isRevealed = cell.classList.toggle('revealed');
+      btn.textContent = isRevealed ? '✓ revealed' : 'reveal';
+      updateProgress();
+    });
+  });
+
+  updateProgress();
+}
+
+function fillCell(field, answer, cn, colClass) {
+  const key = `cn${cn}_${field}`;
+  return `
+    <td class="fill-cell ${colClass}" data-field="${field}">
+      <textarea placeholder="Type your answer…" data-key="${key}" rows="3"></textarea>
+      <div class="answer-text">${answer}</div>
+      <button class="reveal-btn">reveal</button>
+    </td>
+  `;
+}
+
+function updateProgress() {
+  let done = 0;
+  document.querySelectorAll('.fill-cell').forEach(cell => {
+    const ta = cell.querySelector('textarea');
+    if (cell.classList.contains('revealed')) { done++; return; }
+    if (ta && ta.value.trim().length > 0) done++;
+  });
+  document.getElementById('prog-done').textContent = done;
+  const pct = totalCells > 0 ? (done / totalCells) * 100 : 0;
+  document.getElementById('prog-bar').style.width = pct.toFixed(1) + '%';
+}
+
+function applyColumnVisibility() {
+  Object.entries(COLS).forEach(([loKey, classes]) => {
+    const visible = loState[loKey.replace('lo','')];
+    classes.forEach(cls => {
+      document.querySelectorAll('.' + cls).forEach(el => {
+        el.classList.toggle('col-hidden', !visible);
+      });
+    });
+  });
+}
+
+// Toggle buttons
+document.querySelectorAll('.lo-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const lo = btn.dataset.lo;
+    loState[lo] = !loState[lo];
+    btn.classList.toggle('off', !loState[lo]);
+    applyColumnVisibility();
+  });
+});
+
+// Reveal all
+let allRevealed = false;
+document.getElementById('reveal-all-btn').addEventListener('click', () => {
+  allRevealed = !allRevealed;
+  document.querySelectorAll('.fill-cell').forEach(cell => {
+    cell.classList.toggle('revealed', allRevealed);
+    const btn = cell.querySelector('.reveal-btn');
+    if (btn) btn.textContent = allRevealed ? '✓ revealed' : 'reveal';
+  });
+  document.getElementById('reveal-all-btn').textContent = allRevealed ? 'Hide all answers' : 'Reveal all answers';
+  updateProgress();
+});
+
+buildTable();
+</script>
+</body>
+</html>
