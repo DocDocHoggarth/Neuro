@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neuroscience of Pain — Self-Study Review</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* NCC Brand Colors */
+    --ncc-red:        #BA0C2F;   /* Pantone 200 C — primary */
+    --ncc-red-dark:   #8A0922;   /* Pantone 200 C dark tint */
+    --ncc-red-light:  #D94060;   /* Pantone 200 C light tint */
+    --ncc-bright-red: #EF3340;   /* Pantone Red 032 C */
+    --ncc-cyan:       #A4DBE8;   /* Pantone 635 C */
+    --ncc-blue:       #298FC2;   /* Pantone 7689 C */
+
+    /* Layout — dark backgrounds built from near-black + gray */
+    --bg:        #141414;
+    --surface:   #1e1e1e;
+    --surface2:  #272727;
+    --border:    #3a3a3a;
+
+    /* Semantic mappings */
+    --accent:      var(--ncc-red);
+    --accent2:     var(--ncc-red-light);
+    --gold:        var(--ncc-blue);       /* "gold" role → NCC blue */
+    --green:       #4caf82;               /* correct/success — kept neutral */
+    --blue:        var(--ncc-cyan);
+    --red:         var(--ncc-bright-red); /* error state */
+
+    /* Text */
+    --text:       #F0EEEC;
+    --text-muted: #9A9A9A;
+    --text-dim:   #5A5A5A;
+
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #141414 0%, #1e0509 50%, #141414 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 40px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(186,12,47,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  header p {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 560px;
+  }
+
+  /* ── Nav tabs ── */
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    padding: 16px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .nav-tab .tab-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px; height: 20px;
+    background: var(--border);
+    border-radius: 50%;
+    font-size: 11px;
+    margin-right: 8px;
+    color: var(--text-muted);
+  }
+  .nav-tab.active .tab-num { background: var(--accent); color: white; }
+
+  /* ── Sections ── */
+  .section { display: none; padding: 40px; max-width: 900px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  .section-header {
+    margin-bottom: 32px;
+  }
+  .lo-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .section-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .section-header p {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 4px;
+    height: 4px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--ncc-red), var(--ncc-bright-red));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── LO1: Flashcard Matching ── */
+  .instructions-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .instructions-box .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Flashcard */
+  .flashcard-container {
+    perspective: 1200px;
+    margin-bottom: 24px;
+  }
+  .flashcard {
+    width: 100%;
+    height: 200px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 28px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .card-front {
+    background: var(--surface);
+  }
+  .card-back {
+    background: var(--surface2);
+    transform: rotateY(180deg);
+  }
+  .card-front .card-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .card-front .card-term {
+    font-family: 'DM Serif Display', serif;
+    font-size: 30px;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .card-front .card-hint {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .card-back .card-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ncc-cyan);
+    margin-bottom: 12px;
+  }
+  .card-back .card-def {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.6;
+    max-width: 600px;
+  }
+
+  .card-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .card-nav-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .card-nav-btn:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .card-counter {
+    font-size: 13px;
+    color: var(--text-muted);
+    min-width: 80px;
+    text-align: center;
+  }
+
+  /* Self-rate buttons */
+  .self-rate {
+    display: none;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .self-rate.visible { display: flex; }
+  .rate-btn {
+    flex: 1;
+    max-width: 140px;
+    padding: 12px;
+    border-radius: var(--radius);
+    border: 1px solid;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .rate-btn.correct { background: rgba(76,175,130,0.1); border-color: var(--green); color: var(--green); }
+  .rate-btn.again   { background: rgba(212,91,91,0.1);  border-color: var(--red);   color: var(--red);   }
+  .rate-btn:hover { opacity: 0.8; transform: translateY(-1px); }
+
+  .score-display {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .score-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .score-chip span { font-weight: 600; color: var(--text); }
+
+  /* ── LO2: Sort Activity ── */
+  .sort-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 600px) { .sort-grid { grid-template-columns: 1fr; } }
+
+  .sort-column {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    min-height: 300px;
+    transition: border-color 0.2s;
+  }
+  .sort-column.drag-over { border-color: var(--accent); background: rgba(232,98,74,0.05); }
+  .sort-column h3 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sort-column.peripheral h3 { color: var(--ncc-cyan); }
+  .sort-column.central h3 { color: var(--ncc-blue); }
+  .sort-column .drop-hint {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 20px;
+    font-style: italic;
+  }
+
+  .sort-bank {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .sort-bank h3 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .sort-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .sort-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: grab;
+    user-select: none;
+    transition: all 0.15s;
+    color: var(--text);
+  }
+  .sort-item:hover { border-color: var(--ncc-cyan); color: var(--ncc-cyan); transform: translateY(-1px); }
+  .sort-item.dragging { opacity: 0.4; cursor: grabbing; }
+  .sort-item.correct-place { border-color: var(--green); color: var(--green); background: rgba(76,175,130,0.08); cursor: default; }
+  .sort-item.wrong-place  { border-color: var(--red);   color: var(--red);   background: rgba(212,91,91,0.08);   animation: shake 0.35s ease; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary:hover { background: var(--ncc-red-dark); transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+
+  .action-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .feedback-bar {
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .feedback-bar.visible { display: block; }
+  .feedback-bar.success { background: rgba(76,175,130,0.15); border: 1px solid var(--green); color: var(--green); }
+  .feedback-bar.error   { background: rgba(212,91,91,0.15);  border: 1px solid var(--red);   color: var(--red);   }
+  .feedback-bar.info    { background: rgba(91,140,218,0.12); border: 1px solid var(--blue);  color: var(--blue);  }
+
+  /* ── LO3: Neurotransmitter Quiz ── */
+  .nt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .nt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .nt-card .nt-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .nt-card .nt-location {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+  .nt-card .nt-question {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .nt-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .nt-option {
+    padding: 9px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+  }
+  .nt-option:hover:not(:disabled) { border-color: var(--ncc-cyan); color: var(--ncc-cyan); }
+  .nt-option.correct-ans { background: rgba(76,175,130,0.12); border-color: var(--green); color: var(--green); }
+  .nt-option.wrong-ans   { background: rgba(212,91,91,0.12);  border-color: var(--red);   color: var(--red);   }
+  .nt-option:disabled { cursor: default; }
+
+  .nt-explanation {
+    display: none;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-radius: 6px;
+    border-left: 2px solid var(--ncc-red);
+  }
+  .nt-explanation.visible { display: block; }
+
+  /* Score summary */
+  .summary-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    text-align: center;
+    display: none;
+    margin-top: 24px;
+  }
+  .summary-panel.visible { display: block; }
+  .summary-panel h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .summary-panel .big-score {
+    font-size: 56px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+    margin: 12px 0;
+  }
+  .summary-panel p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  /* ── Sub-tabs (LO1 parts) ── */
+  .sub-tab-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px;
+  }
+  .sub-tab {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .sub-tab:hover { color: var(--text); }
+  .sub-tab.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .sub-tab .part-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); display: block; margin-bottom: 2px; }
+
+  .sub-panel { display: none; }
+  .sub-panel.active { display: block; }
+
+  /* ── Fill-in-the-blank ── */
+  .fitb-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
+  .fitb-item.answered-correct { border-color: var(--green); }
+  .fitb-item.answered-wrong   { border-color: var(--red); }
+
+  .fitb-sentence {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.9;
+    margin-bottom: 14px;
+  }
+  .fitb-blank {
+    display: inline-block;
+    min-width: 160px;
+    border-bottom: 2px solid var(--ncc-blue);
+    padding: 0 4px 2px;
+    margin: 0 4px;
+    vertical-align: bottom;
+    text-align: center;
+    font-weight: 500;
+    color: var(--ncc-cyan);
+    font-size: 15px;
+    transition: border-color 0.2s;
+  }
+  .fitb-blank.filled-correct { border-color: var(--green); color: var(--green); }
+  .fitb-blank.filled-wrong   { border-color: var(--red);   color: var(--red);   }
+
+  .fitb-word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .fitb-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .fitb-chip:hover:not(:disabled) { border-color: var(--ncc-cyan); color: var(--ncc-cyan); transform: translateY(-1px); }
+  .fitb-chip.selected { border-color: var(--ncc-red); color: var(--ncc-red-light); background: rgba(186,12,47,0.12); }
+  .fitb-chip.used { opacity: 0.3; cursor: default; text-decoration: line-through; }
+  .fitb-chip:disabled { cursor: default; }
+
+  .fitb-result-label {
+    display: none;
+    font-size: 12px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+  .fitb-result-label.visible { display: block; }
+  .fitb-result-label.correct { background: rgba(76,175,130,0.12); color: var(--green); }
+  .fitb-result-label.wrong   { background: rgba(212,91,91,0.12);  color: var(--red); }
+
+  .fitb-score-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  /* Drag-drop touch fix */
+  .sort-column .sort-item { margin-bottom: 6px; display: block; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">DPTD 731 · Foundational Movement Science</div>
+  <h1>Neuroscience of Pain<br><em style="font-style:italic; color: var(--accent2);">Self-Study Review</em></h1>
+  <p>Three activities aligned to Pain Day 1 learning objectives. Work at your own pace — all answers are drawn directly from your course handout.</p>
+</header>
+
+<nav>
+  <button class="nav-tab active" onclick="showSection(0)">
+    <span class="tab-num">1</span>Pain Terminology (2 Parts)
+  </button>
+  <button class="nav-tab" onclick="showSection(1)">
+    <span class="tab-num">2</span>Peripheral vs. Central
+  </button>
+  <button class="nav-tab" onclick="showSection(2)">
+    <span class="tab-num">3</span>Neurotransmitters
+  </button>
+</nav>
+
+<!-- ════════════════════════════════════════
+     SECTION 1 — LO1: Terminology Flashcards
+     ════════════════════════════════════════ -->
+<div class="section active" id="section-0">
+  <div class="section-header">
+    <div class="lo-label">Learning Objective 1</div>
+    <h2>Pain Terminology</h2>
+    <p>Two activities to build and test your knowledge of all 19 pain terms.</p>
+  </div>
+
+  <!-- Sub-tab bar -->
+  <div class="sub-tab-bar">
+    <button class="sub-tab active" id="subtab-0" onclick="showSubTab(0)">
+      <span class="part-label">Part 1</span>Flashcards
+    </button>
+    <button class="sub-tab" id="subtab-1" onclick="showSubTab(1)">
+      <span class="part-label">Part 2</span>Fill in the Blank
+    </button>
+  </div>
+
+  <!-- Part 1: Flashcards -->
+  <div class="sub-panel active" id="subpanel-0">
+    <div class="score-display">
+      <div class="score-chip">Remaining: <span id="fc-remaining">19</span></div>
+      <div class="score-chip">Mastered: <span id="fc-mastered">0</span></div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="fc-progress" style="width:0%"></div>
+    </div>
+
+    <div class="instructions-box">
+      <span class="icon">💡</span>
+      <span>Click the card to flip it. After reading the definition, mark whether you knew it. Cards you need to review will come back around.</span>
+    </div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+      <div class="flashcard" id="flashcard">
+        <div class="card-face card-front">
+          <div class="card-label">Term</div>
+          <div class="card-term" id="fc-term">Pain</div>
+          <div class="card-hint">Click to reveal definition ↓</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-label">Definition</div>
+          <div class="card-def" id="fc-def"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="self-rate" id="self-rate">
+      <button class="rate-btn correct" onclick="rateCard(true)">✓ Got it</button>
+      <button class="rate-btn again"   onclick="rateCard(false)">↩ Study Again</button>
+    </div>
+
+    <div class="card-nav">
+      <button class="card-nav-btn" onclick="prevCard()">← Previous</button>
+      <span class="card-counter" id="fc-counter">1 / 19</span>
+      <button class="card-nav-btn" onclick="nextCard()">Next →</button>
+    </div>
+
+    <div class="feedback-bar info visible" id="fc-feedback">
+      Work through all cards. "Study Again" cards return to the queue until mastered.
+    </div>
+
+    <div class="summary-panel" id="fc-summary">
+      <h3>All Terms Mastered!</h3>
+      <div class="big-score" id="fc-final-score"></div>
+      <p>You reviewed all 19 pain terminology definitions. Try Part 2 to test active recall.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="resetFlashcards()">Start Over</button>
+        <button class="btn-secondary" onclick="showSubTab(1)">Go to Part 2 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Part 2: Fill in the Blank -->
+  <div class="sub-panel" id="subpanel-1">
+    <div class="fitb-score-row">
+      <div class="score-chip">Answered: <span id="fitb-answered">0</span> / <span id="fitb-total">19</span></div>
+      <div class="score-chip">Correct: <span id="fitb-correct">0</span></div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="fitb-progress" style="width:0%"></div>
+    </div>
+
+    <div class="instructions-box">
+      <span class="icon">✏️</span>
+      <span>Each definition has one term removed. Select the correct term from the word bank below each sentence. One attempt per item.</span>
+    </div>
+
+    <div id="fitb-items"></div>
+
+    <div class="feedback-bar" id="fitb-feedback"></div>
+
+    <div class="summary-panel" id="fitb-summary">
+      <h3>Section Complete!</h3>
+      <div class="big-score" id="fitb-final-score"></div>
+      <p id="fitb-summary-text"></p>
+      <button class="btn-primary" onclick="resetFITB()">Try Again</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SECTION 2 — LO2: Sorting Activity
+     ════════════════════════════════════════ -->
+<div class="section" id="section-1">
+  <div class="section-header">
+    <div class="lo-label">Learning Objective 2</div>
+    <h2>Peripheral vs. Central Neuroanatomy</h2>
+    <p>Drag each structure or description to the correct nervous system column.</p>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="sort-progress" style="width:0%"></div>
+  </div>
+
+  <div class="instructions-box">
+    <span class="icon">🧠</span>
+    <span>Drag items from the bank below into the correct column. Items snap back if placed incorrectly. Check your answers when ready.</span>
+  </div>
+
+  <div class="sort-bank" id="sort-bank">
+    <h3>Structure / Description Bank</h3>
+    <div class="sort-items" id="sort-items-container"></div>
+  </div>
+
+  <div class="sort-grid">
+    <div class="sort-column peripheral" id="drop-peripheral"
+         ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'peripheral')">
+      <h3>🔶 Peripheral Nervous System</h3>
+      <div class="sort-items" id="peripheral-placed"></div>
+      <div class="drop-hint" id="peripheral-hint">Drop here</div>
+    </div>
+    <div class="sort-column central" id="drop-central"
+         ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'central')">
+      <h3>🔷 Central Nervous System</h3>
+      <div class="sort-items" id="central-placed"></div>
+      <div class="drop-hint" id="central-hint">Drop here</div>
+    </div>
+  </div>
+
+  <div class="feedback-bar" id="sort-feedback"></div>
+
+  <div class="action-row">
+    <button class="btn-primary" onclick="checkSort()">Check Answers</button>
+    <button class="btn-secondary" onclick="resetSort()">Reset</button>
+  </div>
+
+  <div class="summary-panel" id="sort-summary">
+    <h3>Sorting Complete!</h3>
+    <div class="big-score" id="sort-final-score"></div>
+    <p id="sort-summary-text"></p>
+    <button class="btn-primary" onclick="resetSort()">Try Again</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SECTION 3 — LO3: Neurotransmitters
+     ════════════════════════════════════════ -->
+<div class="section" id="section-2">
+  <div class="section-header">
+    <div class="lo-label">Learning Objective 3</div>
+    <h2>Neurotransmitters in Nociception</h2>
+    <p>For each neurotransmitter, select its primary role in pain transmission. Read the explanation after each answer.</p>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="nt-progress" style="width:0%"></div>
+  </div>
+
+  <div class="instructions-box">
+    <span class="icon">⚡</span>
+    <span>Select the best answer for each neurotransmitter. After answering, an explanation from your handout appears. Try to predict before you click!</span>
+  </div>
+
+  <div class="nt-grid" id="nt-grid"></div>
+
+  <div class="feedback-bar" id="nt-feedback"></div>
+
+  <div class="summary-panel" id="nt-summary">
+    <h3>Section Complete!</h3>
+    <div class="big-score" id="nt-final-score"></div>
+    <p id="nt-summary-text"></p>
+    <button class="btn-primary" onclick="resetNT()">Try Again</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════
+// DATA
+// ════════════════════════════════════
+
+const TERMS = [
+  { term: "Pain", def: "An unpleasant sensory and emotional experience associated with, or resembling that associated with, actual or potential tissue damage." },
+  { term: "Nociception", def: "The neural process of detecting and encoding noxious stimuli. Nociception does not automatically mean pain is felt." },
+  { term: "Noxious Stimulus", def: "A stimulus that damages or threatens to damage normal tissue." },
+  { term: "Nociceptor", def: "A high-threshold peripheral sensory receptor capable of transducing and encoding noxious stimuli." },
+  { term: "Nociceptive Stimulus", def: "An actually or potentially tissue-damaging event encoded by nociceptors." },
+  { term: "Nociceptive Neuron", def: "A peripheral or central neuron in the somatosensory system that can encode noxious stimuli." },
+  { term: "Nociceptive Pain", def: "Pain arising from actual or threatened damage to non-neural tissue due to activation of nociceptors." },
+  { term: "Neuropathic Pain", def: "Pain caused by a lesion or disease of the somatosensory nervous system." },
+  { term: "Nociplastic Pain", def: "Pain arising from altered nociception without clear evidence of ongoing tissue damage activating nociceptors and without a somatosensory lesion explaining the pain." },
+  { term: "Allodynia", def: "Pain due to a stimulus that does not normally provoke pain." },
+  { term: "Hyperalgesia", def: "Increased pain from a stimulus that normally provokes pain." },
+  { term: "Analgesia", def: "Absence of pain in response to a stimulus that would normally be painful." },
+  { term: "Dysesthesia", def: "An unpleasant abnormal sensation, either spontaneous or evoked." },
+  { term: "Paresthesia", def: "An abnormal sensation, either spontaneous or evoked, that is not necessarily unpleasant." },
+  { term: "Hyperesthesia", def: "Increased sensitivity to stimulation, excluding the special senses." },
+  { term: "Hypoesthesia", def: "Decreased sensitivity to stimulation, excluding the special senses." },
+  { term: "Pain Threshold", def: "The minimum intensity at which a stimulus is perceived as painful." },
+  { term: "Pain Tolerance Level", def: "The greatest intensity of pain a person is willing to accept in a given situation." },
+  { term: "Sensitization (Central & Peripheral)", def: "Increased responsiveness of nociceptive neurons to normal input and/or recruitment of responses to previously subthreshold input. Peripheral = in the periphery (reduced threshold). Central = in the CNS to normal or subthreshold afferent input." },
+];
+
+const SORT_ITEMS = [
+  { id:"s1",  label:"Nociceptors (free nerve endings)", answer:"peripheral" },
+  { id:"s2",  label:"Dorsal root ganglion (DRG)", answer:"peripheral" },
+  { id:"s3",  label:"Aδ and C fibers", answer:"peripheral" },
+  { id:"s4",  label:"TRPV1 channels", answer:"peripheral" },
+  { id:"s5",  label:"Peripheral sensitization", answer:"peripheral" },
+  { id:"s6",  label:"Substance P / CGRP release at peripheral terminal", answer:"peripheral" },
+  { id:"s7",  label:"Dorsal horn of spinal cord", answer:"central" },
+  { id:"s8",  label:"Spinothalamic tract (STT)", answer:"central" },
+  { id:"s9",  label:"Wide dynamic range (WDR) neurons", answer:"central" },
+  { id:"s10", label:"Thalamus", answer:"central" },
+  { id:"s11", label:"Somatosensory cortex", answer:"central" },
+  { id:"s12", label:"Periaqueductal gray (PAG)", answer:"central" },
+  { id:"s13", label:"Central sensitization", answer:"central" },
+  { id:"s14", label:"Descending inhibitory pathways", answer:"central" },
+];
+
+const NT_QUESTIONS = [
+  {
+    name: "Glutamate",
+    location: "Primary afferent synapse and dorsal horn",
+    question: "What is glutamate's primary role in nociceptive transmission?",
+    options: ["Major excitatory transmitter; activates NMDA and AMPA receptors", "Primary inhibitory transmitter in the dorsal horn", "Promotes neurogenic inflammation at peripheral terminals", "Inhibitory modulator in descending pathways"],
+    correct: 0,
+    explanation: "Glutamate is the major excitatory transmitter at the primary afferent synapse. It activates NMDA and AMPA receptors in the dorsal horn and is a key contributor to central sensitization."
+  },
+  {
+    name: "Substance P",
+    location: "Primary afferent terminals and dorsal horn",
+    question: "Substance P is best described as:",
+    options: ["A primary inhibitory neuropeptide in the spinal cord", "An excitatory neuropeptide supporting nociceptive transmission and neurogenic inflammation", "A descending modulatory transmitter from the brainstem", "An ion channel that responds to heat and low pH"],
+    correct: 1,
+    explanation: "Substance P is an excitatory neuropeptide released at peripheral terminals and the dorsal horn. It supports nociceptive transmission and contributes to neurogenic inflammation alongside CGRP."
+  },
+  {
+    name: "CGRP",
+    location: "Peripheral terminals and dorsal horn",
+    question: "What is the primary function of CGRP in pain processing?",
+    options: ["Inhibits dorsal horn excitability via A1 receptors", "Promotes neurogenic inflammation and amplifies nociceptive signaling", "Provides analgesia by binding to opioid receptors", "Suppresses nociceptive transmission via descending pathways"],
+    correct: 1,
+    explanation: "CGRP (calcitonin gene-related peptide) promotes neurogenic inflammation and amplifies nociceptive signaling. It is released alongside substance P at peripheral terminals after nociceptor activation."
+  },
+  {
+    name: "GABA",
+    location: "Dorsal horn interneurons",
+    question: "GABA's role in the dorsal horn is:",
+    options: ["Excitatory — amplifies pain signals via NMDA receptors", "Excitatory — promotes wind-up and central sensitization", "Inhibitory — reduces spinal cord excitability", "Modulatory — has both facilitatory and inhibitory effects"],
+    correct: 2,
+    explanation: "GABA is the primary inhibitory transmitter in the dorsal horn. GABAergic interneurons are a key component of segmental inhibition and are listed in the handout as an inhibitory pain pathway mechanism."
+  },
+  {
+    name: "Endogenous Opioids",
+    location: "Spinal cord, brainstem, and supraspinal sites",
+    question: "Endogenous opioids function to:",
+    options: ["Amplify nociceptive transmission at the primary afferent synapse", "Suppress nociceptive transmission; basis for opioid analgesia", "Promote peripheral sensitization via TRPV1 sensitization", "Increase dorsal horn excitability via NMDA receptor activation"],
+    correct: 1,
+    explanation: "Endogenous opioids suppress nociceptive transmission throughout the pain pathway and form the biological basis for opioid analgesia. They act at spinal cord, brainstem, and supraspinal sites."
+  },
+  {
+    name: "Serotonin (5-HT)",
+    location: "Descending pathways from brainstem",
+    question: "Serotonin's role in pain modulation is best described as:",
+    options: ["Purely inhibitory at all receptor subtypes", "Generally facilitatory — increases dorsal horn excitability", "Generally inhibitory in descending control, though some receptor subtypes can facilitate pain", "A primary excitatory transmitter at the primary afferent synapse"],
+    correct: 2,
+    explanation: "Serotonin is generally inhibitory in descending pain control pathways, but the handout notes that some 5-HT receptor subtypes can facilitate pain. This context-dependence is important clinically."
+  },
+  {
+    name: "Norepinephrine",
+    location: "Descending pathways and spinal cord (from locus coeruleus)",
+    question: "Norepinephrine's primary role in pain processing is:",
+    options: ["Excitatory transmitter contributing to wind-up", "Key inhibitory/modulatory transmitter in descending pain control", "Peripheral sensitizer released during neurogenic inflammation", "Promotes vasodilation and edema at injury sites"],
+    correct: 1,
+    explanation: "Norepinephrine is the primary descending inhibitory/modulatory transmitter. The locus coeruleus is its main source and is listed in the handout as the primary source of noradrenergic descending inhibition."
+  },
+  {
+    name: "Adenosine",
+    location: "Dorsal horn",
+    question: "Adenosine acts in the dorsal horn primarily as:",
+    options: ["An excitatory transmitter amplifying pain signals", "A peripheral transducer responding to thermal stimuli", "An inhibitory modulator, especially via A1 receptor activation", "A neuropeptide released during neurogenic inflammation"],
+    correct: 2,
+    explanation: "Adenosine is generally inhibitory in the dorsal horn, acting primarily through A1 receptor activation. This is noted in the handout's neurotransmitter table."
+  },
+];
+
+// ════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════
+function showSection(idx) {
+  document.querySelectorAll('.section').forEach((s,i) => s.classList.toggle('active', i===idx));
+  document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+}
+
+// ════════════════════════════════════
+// LO1: FLASHCARDS
+// ════════════════════════════════════
+let fcDeck = [];
+let fcIndex = 0;
+let fcMastered = 0;
+let fcIsFlipped = false;
+
+function initFlashcards() {
+  fcDeck = [...TERMS];
+  shuffleArray(fcDeck);
+  fcIndex = 0;
+  fcMastered = 0;
+  fcIsFlipped = false;
+  updateFlashcard();
+  document.getElementById('fc-summary').classList.remove('visible');
+  document.getElementById('fc-feedback').className = 'feedback-bar info visible';
+  document.getElementById('fc-feedback').textContent = 'Work through all cards. "Study Again" cards return to the queue until mastered.';
+}
+
+function updateFlashcard() {
+  if (fcDeck.length === 0) {
+    showFCSummary();
+    return;
+  }
+  const card = fcDeck[fcIndex];
+  document.getElementById('fc-term').textContent = card.term;
+  document.getElementById('fc-def').textContent = card.def;
+  document.getElementById('fc-counter').textContent = `${fcIndex + 1} / ${fcDeck.length}`;
+  document.getElementById('fc-remaining').textContent = fcDeck.length;
+  document.getElementById('fc-mastered').textContent = fcMastered;
+  const pct = (fcMastered / (fcMastered + fcDeck.length)) * 100;
+  document.getElementById('fc-progress').style.width = pct + '%';
+
+  const card_el = document.getElementById('flashcard');
+  card_el.classList.remove('flipped');
+  fcIsFlipped = false;
+  document.getElementById('self-rate').classList.remove('visible');
+}
+
+function flipCard() {
+  const card_el = document.getElementById('flashcard');
+  card_el.classList.toggle('flipped');
+  fcIsFlipped = !fcIsFlipped;
+  if (fcIsFlipped) {
+    document.getElementById('self-rate').classList.add('visible');
+  }
+}
+
+function rateCard(knew) {
+  if (knew) {
+    fcDeck.splice(fcIndex, 1);
+    fcMastered++;
+    if (fcIndex >= fcDeck.length && fcDeck.length > 0) fcIndex = 0;
+  } else {
+    const card = fcDeck.splice(fcIndex, 1)[0];
+    const insertAt = Math.min(fcIndex + 2 + Math.floor(Math.random()*2), fcDeck.length);
+    fcDeck.splice(insertAt, 0, card);
+    if (fcIndex >= fcDeck.length) fcIndex = 0;
+  }
+  document.getElementById('self-rate').classList.remove('visible');
+  updateFlashcard();
+}
+
+function nextCard() {
+  if (fcDeck.length === 0) return;
+  fcIndex = (fcIndex + 1) % fcDeck.length;
+  updateFlashcard();
+}
+
+function prevCard() {
+  if (fcDeck.length === 0) return;
+  fcIndex = (fcIndex - 1 + fcDeck.length) % fcDeck.length;
+  updateFlashcard();
+}
+
+function showFCSummary() {
+  document.getElementById('fc-summary').classList.add('visible');
+  document.getElementById('fc-final-score').textContent = fcMastered + ' / ' + TERMS.length;
+  document.getElementById('fc-progress').style.width = '100%';
+  document.getElementById('self-rate').classList.remove('visible');
+  document.getElementById('fc-feedback').classList.remove('visible');
+}
+
+function resetFlashcards() {
+  initFlashcards();
+}
+
+// ════════════════════════════════════
+// LO2: SORTING
+// ════════════════════════════════════
+let dragItem = null;
+let sortPlacements = {};
+let sortChecked = false;
+
+function initSort() {
+  sortPlacements = {};
+  sortChecked = false;
+  const container = document.getElementById('sort-items-container');
+  container.innerHTML = '';
+  const periphPlaced = document.getElementById('peripheral-placed');
+  const centralPlaced = document.getElementById('central-placed');
+  periphPlaced.innerHTML = '';
+  centralPlaced.innerHTML = '';
+
+  const items = [...SORT_ITEMS];
+  shuffleArray(items);
+
+  items.forEach(item => {
+    const el = createSortEl(item);
+    container.appendChild(el);
+  });
+
+  document.getElementById('sort-feedback').className = 'feedback-bar';
+  document.getElementById('sort-summary').classList.remove('visible');
+  document.getElementById('peripheral-hint').style.display = '';
+  document.getElementById('central-hint').style.display = '';
+  updateSortProgress();
+}
+
+function createSortEl(item) {
+  const el = document.createElement('div');
+  el.className = 'sort-item';
+  el.textContent = item.label;
+  el.dataset.id = item.id;
+  el.draggable = true;
+  el.addEventListener('dragstart', (e) => {
+    dragItem = el;
+    setTimeout(() => el.classList.add('dragging'), 0);
+    e.dataTransfer.setData('text/plain', item.id);
+  });
+  el.addEventListener('dragend', () => {
+    el.classList.remove('dragging');
+  });
+  return el;
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function onDrop(e, column) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!dragItem) return;
+
+  const id = dragItem.dataset.id;
+  const item = SORT_ITEMS.find(x => x.id === id);
+
+  // Remove from wherever it was
+  dragItem.parentNode.removeChild(dragItem);
+  dragItem.classList.remove('correct-place','wrong-place');
+
+  // Add to new column
+  const placed = document.getElementById(column + '-placed');
+  placed.appendChild(dragItem);
+  sortPlacements[id] = column;
+
+  // Hide hints if items present
+  document.getElementById('peripheral-hint').style.display =
+    document.getElementById('peripheral-placed').children.length ? 'none' : '';
+  document.getElementById('central-hint').style.display =
+    document.getElementById('central-placed').children.length ? 'none' : '';
+  document.getElementById('sort-items-container').childElementCount === 0;
+
+  updateSortProgress();
+  dragItem = null;
+}
+
+function updateSortProgress() {
+  const placed = Object.keys(sortPlacements).length;
+  document.getElementById('sort-progress').style.width = (placed / SORT_ITEMS.length * 100) + '%';
+}
+
+function checkSort() {
+  if (Object.keys(sortPlacements).length === 0) {
+    showFeedback('sort-feedback', 'info', 'Drag some items into the columns first.');
+    return;
+  }
+  let correct = 0;
+  let total = Object.keys(sortPlacements).length;
+
+  // Mark each placed item
+  ['peripheral','central'].forEach(col => {
+    const container = document.getElementById(col + '-placed');
+    Array.from(container.children).forEach(el => {
+      const item = SORT_ITEMS.find(x => x.id === el.dataset.id);
+      if (item) {
+        const isCorrect = sortPlacements[item.id] === item.answer;
+        el.classList.toggle('correct-place', isCorrect);
+        el.classList.toggle('wrong-place', !isCorrect);
+        if (isCorrect) correct++;
+      }
+    });
+  });
+
+  const unplaced = SORT_ITEMS.length - total;
+  if (correct === SORT_ITEMS.length) {
+    showFeedback('sort-feedback', 'success', `Perfect! All ${SORT_ITEMS.length} items correctly sorted.`);
+    document.getElementById('sort-summary').classList.add('visible');
+    document.getElementById('sort-final-score').textContent = correct + ' / ' + SORT_ITEMS.length;
+    document.getElementById('sort-summary-text').textContent =
+      'All structures correctly sorted between peripheral and central nervous systems.';
+  } else {
+    let msg = `${correct} of ${total} placed items correct.`;
+    if (unplaced > 0) msg += ` ${unplaced} item(s) not yet placed.`;
+    msg += ' Items marked in red need to be moved.';
+    showFeedback('sort-feedback', 'error', msg);
+  }
+}
+
+function resetSort() {
+  // Move all placed items back to bank
+  ['peripheral-placed','central-placed'].forEach(id => {
+    const container = document.getElementById(id);
+    Array.from(container.children).forEach(el => {
+      el.classList.remove('correct-place','wrong-place');
+      document.getElementById('sort-items-container').appendChild(el);
+    });
+  });
+  sortPlacements = {};
+  sortChecked = false;
+  document.getElementById('sort-feedback').className = 'feedback-bar';
+  document.getElementById('sort-summary').classList.remove('visible');
+  document.getElementById('sort-progress').style.width = '0%';
+  document.getElementById('peripheral-hint').style.display = '';
+  document.getElementById('central-hint').style.display = '';
+  initSort();
+}
+
+// ════════════════════════════════════
+// LO3: NEUROTRANSMITTERS
+// ════════════════════════════════════
+let ntAnswered = 0;
+let ntCorrect = 0;
+
+function initNT() {
+  ntAnswered = 0;
+  ntCorrect = 0;
+  const grid = document.getElementById('nt-grid');
+  grid.innerHTML = '';
+
+  NT_QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'nt-card';
+    card.id = 'nt-card-' + qi;
+
+    const opts = q.options.map((opt, oi) =>
+      `<button class="nt-option" onclick="answerNT(${qi},${oi})" id="nt-opt-${qi}-${oi}">${opt}</button>`
+    ).join('');
+
+    card.innerHTML = `
+      <div class="nt-name">${q.name}</div>
+      <div class="nt-location">📍 ${q.location}</div>
+      <div class="nt-question">${q.question}</div>
+      <div class="nt-options">${opts}</div>
+      <div class="nt-explanation" id="nt-exp-${qi}">${q.explanation}</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  document.getElementById('nt-feedback').className = 'feedback-bar';
+  document.getElementById('nt-summary').classList.remove('visible');
+  document.getElementById('nt-progress').style.width = '0%';
+}
+
+function answerNT(qi, oi) {
+  const q = NT_QUESTIONS[qi];
+  const buttons = document.querySelectorAll(`#nt-card-${qi} .nt-option`);
+  buttons.forEach(b => b.disabled = true);
+
+  const isCorrect = oi === q.correct;
+  buttons[oi].classList.add(isCorrect ? 'correct-ans' : 'wrong-ans');
+  if (!isCorrect) buttons[q.correct].classList.add('correct-ans');
+
+  document.getElementById(`nt-exp-${qi}`).classList.add('visible');
+
+  ntAnswered++;
+  if (isCorrect) ntCorrect++;
+
+  const pct = ntAnswered / NT_QUESTIONS.length * 100;
+  document.getElementById('nt-progress').style.width = pct + '%';
+
+  if (ntAnswered === NT_QUESTIONS.length) {
+    setTimeout(() => {
+      document.getElementById('nt-summary').classList.add('visible');
+      document.getElementById('nt-final-score').textContent = ntCorrect + ' / ' + NT_QUESTIONS.length;
+      const pctScore = Math.round(ntCorrect / NT_QUESTIONS.length * 100);
+      let msg = pctScore === 100 ? 'Excellent! All neurotransmitters correctly identified.' :
+                pctScore >= 75 ? 'Good work! Review any explanations for items you missed.' :
+                'Keep reviewing — re-read the neurotransmitter table in your handout and try again.';
+      document.getElementById('nt-summary-text').textContent = msg;
+      showFeedback('nt-feedback', pctScore === 100 ? 'success' : 'info',
+        `You answered ${ntCorrect} of ${NT_QUESTIONS.length} correctly (${pctScore}%).`);
+    }, 400);
+  }
+}
+
+function resetNT() {
+  initNT();
+}
+
+// ════════════════════════════════════
+// SUB-TABS (LO1)
+// ════════════════════════════════════
+function showSubTab(idx) {
+  document.querySelectorAll('.sub-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.sub-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+}
+
+// ════════════════════════════════════
+// LO1 PART 2: FILL IN THE BLANK DATA
+// ════════════════════════════════════
+const FITB_ITEMS = [
+  {
+    term: "Pain",
+    before: "",
+    after: " is an unpleasant sensory and emotional experience associated with, or resembling that associated with, actual or potential tissue damage.",
+    distractors: ["Nociception", "Dysesthesia", "Hyperalgesia"]
+  },
+  {
+    term: "Nociception",
+    before: "",
+    after: " is the neural process of detecting and encoding noxious stimuli — it does not automatically mean pain is felt.",
+    distractors: ["Pain", "Sensitization", "Nociceptive Pain"]
+  },
+  {
+    term: "Noxious Stimulus",
+    before: "A ",
+    after: " is a stimulus that damages or threatens to damage normal tissue.",
+    distractors: ["Nociceptive Stimulus", "Pain Threshold", "Nociceptor"]
+  },
+  {
+    term: "Nociceptor",
+    before: "A ",
+    after: " is a high-threshold peripheral sensory receptor capable of transducing and encoding noxious stimuli.",
+    distractors: ["Nociceptive Neuron", "Noxious Stimulus", "TRPV1"]
+  },
+  {
+    term: "Nociceptive Stimulus",
+    before: "A ",
+    after: " is an actually or potentially tissue-damaging event encoded by nociceptors.",
+    distractors: ["Noxious Stimulus", "Nociceptor", "Pain Threshold"]
+  },
+  {
+    term: "Nociceptive Neuron",
+    before: "A ",
+    after: " is a peripheral or central neuron in the somatosensory system that can encode noxious stimuli.",
+    distractors: ["Nociceptor", "Wide Dynamic Range Neuron", "Primary Afferent"]
+  },
+  {
+    term: "Nociceptive Pain",
+    before: "",
+    after: " arises from actual or threatened damage to non-neural tissue due to activation of nociceptors.",
+    distractors: ["Neuropathic Pain", "Nociplastic Pain", "Referred Pain"]
+  },
+  {
+    term: "Neuropathic Pain",
+    before: "",
+    after: " is caused by a lesion or disease of the somatosensory nervous system.",
+    distractors: ["Nociceptive Pain", "Nociplastic Pain", "Central Sensitization"]
+  },
+  {
+    term: "Nociplastic Pain",
+    before: "",
+    after: " arises from altered nociception without clear evidence of ongoing tissue damage activating nociceptors and without a somatosensory lesion explaining the pain.",
+    distractors: ["Neuropathic Pain", "Central Sensitization", "Hyperalgesia"]
+  },
+  {
+    term: "Allodynia",
+    before: "",
+    after: " is pain due to a stimulus that does not normally provoke pain.",
+    distractors: ["Hyperalgesia", "Dysesthesia", "Hyperesthesia"]
+  },
+  {
+    term: "Hyperalgesia",
+    before: "",
+    after: " is increased pain from a stimulus that normally provokes pain.",
+    distractors: ["Allodynia", "Hyperesthesia", "Sensitization"]
+  },
+  {
+    term: "Analgesia",
+    before: "",
+    after: " is the absence of pain in response to a stimulus that would normally be painful.",
+    distractors: ["Hypoesthesia", "Pain Tolerance Level", "Paresthesia"]
+  },
+  {
+    term: "Dysesthesia",
+    before: "",
+    after: " is an unpleasant abnormal sensation, either spontaneous or evoked.",
+    distractors: ["Paresthesia", "Hyperesthesia", "Allodynia"]
+  },
+  {
+    term: "Paresthesia",
+    before: "",
+    after: " is an abnormal sensation, either spontaneous or evoked, that is not necessarily unpleasant.",
+    distractors: ["Dysesthesia", "Hypoesthesia", "Hyperesthesia"]
+  },
+  {
+    term: "Hyperesthesia",
+    before: "",
+    after: " is increased sensitivity to stimulation, excluding the special senses.",
+    distractors: ["Hypoesthesia", "Hyperalgesia", "Allodynia"]
+  },
+  {
+    term: "Hypoesthesia",
+    before: "",
+    after: " is decreased sensitivity to stimulation, excluding the special senses.",
+    distractors: ["Hyperesthesia", "Analgesia", "Paresthesia"]
+  },
+  {
+    term: "Pain Threshold",
+    before: "",
+    after: " is the minimum intensity at which a stimulus is perceived as painful.",
+    distractors: ["Pain Tolerance Level", "Sensitization", "Nociception"]
+  },
+  {
+    term: "Pain Tolerance Level",
+    before: "",
+    after: " is the greatest intensity of pain a person is willing to accept in a given situation.",
+    distractors: ["Pain Threshold", "Analgesia", "Hyperalgesia"]
+  },
+  {
+    term: "Sensitization",
+    before: "",
+    after: " is increased responsiveness of nociceptive neurons to normal input and/or recruitment of responses to previously subthreshold input. The peripheral form involves reduced threshold in the periphery; the central form involves increased CNS responsiveness.",
+    distractors: ["Allodynia", "Hyperalgesia", "Wind-up"]
+  },
+];
+
+// ════════════════════════════════════
+// LO1 PART 2: FILL IN THE BLANK LOGIC
+// ════════════════════════════════════
+let fitbAnswered = 0;
+let fitbCorrect = 0;
+let fitbData = [];
+
+function initFITB() {
+  fitbAnswered = 0;
+  fitbCorrect = 0;
+  fitbData = FITB_ITEMS.map(item => ({ ...item, answered: false, wasCorrect: false }));
+  shuffleArray(fitbData);
+
+  const container = document.getElementById('fitb-items');
+  container.innerHTML = '';
+
+  fitbData.forEach((item, idx) => {
+    // Build word bank: correct term + distractors, shuffled
+    const wordBank = shuffleArray([item.term, ...item.distractors]);
+
+    const chips = wordBank.map(w =>
+      `<button class="fitb-chip" id="fitb-chip-${idx}-${w.replace(/\s+/g,'-')}" onclick="selectFITB(${idx}, '${w.replace(/'/g,"\\'")}', this)">${w}</button>`
+    ).join('');
+
+    const el = document.createElement('div');
+    el.className = 'fitb-item';
+    el.id = `fitb-item-${idx}`;
+    el.innerHTML = `
+      <div class="fitb-sentence">
+        ${item.before}<span class="fitb-blank" id="fitb-blank-${idx}">_______________</span>${item.after}
+      </div>
+      <div class="fitb-word-bank">${chips}</div>
+      <div class="fitb-result-label" id="fitb-result-${idx}"></div>
+    `;
+    container.appendChild(el);
+  });
+
+  document.getElementById('fitb-answered').textContent = '0';
+  document.getElementById('fitb-total').textContent = fitbData.length;
+  document.getElementById('fitb-correct').textContent = '0';
+  document.getElementById('fitb-progress').style.width = '0%';
+  document.getElementById('fitb-feedback').className = 'feedback-bar';
+  document.getElementById('fitb-summary').classList.remove('visible');
+}
+
+function selectFITB(idx, choice, chipEl) {
+  const item = fitbData[idx];
+  if (item.answered) return;
+  item.answered = true;
+
+  const isCorrect = choice === item.term;
+  item.wasCorrect = isCorrect;
+
+  // Fill blank
+  const blank = document.getElementById(`fitb-blank-${idx}`);
+  blank.textContent = choice;
+  blank.classList.add(isCorrect ? 'filled-correct' : 'filled-wrong');
+
+  // Style all chips in this item
+  const itemEl = document.getElementById(`fitb-item-${idx}`);
+  itemEl.querySelectorAll('.fitb-chip').forEach(c => {
+    c.disabled = true;
+    if (c === chipEl) c.classList.add('selected');
+  });
+  itemEl.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+
+  // Result label
+  const result = document.getElementById(`fitb-result-${idx}`);
+  result.classList.add('visible');
+  if (isCorrect) {
+    result.className = 'fitb-result-label visible correct';
+    result.textContent = '✓ Correct';
+  } else {
+    result.className = 'fitb-result-label visible wrong';
+    result.textContent = `✗ The correct term is: ${item.term}`;
+  }
+
+  // Update counts
+  fitbAnswered++;
+  if (isCorrect) fitbCorrect++;
+  document.getElementById('fitb-answered').textContent = fitbAnswered;
+  document.getElementById('fitb-correct').textContent = fitbCorrect;
+  document.getElementById('fitb-progress').style.width = (fitbAnswered / fitbData.length * 100) + '%';
+
+  if (fitbAnswered === fitbData.length) {
+    setTimeout(() => {
+      const pct = Math.round(fitbCorrect / fitbData.length * 100);
+      document.getElementById('fitb-summary').classList.add('visible');
+      document.getElementById('fitb-final-score').textContent = fitbCorrect + ' / ' + fitbData.length;
+      const msg = pct === 100 ? 'Perfect recall — all 19 terms correctly placed.' :
+                  pct >= 80  ? 'Strong performance. Review any terms marked in red.' :
+                  pct >= 60  ? 'Good effort. Return to the flashcards for any terms you missed.' :
+                               'Keep studying — try Part 1 again, then return here.';
+      document.getElementById('fitb-summary-text').textContent = msg;
+      showFeedback('fitb-feedback', pct === 100 ? 'success' : 'info',
+        `You answered ${fitbCorrect} of ${fitbData.length} correctly (${pct}%).`);
+    }, 400);
+  }
+}
+
+function resetFITB() {
+  initFITB();
+}
+
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showFeedback(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = `feedback-bar ${type} visible`;
+  el.textContent = msg;
+}
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+initFlashcards();
+initSort();
+initNT();
+initFITB();
+</script>
+</body>
+</html>
