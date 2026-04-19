@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>Vestibular Lab Interactive Studio</title>
+  <style>
+    :root {
+      --bg: #eef5f7;
+      --bg-deep: #dbe7ea;
+      --surface: rgba(255, 255, 255, 0.94);
+      --surface-strong: #ffffff;
+      --surface-soft: #f7fbfc;
+      --ink: #142531;
+      --muted: #5d707d;
+      --border: rgba(20, 37, 49, 0.13);
+      --accent: #0f766e;
+      --accent-strong: #155e75;
+      --accent-soft: rgba(15, 118, 110, 0.11);
+      --amber: #b7791f;
+      --amber-soft: rgba(183, 121, 31, 0.14);
+      --navy: #1d4ed8;
+      --navy-soft: rgba(29, 78, 216, 0.12);
+      --rose: #b83280;
+      --rose-soft: rgba(184, 50, 128, 0.12);
+      --success: #166534;
+      --success-soft: rgba(22, 101, 52, 0.12);
+      --danger: #b42318;
+      --danger-soft: rgba(180, 35, 24, 0.1);
+      --focus: #1d4ed8;
+      --shadow-lg: 0 28px 60px rgba(19, 38, 49, 0.14);
+      --shadow-md: 0 18px 34px rgba(19, 38, 49, 0.11);
+      --shadow-sm: 0 10px 22px rgba(19, 38, 49, 0.08);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --transition: 180ms ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 26rem),
+        radial-gradient(circle at bottom right, rgba(184, 50, 128, 0.08), transparent 26rem),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .app-shell {
+      max-width: 1460px;
+      margin: 0 auto;
+      padding: 26px 18px 48px;
+    }
+
+    .hero,
+    .overview-card,
+    .session-panel,
+    .activity-card,
+    .feedback-box,
+    .choice-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      background: var(--surface);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(290px, 0.8fr);
+      gap: 22px;
+      padding: 28px;
+      margin-bottom: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -7rem -7rem auto;
+      width: 18rem;
+      height: 18rem;
+      background: radial-gradient(circle, rgba(29, 78, 216, 0.18), transparent 68%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .hero h1,
+    .section-title,
+    .activity-card h3,
+    .stats-value {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    .hero h1 {
+      margin-top: 14px;
+      font-size: clamp(2.3rem, 4vw, 4rem);
+      line-height: 0.96;
+      max-width: 10ch;
+    }
+
+    .hero p {
+      max-width: 70ch;
+      margin: 14px 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 1.02rem;
+    }
+
+    .hero-note {
+      margin-top: 18px;
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(20, 37, 49, 0.08);
+      color: var(--muted);
+      font-size: 0.92rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .hero-stats {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .stats-card {
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 251, 252, 0.95));
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stats-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 800;
+    }
+
+    .stats-value {
+      display: block;
+      margin-top: 8px;
+      font-size: 2.1rem;
+      line-height: 1;
+    }
+
+    .stats-note {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .overview-card {
+      padding: 20px;
+    }
+
+    .overview-card h2 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+    }
+
+    .overview-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .session-panel {
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+
+    .session-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      line-height: 1;
+    }
+
+    .section-copy {
+      max-width: 70ch;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .session-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--navy-soft);
+      color: var(--navy);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .activity-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .activity-card {
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .activity-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    .activity-card h3 {
+      font-size: 1.55rem;
+      line-height: 1.03;
+    }
+
+    .activity-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .badge.teal {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .badge.gold {
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .badge.rose {
+      background: var(--rose-soft);
+      color: var(--rose);
+    }
+
+    .activity-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-weight: 800;
+      cursor: pointer;
+      transition:
+        transform var(--transition),
+        background var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition),
+        color var(--transition);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 12px 26px rgba(15, 118, 110, 0.2);
+    }
+
+    .btn-secondary {
+      border-color: var(--border);
+      background: var(--surface-strong);
+      color: var(--ink);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-tertiary {
+      background: var(--surface-soft);
+      border-color: rgba(20, 37, 49, 0.08);
+      color: var(--muted);
+    }
+
+    .feedback-box {
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.84);
+      font-size: 0.96rem;
+      line-height: 1.55;
+      color: var(--muted);
+      box-shadow: none;
+    }
+
+    .feedback-box.success {
+      border-color: rgba(22, 101, 52, 0.2);
+      background: linear-gradient(180deg, var(--success-soft), rgba(255, 255, 255, 0.98));
+      color: var(--success);
+    }
+
+    .feedback-box.error {
+      border-color: rgba(180, 35, 24, 0.16);
+      background: linear-gradient(180deg, var(--danger-soft), rgba(255, 255, 255, 0.98));
+      color: #8d251d;
+    }
+
+    .feedback-box.info {
+      border-color: rgba(29, 78, 216, 0.14);
+      background: linear-gradient(180deg, rgba(29, 78, 216, 0.08), rgba(255, 255, 255, 0.98));
+      color: #1e3a8a;
+    }
+
+    .match-board {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 160px 1fr;
+      gap: 18px;
+      align-items: stretch;
+      min-height: 420px;
+    }
+
+    .match-column {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .match-spine {
+      position: relative;
+      min-height: 420px;
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(180deg, rgba(29, 78, 216, 0.08), rgba(15, 118, 110, 0.08)),
+        var(--surface-soft);
+      border: 1px dashed rgba(29, 78, 216, 0.2);
+      overflow: hidden;
+    }
+
+    .match-spine svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .match-spine-label {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(20, 37, 49, 0.08);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .match-node {
+      position: relative;
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 251, 252, 0.96));
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition:
+        transform var(--transition),
+        border-color var(--transition),
+        background var(--transition),
+        box-shadow var(--transition);
+    }
+
+    .match-node:hover {
+      transform: translateY(-1px);
+      border-color: rgba(29, 78, 216, 0.28);
+    }
+
+    .match-node.selected {
+      border-color: var(--navy);
+      background: linear-gradient(180deg, rgba(29, 78, 216, 0.11), rgba(255, 255, 255, 0.98));
+      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.08);
+    }
+
+    .match-node.matched {
+      border-color: rgba(15, 118, 110, 0.24);
+    }
+
+    .match-node.correct {
+      border-color: rgba(22, 101, 52, 0.34);
+      background: linear-gradient(180deg, rgba(22, 101, 52, 0.09), rgba(255, 255, 255, 0.98));
+    }
+
+    .match-node.incorrect {
+      border-color: rgba(180, 35, 24, 0.28);
+      background: linear-gradient(180deg, rgba(180, 35, 24, 0.08), rgba(255, 255, 255, 0.98));
+    }
+
+    .node-label {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .node-meta {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .node-anchor {
+      position: absolute;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, var(--accent), var(--navy));
+      box-shadow: 0 0 0 5px rgba(15, 118, 110, 0.12);
+    }
+
+    .match-node.left .node-anchor {
+      right: -6px;
+    }
+
+    .match-node.right .node-anchor {
+      left: -6px;
+    }
+
+    .builder-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .builder-panel {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 251, 252, 0.96));
+      box-shadow: var(--shadow-sm);
+    }
+
+    .builder-panel h4 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+    }
+
+    .builder-panel p {
+      margin: 0 0 12px;
+      font-size: 0.92rem;
+    }
+
+    .bank {
+      min-height: 90px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(20, 37, 49, 0.18);
+      background: rgba(255, 255, 255, 0.72);
+      margin-bottom: 12px;
+    }
+
+    .bank.is-targeted,
+    .drop-zone.is-targeted {
+      border-color: rgba(29, 78, 216, 0.35);
+      box-shadow: inset 0 0 0 3px rgba(29, 78, 216, 0.08);
+    }
+
+    .token {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(20, 37, 49, 0.12);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(242, 248, 250, 0.96));
+      color: var(--ink);
+      cursor: grab;
+      box-shadow: var(--shadow-sm);
+      transition:
+        transform var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition),
+        background var(--transition);
+      user-select: none;
+    }
+
+    .token:hover {
+      transform: translateY(-1px);
+      border-color: rgba(15, 118, 110, 0.28);
+    }
+
+    .token.selected {
+      border-color: var(--navy);
+      background: linear-gradient(135deg, rgba(29, 78, 216, 0.12), rgba(255, 255, 255, 0.98));
+      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.08);
+    }
+
+    .token.correct {
+      border-color: rgba(22, 101, 52, 0.3);
+      background: linear-gradient(135deg, rgba(22, 101, 52, 0.1), rgba(255, 255, 255, 0.98));
+    }
+
+    .token.incorrect {
+      border-color: rgba(180, 35, 24, 0.26);
+      background: linear-gradient(135deg, rgba(180, 35, 24, 0.09), rgba(255, 255, 255, 0.98));
+    }
+
+    .token.dragging {
+      opacity: 0.5;
+      transform: scale(0.98);
+    }
+
+    .slot-list,
+    .zone-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .drop-zone {
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(20, 37, 49, 0.18);
+      background: rgba(255, 255, 255, 0.78);
+      transition:
+        border-color var(--transition),
+        box-shadow var(--transition),
+        background var(--transition);
+    }
+
+    .drop-zone.correct {
+      border-color: rgba(22, 101, 52, 0.34);
+      background: linear-gradient(180deg, rgba(22, 101, 52, 0.08), rgba(255, 255, 255, 0.98));
+    }
+
+    .drop-zone.incorrect {
+      border-color: rgba(180, 35, 24, 0.26);
+      background: linear-gradient(180deg, rgba(180, 35, 24, 0.07), rgba(255, 255, 255, 0.98));
+    }
+
+    .slot-number {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--navy-soft);
+      color: var(--navy);
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    .zone-copy {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .zone-title {
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .zone-desc {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .zone-token-wrap {
+      flex: 1 1 260px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .empty-hint {
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-style: italic;
+    }
+
+    .challenge-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .choice-card {
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .choice-card h4 {
+      margin: 0 0 8px;
+      font-size: 1.08rem;
+    }
+
+    .choice-card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .choice-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .choice-btn {
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(20, 37, 49, 0.12);
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--ink);
+      font-weight: 700;
+      cursor: pointer;
+      transition:
+        transform var(--transition),
+        border-color var(--transition),
+        background var(--transition);
+    }
+
+    .choice-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .choice-btn.correct {
+      border-color: rgba(22, 101, 52, 0.34);
+      background: rgba(22, 101, 52, 0.1);
+      color: var(--success);
+    }
+
+    .choice-btn.incorrect {
+      border-color: rgba(180, 35, 24, 0.28);
+      background: rgba(180, 35, 24, 0.08);
+      color: #8d251d;
+    }
+
+    .choice-explainer {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.5;
+      min-height: 42px;
+    }
+
+    .footer-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .overview-grid,
+      .builder-grid,
+      .challenge-grid,
+      .match-board {
+        grid-template-columns: 1fr;
+      }
+
+      .match-spine {
+        min-height: 220px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        padding: 16px 12px 36px;
+      }
+
+      .hero,
+      .session-panel,
+      .activity-card,
+      .overview-card {
+        padding: 18px;
+      }
+
+      .activity-controls,
+      .choice-buttons {
+        flex-direction: column;
+      }
+
+      .zone-token-wrap {
+        justify-content: flex-start;
+      }
+
+      .drop-zone {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <span class="eyebrow">Vestibular Neuroscience Lab</span>
+        <h1>Interactive Studio for Motion, Balance, and Reflexes</h1>
+        <p>
+          This version turns the vestibular lab into a sequence of mini challenges instead of written-response boxes.
+          Students connect structures to functions, build motion-detection sequences, sort real-life scenarios, and
+          test push-pull plus multisensory reasoning with immediate feedback.
+        </p>
+        <div class="hero-note">Use drag-and-drop or tap a card, then tap a target. Each activity checks itself.</div>
+      </div>
+      <div class="hero-stats">
+        <div class="stats-card">
+          <span class="stats-label">Progress</span>
+          <span class="stats-value"><span id="completeCount">0</span> / <span id="totalActivities">5</span></span>
+          <span class="stats-note">Activities marked complete when all answers in that section are correct.</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="overview-grid" aria-label="Overview">
+      <article class="overview-card">
+        <h2>Learning Targets</h2>
+        <ul>
+          <li>Distinguish canal, otolith, nerve, and nuclear functions.</li>
+          <li>Sequence vestibular mechanotransduction events accurately.</li>
+          <li>Sort stimuli by rotation, translation, and multisensory balance demands.</li>
+          <li>Explain push-pull coding and sensory reweighting in equilibrium.</li>
+        </ul>
+      </article>
+      <article class="overview-card">
+        <h2>How To Run It</h2>
+        <ul>
+          <li>Project one challenge at a time.</li>
+          <li>Let pairs make predictions before checking.</li>
+          <li>Use reset buttons for fast replay with a new group.</li>
+          <li>Pause after each check for a short debrief.</li>
+        </ul>
+      </article>
+      <article class="overview-card">
+        <h2>What Changed</h2>
+        <ul>
+          <li>Text areas were removed.</li>
+          <li>Activities now rely on movement, matching, and quick choices.</li>
+          <li>Feedback is immediate so students can self-correct in class.</li>
+          <li>Each section can stand alone if you only want a few minutes of interaction.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="session-panel">
+      <div class="session-header">
+        <div>
+          <div class="section-title">Session 1</div>
+          <div class="section-copy">Anatomy and sensory transduction through function matching and ordered event building.</div>
+        </div>
+        <div class="session-tag">50 minutes · foundations</div>
+      </div>
+
+      <div class="activity-grid">
+        <article class="activity-card" data-activity-id="matching">
+          <div class="activity-top">
+            <div>
+              <h3>1. Connect Structures to Their Jobs</h3>
+              <p>Click one structure on the left and its best function on the right to draw a connection. Re-click a matched item to clear it.</p>
+            </div>
+            <div class="badge-row">
+              <span class="badge teal">Connect The Dots</span>
+            </div>
+          </div>
+          <div class="activity-controls">
+            <button class="btn btn-primary" id="matchCheck">Check Connections</button>
+            <button class="btn btn-secondary" id="matchReset">Reset Connections</button>
+          </div>
+          <div class="match-board" id="matchBoard">
+            <div class="match-column" id="matchLeft"></div>
+            <div class="match-spine">
+              <div class="match-spine-label">Neural Wiring</div>
+              <svg id="matchLines" viewBox="0 0 160 420" preserveAspectRatio="none" aria-hidden="true"></svg>
+            </div>
+            <div class="match-column" id="matchRight"></div>
+          </div>
+          <div class="feedback-box info" id="matchFeedback">Select a structure, then select its function to make a line.</div>
+        </article>
+
+        <article class="activity-card" data-activity-id="sequence">
+          <div class="activity-top">
+            <div>
+              <h3>2. Build the Motion Signal</h3>
+              <p>Arrange the steps in the correct order for canal and otolith transduction. Drag a step into a slot or tap a step, then tap a numbered slot.</p>
+            </div>
+            <div class="badge-row">
+              <span class="badge teal">Sequence Builder</span>
+            </div>
+          </div>
+          <div class="activity-controls">
+            <button class="btn btn-primary" id="sequenceCheck">Check Sequences</button>
+            <button class="btn btn-secondary" id="sequenceReset">Reset Sequences</button>
+          </div>
+          <div class="builder-grid">
+            <section class="builder-panel">
+              <h4>Semicircular Canals</h4>
+              <p>Order the chain of events that turns head rotation into a change in afferent firing.</p>
+              <div class="bank" id="canalBank" aria-label="Canal sequence step bank"></div>
+              <div class="slot-list" id="canalSlots"></div>
+            </section>
+            <section class="builder-panel">
+              <h4>Otolith Organs</h4>
+              <p>Order the chain of events that turns tilt or linear acceleration into a neural signal.</p>
+              <div class="bank" id="otolithBank" aria-label="Otolith sequence step bank"></div>
+              <div class="slot-list" id="otolithSlots"></div>
+            </section>
+          </div>
+          <div class="feedback-box info" id="sequenceFeedback">Correct order matters here because vestibular transduction is a mechanical chain, not just a list of facts.</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="session-panel">
+      <div class="session-header">
+        <div>
+          <div class="section-title">Session 2</div>
+          <div class="section-copy">Functional differentiation, push-pull logic, multisensory integration, and central pathway relay.</div>
+        </div>
+        <div class="session-tag">50 minutes · integration</div>
+      </div>
+
+      <div class="activity-grid">
+        <article class="activity-card" data-activity-id="sorting">
+          <div class="activity-top">
+            <div>
+              <h3>3. Sort the Stimulus Cards</h3>
+              <p>Place each scenario where it belongs: canals, otolith organs, or multisensory balance integration.</p>
+            </div>
+            <div class="badge-row">
+              <span class="badge teal">Drag And Drop</span>
+            </div>
+          </div>
+          <div class="activity-controls">
+            <button class="btn btn-primary" id="sortingCheck">Check Sorting</button>
+            <button class="btn btn-secondary" id="sortingReset">Reset Sorting</button>
+          </div>
+          <div class="builder-panel">
+            <div class="bank" id="scenarioBank" aria-label="Scenario card bank"></div>
+            <div class="zone-list" id="scenarioZones"></div>
+          </div>
+          <div class="feedback-box info" id="sortingFeedback">Look for the dominant stimulus: rotation, linear acceleration/gravity, or whole-system balance weighting.</div>
+        </article>
+
+        <article class="activity-card" data-activity-id="choices">
+          <div class="activity-top">
+            <div>
+              <h3>4. Push-Pull and Sensory Weighting Quickfire</h3>
+              <p>Tap the best answer for each case. These are built for fast whole-class prediction and debrief.</p>
+            </div>
+            <div class="badge-row">
+              <span class="badge rose">Quick Check</span>
+            </div>
+          </div>
+          <div class="challenge-grid" id="choiceGrid"></div>
+          <div class="feedback-box info" id="choiceFeedback">Choose an answer in every case to reveal the explanations.</div>
+        </article>
+
+        <article class="activity-card" data-activity-id="pathway">
+          <div class="activity-top">
+            <div>
+              <h3>5. Relay the Central Pathway</h3>
+              <p>Order the pathway from peripheral detection to central processing and output targets.</p>
+            </div>
+            <div class="badge-row">
+              <span class="badge teal">Sequence Builder</span>
+            </div>
+          </div>
+          <div class="activity-controls">
+            <button class="btn btn-primary" id="pathwayCheck">Check Pathway</button>
+            <button class="btn btn-secondary" id="pathwayReset">Reset Pathway</button>
+          </div>
+          <div class="builder-panel">
+            <div class="bank" id="pathwayBank" aria-label="Vestibular pathway card bank"></div>
+            <div class="slot-list" id="pathwaySlots"></div>
+          </div>
+          <div class="feedback-box info" id="pathwayFeedback">The pathway matters because vestibular information is transformed from detection into reflexes, posture, and cerebellar coordination.</div>
+        </article>
+      </div>
+    </section>
+
+    <p class="footer-note">This page is designed as a live classroom companion with replayable self-checking activities instead of typed answers.</p>
+  </div>
+
+  <script>
+    const totalActivities = 5;
+    const activityCompletion = {
+      matching: false,
+      sequence: false,
+      sorting: false,
+      choices: false,
+      pathway: false
+    };
+
+    function updateProgress() {
+      const complete = Object.values(activityCompletion).filter(Boolean).length;
+      document.getElementById("completeCount").textContent = String(complete);
+      document.getElementById("totalActivities").textContent = String(totalActivities);
+    }
+
+    function setActivityComplete(id, value) {
+      activityCompletion[id] = value;
+      updateProgress();
+    }
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function setFeedback(id, message, tone) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.className = "feedback-box";
+      if (tone) {
+        el.classList.add(tone);
+      }
+    }
+
+    const matchingData = {
+      left: [
+        { id: "canals", label: "Semicircular canals", meta: "Three orthogonal canals in the inner ear" },
+        { id: "utricle", label: "Utricle", meta: "Macula oriented mainly in the horizontal plane" },
+        { id: "saccule", label: "Saccule", meta: "Macula oriented more vertically" },
+        { id: "nerve", label: "Vestibular nerve", meta: "Afferent pathway leaving the labyrinth" },
+        { id: "nuclei", label: "Vestibular nuclei", meta: "Brainstem integration hub" }
+      ],
+      right: [
+        { id: "f-afferent", label: "Carry vestibular signals from receptors toward the CNS", meta: "Primary sensory axons bundle here." },
+        { id: "f-vertical", label: "Detect vertical acceleration and head position relative to gravity", meta: "Strongly involved when motion is up-down." },
+        { id: "f-rotation", label: "Detect angular acceleration during head rotation", meta: "Cupula and endolymph dynamics dominate here." },
+        { id: "f-integration", label: "Distribute vestibular information to reflex and cerebellar pathways", meta: "Coordinates gaze and postural responses." },
+        { id: "f-horizontal", label: "Detect tilt and linear acceleration in the horizontal plane", meta: "Especially useful for head translation and tilt." }
+      ],
+      answers: {
+        canals: "f-rotation",
+        utricle: "f-horizontal",
+        saccule: "f-vertical",
+        nerve: "f-afferent",
+        nuclei: "f-integration"
+      }
+    };
+
+    const matchingState = {
+      selectedLeft: null,
+      selectedRight: null,
+      pairs: {}
+    };
+    let matchingChecked = false;
+
+    function clearMatchingSelection() {
+      matchingState.selectedLeft = null;
+      matchingState.selectedRight = null;
+      document.querySelectorAll(".match-node").forEach((node) => node.classList.remove("selected"));
+    }
+
+    function resetMatching() {
+      matchingState.selectedLeft = null;
+      matchingState.selectedRight = null;
+      matchingState.pairs = {};
+      matchingChecked = false;
+      renderMatching();
+      setFeedback("matchFeedback", "Select a structure, then select its function to make a line.", "info");
+      setActivityComplete("matching", false);
+    }
+
+    function renderMatching() {
+      const leftCol = document.getElementById("matchLeft");
+      const rightCol = document.getElementById("matchRight");
+      leftCol.innerHTML = "";
+      rightCol.innerHTML = "";
+
+      matchingData.left.forEach((item) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "match-node left";
+        button.dataset.side = "left";
+        button.dataset.id = item.id;
+        button.innerHTML = `
+          <span class="node-anchor" aria-hidden="true"></span>
+          <div class="node-label">${item.label}</div>
+          <div class="node-meta">${item.meta}</div>
+        `;
+        button.addEventListener("click", () => handleMatchNodeClick("left", item.id));
+        leftCol.appendChild(button);
+      });
+
+      matchingData.right.forEach((item) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "match-node right";
+        button.dataset.side = "right";
+        button.dataset.id = item.id;
+        button.innerHTML = `
+          <span class="node-anchor" aria-hidden="true"></span>
+          <div class="node-label">${item.label}</div>
+          <div class="node-meta">${item.meta}</div>
+        `;
+        button.addEventListener("click", () => handleMatchNodeClick("right", item.id));
+        rightCol.appendChild(button);
+      });
+
+      Object.entries(matchingState.pairs).forEach(([leftId, rightId]) => {
+        const leftNode = document.querySelector(`.match-node.left[data-id="${leftId}"]`);
+        const rightNode = document.querySelector(`.match-node.right[data-id="${rightId}"]`);
+        if (leftNode) {
+          leftNode.classList.add("matched");
+        }
+        if (rightNode) {
+          rightNode.classList.add("matched");
+        }
+      });
+
+      drawMatchLines(matchingChecked);
+    }
+
+    function handleMatchNodeClick(side, id) {
+      const currentPairs = matchingState.pairs;
+
+      if (side === "left" && currentPairs[id]) {
+        delete currentPairs[id];
+        renderMatching();
+        clearMatchingSelection();
+        return;
+      }
+
+      if (side === "right") {
+        const existingLeft = Object.keys(currentPairs).find((leftId) => currentPairs[leftId] === id);
+        if (existingLeft) {
+          delete currentPairs[existingLeft];
+          renderMatching();
+          clearMatchingSelection();
+          return;
+        }
+      }
+
+      if (side === "left") {
+        matchingState.selectedLeft = id;
+      } else {
+        matchingState.selectedRight = id;
+      }
+
+      document.querySelectorAll(".match-node").forEach((node) => node.classList.remove("selected"));
+      if (matchingState.selectedLeft) {
+        const leftNode = document.querySelector(`.match-node.left[data-id="${matchingState.selectedLeft}"]`);
+        if (leftNode) {
+          leftNode.classList.add("selected");
+        }
+      }
+      if (matchingState.selectedRight) {
+        const rightNode = document.querySelector(`.match-node.right[data-id="${matchingState.selectedRight}"]`);
+        if (rightNode) {
+          rightNode.classList.add("selected");
+        }
+      }
+
+      if (matchingState.selectedLeft && matchingState.selectedRight) {
+        Object.keys(currentPairs).forEach((leftId) => {
+          if (currentPairs[leftId] === matchingState.selectedRight) {
+            delete currentPairs[leftId];
+          }
+        });
+        currentPairs[matchingState.selectedLeft] = matchingState.selectedRight;
+        clearMatchingSelection();
+        renderMatching();
+      }
+    }
+
+    function drawMatchLines(showResults = false) {
+      const svg = document.getElementById("matchLines");
+      const board = document.getElementById("matchBoard");
+      const spine = svg.parentElement.getBoundingClientRect();
+      const boardRect = board.getBoundingClientRect();
+      const height = Math.max(boardRect.height - 2, 220);
+      svg.setAttribute("viewBox", `0 0 160 ${height}`);
+      svg.innerHTML = "";
+
+      Object.entries(matchingState.pairs).forEach(([leftId, rightId]) => {
+        const leftNode = document.querySelector(`.match-node.left[data-id="${leftId}"] .node-anchor`);
+        const rightNode = document.querySelector(`.match-node.right[data-id="${rightId}"] .node-anchor`);
+        if (!leftNode || !rightNode) {
+          return;
+        }
+
+        const leftRect = leftNode.getBoundingClientRect();
+        const rightRect = rightNode.getBoundingClientRect();
+        const x1 = Math.max(10, leftRect.right - spine.left);
+        const y1 = leftRect.top + leftRect.height / 2 - spine.top;
+        const x2 = Math.min(150, rightRect.left - spine.left);
+        const y2 = rightRect.top + rightRect.height / 2 - spine.top;
+        const isCorrect = matchingData.answers[leftId] === rightId;
+        const color = !showResults ? "#1d4ed8" : (isCorrect ? "#166534" : "#b42318");
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        const c1 = x1 + 24;
+        const c2 = x2 - 24;
+        path.setAttribute("d", `M ${x1} ${y1} C ${c1} ${y1}, ${c2} ${y2}, ${x2} ${y2}`);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", color);
+        path.setAttribute("stroke-width", "4");
+        path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("opacity", "0.92");
+        svg.appendChild(path);
+      });
+    }
+
+    function checkMatching() {
+      let correct = 0;
+      document.querySelectorAll(".match-node").forEach((node) => node.classList.remove("correct", "incorrect", "selected"));
+      matchingData.left.forEach((item) => {
+        const chosen = matchingState.pairs[item.id];
+        const expected = matchingData.answers[item.id];
+        const leftNode = document.querySelector(`.match-node.left[data-id="${item.id}"]`);
+        if (!leftNode) {
+          return;
+        }
+        if (chosen && chosen === expected) {
+          correct += 1;
+          leftNode.classList.add("correct");
+          const rightNode = document.querySelector(`.match-node.right[data-id="${chosen}"]`);
+          if (rightNode) {
+            rightNode.classList.add("correct");
+          }
+        } else {
+          leftNode.classList.add("incorrect");
+          if (chosen) {
+            const rightNode = document.querySelector(`.match-node.right[data-id="${chosen}"]`);
+            if (rightNode) {
+              rightNode.classList.add("incorrect");
+            }
+          }
+        }
+      });
+
+      matchingChecked = true;
+      drawMatchLines(true);
+      const total = matchingData.left.length;
+      if (correct === total) {
+        setFeedback("matchFeedback", "All five matches are correct. Students now have the structure-function map in place.", "success");
+        setActivityComplete("matching", true);
+      } else {
+        setFeedback("matchFeedback", `${correct} of ${total} connections are correct. Revisit which structure detects rotation, which ones detect translation/gravity, and where integration happens.`, "error");
+        setActivityComplete("matching", false);
+      }
+    }
+
+    class PlacementActivity {
+      constructor(config) {
+        this.config = config;
+        this.placements = {};
+        this.selectedTokenId = null;
+        this.dragTokenId = null;
+      }
+
+      init() {
+        this.reset();
+        const checkBtn = document.getElementById(this.config.checkButtonId);
+        const resetBtn = document.getElementById(this.config.resetButtonId);
+        if (checkBtn) {
+          checkBtn.addEventListener("click", () => this.check());
+        }
+        if (resetBtn) {
+          resetBtn.addEventListener("click", () => this.reset());
+        }
+      }
+
+      reset() {
+        this.placements = {};
+        this.selectedTokenId = null;
+        this.dragTokenId = null;
+        this.render();
+        setFeedback(this.config.feedbackId, this.config.instructions, "info");
+        setActivityComplete(this.config.activityId, false);
+      }
+
+      getTokenPlacement(tokenId) {
+        return this.placements[tokenId] || null;
+      }
+
+      placeToken(tokenId, zoneId) {
+        if (this.config.mode === "single") {
+          const existingTokenId = Object.keys(this.placements).find((id) => this.placements[id] === zoneId);
+          if (existingTokenId && existingTokenId !== tokenId) {
+            delete this.placements[existingTokenId];
+          }
+        }
+        this.placements[tokenId] = zoneId;
+        this.selectedTokenId = null;
+        this.render();
+      }
+
+      returnToken(tokenId) {
+        delete this.placements[tokenId];
+        this.selectedTokenId = null;
+        this.render();
+      }
+
+      getBankTokens() {
+        return this.config.tokens.filter((token) => !this.placements[token.id]);
+      }
+
+      getZoneTokens(zoneId) {
+        return this.config.tokens.filter((token) => this.placements[token.id] === zoneId);
+      }
+
+      render() {
+        const bank = document.getElementById(this.config.bankId);
+        const zonesWrap = document.getElementById(this.config.zonesId);
+        bank.innerHTML = "";
+        zonesWrap.innerHTML = "";
+
+        bank.ondragover = (event) => {
+          event.preventDefault();
+          bank.classList.add("is-targeted");
+        };
+        bank.ondragleave = (event) => {
+          if (!bank.contains(event.relatedTarget)) {
+            bank.classList.remove("is-targeted");
+          }
+        };
+        bank.ondrop = (event) => {
+          event.preventDefault();
+          bank.classList.remove("is-targeted");
+          if (this.dragTokenId) {
+            this.returnToken(this.dragTokenId);
+            this.dragTokenId = null;
+          }
+        };
+        bank.onclick = () => {
+          if (this.selectedTokenId && this.getTokenPlacement(this.selectedTokenId)) {
+            this.returnToken(this.selectedTokenId);
+          }
+        };
+
+        const bankTokens = this.getBankTokens();
+        if (bankTokens.length === 0) {
+          const hint = document.createElement("div");
+          hint.className = "empty-hint";
+          hint.textContent = "All cards placed. Check your work or drag a card back here to revise.";
+          bank.appendChild(hint);
+        } else {
+          bankTokens.forEach((token) => bank.appendChild(this.createToken(token, false)));
+        }
+
+        this.config.zones.forEach((zone, index) => {
+          const zoneEl = document.createElement("div");
+          zoneEl.className = "drop-zone";
+          zoneEl.dataset.zoneId = zone.id;
+          zoneEl.innerHTML = `
+            ${zone.orderLabel ? `<div class="slot-number">${zone.orderLabel}</div>` : ""}
+            <div class="zone-copy">
+              <div class="zone-title">${zone.title}</div>
+              <div class="zone-desc">${zone.desc}</div>
+            </div>
+            <div class="zone-token-wrap"></div>
+          `;
+          const targetWrap = zoneEl.querySelector(".zone-token-wrap");
+
+          zoneEl.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            zoneEl.classList.add("is-targeted");
+          });
+          zoneEl.addEventListener("dragleave", (event) => {
+            if (!zoneEl.contains(event.relatedTarget)) {
+              zoneEl.classList.remove("is-targeted");
+            }
+          });
+          zoneEl.addEventListener("drop", (event) => {
+            event.preventDefault();
+            zoneEl.classList.remove("is-targeted");
+            if (this.dragTokenId) {
+              this.placeToken(this.dragTokenId, zone.id);
+              this.dragTokenId = null;
+            }
+          });
+          zoneEl.addEventListener("click", () => {
+            if (this.selectedTokenId) {
+              this.placeToken(this.selectedTokenId, zone.id);
+            }
+          });
+
+          const placedTokens = this.getZoneTokens(zone.id);
+          if (placedTokens.length === 0) {
+            const hint = document.createElement("div");
+            hint.className = "empty-hint";
+            hint.textContent = this.config.mode === "single" ? "Drop one card here" : "Drop matching cards here";
+            targetWrap.appendChild(hint);
+          } else if (this.config.mode === "single") {
+            targetWrap.appendChild(this.createToken(placedTokens[0], true));
+          } else {
+            const stack = document.createElement("div");
+            stack.style.display = "flex";
+            stack.style.flexWrap = "wrap";
+            stack.style.gap = "8px";
+            placedTokens.forEach((token) => stack.appendChild(this.createToken(token, true)));
+            targetWrap.appendChild(stack);
+          }
+
+          if (this.lastCheckResult) {
+            const zoneResult = this.lastCheckResult.zoneState[zone.id];
+            if (zoneResult === "correct") {
+              zoneEl.classList.add("correct");
+            }
+            if (zoneResult === "incorrect") {
+              zoneEl.classList.add("incorrect");
+            }
+          }
+
+          zonesWrap.appendChild(zoneEl);
+        });
+      }
+
+      createToken(token, placed) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "token";
+        button.draggable = true;
+        button.dataset.tokenId = token.id;
+        button.textContent = token.label;
+        if (this.selectedTokenId === token.id) {
+          button.classList.add("selected");
+        }
+        if (this.lastCheckResult) {
+          const tokenState = this.lastCheckResult.tokenState[token.id];
+          if (tokenState) {
+            button.classList.add(tokenState);
+          }
+        }
+
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (placed) {
+            this.returnToken(token.id);
+            return;
+          }
+          this.selectedTokenId = this.selectedTokenId === token.id ? null : token.id;
+          this.render();
+        });
+
+        button.addEventListener("dragstart", () => {
+          this.dragTokenId = token.id;
+          button.classList.add("dragging");
+        });
+        button.addEventListener("dragend", () => {
+          this.dragTokenId = null;
+          button.classList.remove("dragging");
+        });
+        return button;
+      }
+
+      check() {
+        const tokenState = {};
+        const zoneState = {};
+        let correct = 0;
+
+        this.config.tokens.forEach((token) => {
+          const expected = this.config.answers[token.id];
+          const placed = this.placements[token.id];
+          if (placed && placed === expected) {
+            tokenState[token.id] = "correct";
+            correct += 1;
+          } else if (placed) {
+            tokenState[token.id] = "incorrect";
+          }
+        });
+
+        this.config.zones.forEach((zone) => {
+          const tokensHere = this.getZoneTokens(zone.id);
+          if (tokensHere.length === 0) {
+            zoneState[zone.id] = "";
+            return;
+          }
+          const allCorrect = tokensHere.every((token) => this.config.answers[token.id] === zone.id);
+          zoneState[zone.id] = allCorrect ? "correct" : "incorrect";
+        });
+
+        this.lastCheckResult = { tokenState, zoneState };
+        this.render();
+
+        const total = this.config.tokens.length;
+        if (correct === total) {
+          setFeedback(this.config.feedbackId, this.config.successMessage, "success");
+          setActivityComplete(this.config.activityId, true);
+        } else {
+          setFeedback(this.config.feedbackId, `${correct} of ${total} cards are in the right place. ${this.config.revisionPrompt}`, "error");
+          setActivityComplete(this.config.activityId, false);
+        }
+      }
+    }
+
+    const canalTokens = [
+      { id: "c1", label: "Head begins to rotate" },
+      { id: "c2", label: "Endolymph lags because of inertia" },
+      { id: "c3", label: "Cupula is displaced" },
+      { id: "c4", label: "Hair bundles bend" },
+      { id: "c5", label: "Afferent firing changes" }
+    ];
+
+    const otolithTokens = [
+      { id: "o1", label: "Head tilts or linearly accelerates" },
+      { id: "o2", label: "Otolithic membrane shifts" },
+      { id: "o3", label: "Hair bundles bend at the macula" },
+      { id: "o4", label: "Hair cell membrane potential changes" },
+      { id: "o5", label: "Afferent firing changes" }
+    ];
+
+    const canalZones = [
+      { id: "canal-1", title: "Step 1", desc: "Start of the rotational event", orderLabel: "1" },
+      { id: "canal-2", title: "Step 2", desc: "Mechanical lag in the system", orderLabel: "2" },
+      { id: "canal-3", title: "Step 3", desc: "Cupula deflection", orderLabel: "3" },
+      { id: "canal-4", title: "Step 4", desc: "Receptor bundle movement", orderLabel: "4" },
+      { id: "canal-5", title: "Step 5", desc: "Neural output change", orderLabel: "5" }
+    ];
+
+    const otolithZones = [
+      { id: "otolith-1", title: "Step 1", desc: "Stimulus begins", orderLabel: "1" },
+      { id: "otolith-2", title: "Step 2", desc: "Weighted membrane shifts", orderLabel: "2" },
+      { id: "otolith-3", title: "Step 3", desc: "Macular bundle deflection", orderLabel: "3" },
+      { id: "otolith-4", title: "Step 4", desc: "Hair cell potential changes", orderLabel: "4" },
+      { id: "otolith-5", title: "Step 5", desc: "Signal sent downstream", orderLabel: "5" }
+    ];
+
+    const canalActivity = new PlacementActivity({
+      activityId: "sequence",
+      bankId: "canalBank",
+      zonesId: "canalSlots",
+      checkButtonId: "sequenceCheck",
+      resetButtonId: "sequenceReset",
+      feedbackId: "sequenceFeedback",
+      instructions: "Arrange both lists, then click Check Sequences.",
+      mode: "single",
+      tokens: shuffle(canalTokens),
+      zones: canalZones,
+      answers: {
+        c1: "canal-1",
+        c2: "canal-2",
+        c3: "canal-3",
+        c4: "canal-4",
+        c5: "canal-5"
+      },
+      successMessage: "Both mechanotransduction sequences are correct. Students can now compare cupula-based and otolithic-membrane-based signaling clearly.",
+      revisionPrompt: "Focus on what moves first, what lags, and when the receptor potential changes."
+    });
+
+    const otolithActivity = new PlacementActivity({
+      activityId: "sequence",
+      bankId: "otolithBank",
+      zonesId: "otolithSlots",
+      checkButtonId: "sequenceCheck",
+      resetButtonId: "sequenceReset",
+      feedbackId: "sequenceFeedback",
+      instructions: "Arrange both lists, then click Check Sequences.",
+      mode: "single",
+      tokens: shuffle(otolithTokens),
+      zones: otolithZones,
+      answers: {
+        o1: "otolith-1",
+        o2: "otolith-2",
+        o3: "otolith-3",
+        o4: "otolith-4",
+        o5: "otolith-5"
+      },
+      successMessage: "",
+      revisionPrompt: ""
+    });
+
+    canalActivity.check = function checkCombinedSequence() {
+      PlacementActivity.prototype.check.call(this);
+      PlacementActivity.prototype.check.call(otolithActivity);
+      const thisCorrect = Object.values(this.lastCheckResult.tokenState).filter((state) => state === "correct").length;
+      const otherCorrect = Object.values(otolithActivity.lastCheckResult.tokenState).filter((state) => state === "correct").length;
+      const total = this.config.tokens.length + otolithActivity.config.tokens.length;
+      const correct = thisCorrect + otherCorrect;
+      if (correct === total) {
+        setFeedback("sequenceFeedback", "All ten steps are in the correct order across both systems. That sequence now mirrors the underlying biomechanics cleanly.", "success");
+        setActivityComplete("sequence", true);
+      } else {
+        setFeedback("sequenceFeedback", `${correct} of ${total} steps are correct. Compare where the moving mass sits in each organ and when firing changes actually occur.`, "error");
+        setActivityComplete("sequence", false);
+      }
+    };
+
+    canalActivity.reset = function resetCombinedSequence() {
+      this.lastCheckResult = null;
+      otolithActivity.lastCheckResult = null;
+      this.tokens = shuffle(canalTokens);
+      otolithActivity.tokens = shuffle(otolithTokens);
+      this.placements = {};
+      otolithActivity.placements = {};
+      this.selectedTokenId = null;
+      otolithActivity.selectedTokenId = null;
+      this.dragTokenId = null;
+      otolithActivity.dragTokenId = null;
+      PlacementActivity.prototype.render.call(this);
+      PlacementActivity.prototype.render.call(otolithActivity);
+      setFeedback("sequenceFeedback", "Arrange both lists, then click Check Sequences.", "info");
+      setActivityComplete("sequence", false);
+    };
+
+    const sortingActivity = new PlacementActivity({
+      activityId: "sorting",
+      bankId: "scenarioBank",
+      zonesId: "scenarioZones",
+      checkButtonId: "sortingCheck",
+      resetButtonId: "sortingReset",
+      feedbackId: "sortingFeedback",
+      instructions: "Sort each scenario by its dominant vestibular or balance demand.",
+      mode: "multi",
+      tokens: shuffle([
+        { id: "s1", label: "Turning fast to check a blind spot" },
+        { id: "s2", label: "An elevator starts moving upward" },
+        { id: "s3", label: "Standing on foam with eyes closed" },
+        { id: "s4", label: "Spinning in a chair, then stopping" },
+        { id: "s5", label: "Tilting your head toward one shoulder" },
+        { id: "s6", label: "Walking on stable ground with eyes open" },
+        { id: "s7", label: "A quick left-right head turn during gait" },
+        { id: "s8", label: "Sudden forward acceleration in a car" }
+      ]),
+      zones: [
+        { id: "z-canals", title: "Semicircular canals", desc: "Best for angular acceleration and head rotation" },
+        { id: "z-otoliths", title: "Otolith organs", desc: "Best for linear acceleration and head position relative to gravity" },
+        { id: "z-integration", title: "Multisensory balance integration", desc: "Best when vestibular, visual, and somatosensory weighting all matter" }
+      ],
+      answers: {
+        s1: "z-canals",
+        s2: "z-otoliths",
+        s3: "z-integration",
+        s4: "z-canals",
+        s5: "z-otoliths",
+        s6: "z-integration",
+        s7: "z-canals",
+        s8: "z-otoliths"
+      },
+      successMessage: "All scenarios are sorted correctly. The class now has a clean canal-versus-otolith-versus-integration map.",
+      revisionPrompt: "Recheck whether the motion is rotational, translational, or mainly a balance-weighting problem."
+    });
+
+    const pathwayActivity = new PlacementActivity({
+      activityId: "pathway",
+      bankId: "pathwayBank",
+      zonesId: "pathwaySlots",
+      checkButtonId: "pathwayCheck",
+      resetButtonId: "pathwayReset",
+      feedbackId: "pathwayFeedback",
+      instructions: "Place the pathway stages in order from receptor to central targets.",
+      mode: "single",
+      tokens: shuffle([
+        { id: "p1", label: "Peripheral receptor in canals or otolith organs" },
+        { id: "p2", label: "Vestibular nerve" },
+        { id: "p3", label: "Vestibular nuclei" },
+        { id: "p4", label: "Cerebellum" },
+        { id: "p5", label: "Ocular and postural output pathways" }
+      ]),
+      zones: [
+        { id: "path-1", title: "Stage 1", desc: "Where detection begins", orderLabel: "1" },
+        { id: "path-2", title: "Stage 2", desc: "Primary afferent relay", orderLabel: "2" },
+        { id: "path-3", title: "Stage 3", desc: "Brainstem integration", orderLabel: "3" },
+        { id: "path-4", title: "Stage 4", desc: "Coordination and calibration", orderLabel: "4" },
+        { id: "path-5", title: "Stage 5", desc: "Functional reflex outputs", orderLabel: "5" }
+      ],
+      answers: {
+        p1: "path-1",
+        p2: "path-2",
+        p3: "path-3",
+        p4: "path-4",
+        p5: "path-5"
+      },
+      successMessage: "The central relay is in the right order. This is a strong bridge from peripheral detection to reflex function.",
+      revisionPrompt: "Keep the relay order in mind: receptor first, nerve second, nuclei third, then cerebellar and output targets."
+    });
+
+    const choiceCases = [
+      {
+        id: "q1",
+        title: "Head turns left",
+        prompt: "What should happen in the horizontal canal pair?",
+        correct: "Left side excitation and right side inhibition",
+        options: [
+          "Left side excitation and right side inhibition",
+          "Right side excitation and left side inhibition",
+          "Both sides increase equally"
+        ],
+        explanation: "Push-pull organization means the canal aligned with the turn increases firing while the partner on the opposite side decreases firing."
+      },
+      {
+        id: "q2",
+        title: "Why baseline firing matters",
+        prompt: "What is the best reason baseline afferent firing is useful?",
+        correct: "It allows firing to either increase or decrease to encode opposite directions",
+        options: [
+          "It allows firing to either increase or decrease to encode opposite directions",
+          "It prevents hair cells from bending",
+          "It removes the need for paired canals"
+        ],
+        explanation: "If baseline firing exists, bending one way can raise firing and bending the other way can lower it, which supports bidirectional coding."
+      },
+      {
+        id: "q3",
+        title: "Standing on foam with eyes closed",
+        prompt: "Which information source becomes relatively more important?",
+        correct: "Vestibular input",
+        options: [
+          "Vestibular input",
+          "Visual input",
+          "Somatosensory input from the support surface"
+        ],
+        explanation: "Foam degrades support-surface cues and closed eyes remove vision, so vestibular information becomes especially valuable."
+      },
+      {
+        id: "q4",
+        title: "Standing on firm ground with eyes open",
+        prompt: "Which system often provides especially reliable information here?",
+        correct: "Somatosensory input, with vision and vestibular input supporting it",
+        options: [
+          "Somatosensory input, with vision and vestibular input supporting it",
+          "Vestibular input only",
+          "Vision alone"
+        ],
+        explanation: "On a stable surface with the eyes open, somatosensory cues are highly reliable, but balance still remains multisensory."
+      }
+    ];
+
+    const choiceState = {};
+
+    function renderChoices() {
+      const grid = document.getElementById("choiceGrid");
+      grid.innerHTML = "";
+      choiceCases.forEach((item) => {
+        const card = document.createElement("article");
+        card.className = "choice-card";
+        const explainer = choiceState[item.id]
+          ? item.explanation
+          : "Select an answer to reveal the rationale.";
+        card.innerHTML = `
+          <h4>${item.title}</h4>
+          <p>${item.prompt}</p>
+          <div class="choice-buttons"></div>
+          <div class="choice-explainer">${explainer}</div>
+        `;
+        const buttonWrap = card.querySelector(".choice-buttons");
+        item.options.forEach((option) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice-btn";
+          button.textContent = option;
+          if (choiceState[item.id]) {
+            if (option === item.correct) {
+              button.classList.add("correct");
+            } else if (choiceState[item.id] === option) {
+              button.classList.add("incorrect");
+            }
+          }
+          button.addEventListener("click", () => {
+            choiceState[item.id] = option;
+            renderChoices();
+            checkChoicesProgress();
+          });
+          buttonWrap.appendChild(button);
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function checkChoicesProgress() {
+      const answered = choiceCases.filter((item) => Boolean(choiceState[item.id]));
+      const correct = choiceCases.filter((item) => choiceState[item.id] === item.correct).length;
+      if (answered.length < choiceCases.length) {
+        setFeedback("choiceFeedback", `${answered.length} of ${choiceCases.length} cases answered. Keep going to reveal all explanations.`, "info");
+        setActivityComplete("choices", false);
+        return;
+      }
+      if (correct === choiceCases.length) {
+        setFeedback("choiceFeedback", "All quickfire cases are correct. Push-pull coding and sensory reweighting are in place.", "success");
+        setActivityComplete("choices", true);
+      } else {
+        setFeedback("choiceFeedback", `${correct} of ${choiceCases.length} quickfire cases are correct. Use the explanations to debrief the missed concepts.`, "error");
+        setActivityComplete("choices", false);
+      }
+    }
+
+    function init() {
+      updateProgress();
+      renderMatching();
+      resetMatching();
+      document.getElementById("matchCheck").addEventListener("click", checkMatching);
+      document.getElementById("matchReset").addEventListener("click", resetMatching);
+      window.addEventListener("resize", () => drawMatchLines(matchingChecked));
+
+      canalActivity.init();
+      otolithActivity.render();
+      sortingActivity.init();
+      pathwayActivity.init();
+      renderChoices();
+      setFeedback("choiceFeedback", "Choose an answer in every case to reveal the explanations.", "info");
+    }
+
+    init();
+  </script>
+</body>
+</html>
