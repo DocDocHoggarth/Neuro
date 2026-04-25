@@ -1,0 +1,1965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neuro Pathways Review Lab</title>
+
+  <!-- ================================
+       Styles
+       ================================ -->
+  <style>
+    :root {
+      --red: #b31b1b;
+      --red-dark: #7f1212;
+      --charcoal: #242424;
+      --gray: #f4f4f4;
+      --gray-dark: #666666;
+      --success: #1f7a3f;
+      --warning: #b36b00;
+      --error: #b00020;
+      --white: #ffffff;
+      --border: #d8d3d0;
+      --shadow: 0 16px 36px rgba(36, 36, 36, 0.08);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --max-width: 1100px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--charcoal);
+      background:
+        radial-gradient(circle at top, rgba(179, 27, 27, 0.12), transparent 34%),
+        linear-gradient(180deg, #fbfbfa 0%, #f3f2f1 100%);
+      min-height: 100vh;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: Georgia, Cambria, "Times New Roman", serif;
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 3px solid rgba(179, 27, 27, 0.28);
+      outline-offset: 3px;
+    }
+
+    .page-shell {
+      width: min(var(--max-width), calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 1.5rem 0 2.5rem;
+    }
+
+    .site-header {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(179, 27, 27, 0.12);
+      box-shadow: var(--shadow);
+      border-radius: calc(var(--radius) + 4px);
+      padding: 2rem;
+      backdrop-filter: blur(8px);
+      transition: padding 180ms ease, border-radius 180ms ease;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--red);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .site-header h1 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--charcoal);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 2.4vw, 1.3rem);
+      color: #4b4b4b;
+      max-width: 44rem;
+    }
+
+    .header-grid {
+      display: grid;
+      grid-template-columns: 2.4fr 1fr;
+      gap: 1.25rem;
+      align-items: end;
+      margin-top: 1.25rem;
+    }
+
+    .callout {
+      background: linear-gradient(180deg, rgba(179, 27, 27, 0.08), rgba(179, 27, 27, 0.02));
+      border: 1px solid rgba(179, 27, 27, 0.12);
+      border-radius: 18px;
+      padding: 1rem 1.1rem;
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 0.35rem;
+      color: var(--red-dark);
+    }
+
+    .app-main {
+      margin-top: 1.5rem;
+    }
+
+    .screen {
+      animation: fadeIn 220ms ease;
+    }
+
+    .home-layout {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .intro-card,
+    .question-card,
+    .results-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .intro-card {
+      padding: 1.4rem;
+    }
+
+    .intro-card h2 {
+      font-size: 1.45rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .intro-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1.2fr 1fr;
+    }
+
+    .instruction-list {
+      padding-left: 1.25rem;
+      margin: 0.75rem 0 0;
+      color: #454545;
+    }
+
+    .instruction-list li + li {
+      margin-top: 0.45rem;
+    }
+
+    .score-snippet {
+      align-self: start;
+      background: var(--gray);
+      border-radius: 18px;
+      padding: 1rem;
+    }
+
+    .score-snippet strong {
+      display: block;
+      color: var(--red-dark);
+      margin-bottom: 0.4rem;
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 1rem;
+    }
+
+    .module-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      padding: 1.2rem;
+      background: linear-gradient(180deg, #ffffff 0%, #fcf7f7 100%);
+      border: 1px solid rgba(127, 18, 18, 0.12);
+      border-top: 5px solid var(--red);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-height: 100%;
+    }
+
+    .module-card h3 {
+      font-size: 1.25rem;
+    }
+
+    .module-card p {
+      color: #4d4d4d;
+      flex: 1;
+    }
+
+    .module-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      color: var(--gray-dark);
+      font-size: 0.95rem;
+    }
+
+    .module-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(179, 27, 27, 0.08);
+      color: var(--red-dark);
+      border-radius: 999px;
+      padding: 0.35rem 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .ghost-button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.9rem 1.2rem;
+      min-height: 3rem;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .primary-button:hover,
+    .secondary-button:hover,
+    .ghost-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .primary-button {
+      background: linear-gradient(180deg, var(--red) 0%, var(--red-dark) 100%);
+      color: var(--white);
+      box-shadow: 0 10px 22px rgba(127, 18, 18, 0.22);
+    }
+
+    .secondary-button {
+      background: #ece7e5;
+      color: var(--charcoal);
+    }
+
+    .ghost-button {
+      background: transparent;
+      color: var(--red-dark);
+      border: 1px solid rgba(127, 18, 18, 0.22);
+    }
+
+    .primary-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .quiz-shell,
+    .results-shell {
+      display: grid;
+      gap: 1rem;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    #quiz-home-button {
+      justify-self: start;
+      padding-inline: 1rem;
+    }
+
+    .quiz-topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      color: var(--gray-dark);
+      font-size: 0.95rem;
+      padding: 0 0.35rem;
+    }
+
+    .question-card {
+      padding: 1.5rem;
+    }
+
+    .question-kicker {
+      font-size: 0.92rem;
+      color: var(--red-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+    }
+
+    .question-card h2 {
+      font-size: clamp(1.45rem, 2.5vw, 2rem);
+      margin-bottom: 1rem;
+    }
+
+    .case-panel {
+      background: linear-gradient(180deg, rgba(179, 27, 27, 0.08), rgba(179, 27, 27, 0.03));
+      border: 1px solid rgba(179, 27, 27, 0.18);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.2rem;
+    }
+
+    .case-panel strong {
+      display: block;
+      margin-bottom: 0.45rem;
+      color: var(--red-dark);
+    }
+
+    .choices-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.25rem 0 0;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .choice-button {
+      width: 100%;
+      text-align: left;
+      background: #fcfbfb;
+      border: 2px solid #d9d4d1;
+      border-radius: 18px;
+      padding: 1rem 1.05rem;
+      color: var(--charcoal);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .choice-button:hover:not(:disabled) {
+      border-color: rgba(179, 27, 27, 0.45);
+      background: #fff7f7;
+    }
+
+    .choice-button.selected {
+      border-color: var(--red);
+      background: rgba(179, 27, 27, 0.08);
+    }
+
+    .choice-button.correct-answer {
+      border-color: var(--success);
+      background: rgba(31, 122, 63, 0.09);
+    }
+
+    .choice-button.incorrect-answer {
+      border-color: var(--error);
+      background: rgba(176, 0, 32, 0.08);
+    }
+
+    .choice-button:disabled {
+      cursor: default;
+      opacity: 1;
+    }
+
+    .choice-label {
+      flex: 1;
+      font-weight: 700;
+    }
+
+    .choice-note {
+      flex-shrink: 0;
+      font-size: 0.85rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(36, 36, 36, 0.08);
+      color: #414141;
+      align-self: center;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 1.25rem;
+    }
+
+    .feedback-box {
+      margin-top: 1.25rem;
+      border-radius: 20px;
+      padding: 1.05rem 1.1rem;
+      border: 1px solid transparent;
+    }
+
+    .feedback-box.correct {
+      background: rgba(31, 122, 63, 0.08);
+      border-color: rgba(31, 122, 63, 0.25);
+    }
+
+    .feedback-box.incorrect {
+      background: rgba(176, 0, 32, 0.08);
+      border-color: rgba(176, 0, 32, 0.2);
+    }
+
+    .feedback-box h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .feedback-box p + p {
+      margin-top: 0.55rem;
+    }
+
+    .results-card {
+      padding: 1.45rem;
+    }
+
+    .results-header {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1.25fr 0.8fr;
+      align-items: start;
+    }
+
+    .score-panel {
+      background: linear-gradient(180deg, rgba(179, 27, 27, 0.1), rgba(179, 27, 27, 0.04));
+      border: 1px solid rgba(179, 27, 27, 0.15);
+      border-radius: 20px;
+      padding: 1rem 1.15rem;
+      text-align: center;
+    }
+
+    .score-panel .score-value {
+      display: block;
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-weight: 700;
+      color: var(--red-dark);
+      margin-bottom: 0.25rem;
+    }
+
+    .performance-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.9rem;
+      padding: 0.45rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      background: rgba(36, 36, 36, 0.06);
+    }
+
+    .summary-box {
+      background: var(--gray);
+      border-radius: 20px;
+      padding: 1rem 1.1rem;
+      margin-top: 1rem;
+    }
+
+    .tag-grid {
+      margin-top: 1rem;
+      display: grid;
+      gap: 0.85rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .tag-card {
+      background: #fffdfd;
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--warning);
+      border-radius: 18px;
+      padding: 0.95rem 1rem;
+    }
+
+    .tag-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .tag-card p {
+      color: #4b4b4b;
+      font-size: 0.96rem;
+    }
+
+    .tag-card p + p {
+      margin-top: 0.45rem;
+    }
+
+    .empty-review {
+      margin-top: 1rem;
+      background: rgba(31, 122, 63, 0.08);
+      border: 1px solid rgba(31, 122, 63, 0.18);
+      border-radius: 18px;
+      padding: 1rem 1.05rem;
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--gray-dark);
+      font-size: 0.95rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    body[data-screen="quiz-screen"] .site-header,
+    body[data-screen="results-screen"] .site-header {
+      padding: 1rem 1.35rem;
+      border-radius: 24px;
+    }
+
+    body[data-screen="quiz-screen"] .eyebrow,
+    body[data-screen="results-screen"] .eyebrow,
+    body[data-screen="quiz-screen"] .header-grid,
+    body[data-screen="results-screen"] .header-grid {
+      display: none;
+    }
+
+    body[data-screen="quiz-screen"] .site-header h1,
+    body[data-screen="results-screen"] .site-header h1 {
+      font-size: clamp(1.45rem, 3vw, 2.2rem);
+      margin-bottom: 0.2rem;
+    }
+
+    body[data-screen="quiz-screen"] .subtitle,
+    body[data-screen="results-screen"] .subtitle {
+      font-size: 0.98rem;
+      max-width: none;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .header-grid,
+      .intro-grid,
+      .results-header {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-shell {
+        width: min(var(--max-width), calc(100% - 1rem));
+        padding-top: 0.75rem;
+      }
+
+      .site-header,
+      .intro-card,
+      .question-card,
+      .results-card {
+        padding: 1rem;
+      }
+
+      .quiz-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .choice-button {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .choice-note {
+        align-self: flex-start;
+      }
+
+      .action-row {
+        flex-direction: column;
+      }
+
+      .primary-button,
+      .secondary-button,
+      .ghost-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body data-screen="home-screen">
+  <!-- ================================
+       App Layout
+       ================================ -->
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="eyebrow">Neuroscience Review Activity</div>
+      <h1>Neuro Pathways Review Lab</h1>
+      <p class="subtitle">A self-paced review activity for foundational DPT neuroscience</p>
+
+      <div class="header-grid">
+        <div class="callout">
+          <strong>How it works</strong>
+          Choose a module, answer one question at a time, review the explanation and cue, then finish with a focused summary of what to revisit.
+        </div>
+        <div class="callout">
+          <strong>Best use</strong>
+          Use this to strengthen pathway, anatomy, cranial nerve, and lesion-localization reasoning before a quiz, lab, or study session.
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <section id="home-screen" class="screen home-layout">
+        <div class="intro-card">
+          <div class="intro-grid">
+            <div>
+              <h2>Start a review set</h2>
+              <p>Select one module for targeted practice or use mixed practice for a broader check-in across the review bank.</p>
+              <ol class="instruction-list">
+                <li>Choose a module card below.</li>
+                <li>Select one answer and submit it.</li>
+                <li>Read the explanation and memory cue before moving on.</li>
+                <li>Use the end-of-module summary to decide what to revisit.</li>
+              </ol>
+            </div>
+            <aside class="score-snippet" id="last-score-card" aria-live="polite">
+              <strong>Last activity</strong>
+              <p>No prior score saved on this device yet.</p>
+            </aside>
+          </div>
+        </div>
+
+        <div id="module-grid" class="module-grid" aria-label="Quiz modules"></div>
+      </section>
+
+      <section id="quiz-screen" class="screen hidden">
+        <div class="quiz-shell">
+          <button id="quiz-home-button" class="ghost-button" type="button">Return Home</button>
+
+          <div class="quiz-topbar">
+            <p id="quiz-kicker">Module</p>
+            <p id="quiz-progress" aria-live="polite">Question 1 of 1</p>
+          </div>
+
+          <aside id="case-panel" class="case-panel hidden">
+            <strong>Patient Case</strong>
+            <p id="case-text"></p>
+          </aside>
+
+          <article class="question-card">
+            <p id="question-module" class="question-kicker">Module Title</p>
+            <h2 id="question-text" tabindex="-1">Question prompt</h2>
+
+            <ul id="answer-choices" class="choices-list" role="radiogroup" aria-labelledby="question-text"></ul>
+
+            <div id="feedback-box" class="feedback-box hidden" aria-live="polite" tabindex="-1"></div>
+
+            <div class="action-row">
+              <button id="submit-button" class="primary-button" type="button" disabled>Submit Answer</button>
+              <button id="next-button" class="secondary-button hidden" type="button">Next Question</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="results-screen" class="screen hidden">
+        <div class="results-shell">
+          <div class="results-card">
+            <div class="results-header">
+              <div>
+                <h2 id="results-title">Module Complete</h2>
+                <div class="summary-box">
+                  <p id="results-summary"></p>
+                </div>
+              </div>
+
+              <div class="score-panel">
+                <span id="score-value" class="score-value">0%</span>
+                <p id="score-detail">0 / 0 correct</p>
+                <div id="performance-pill" class="performance-pill">Review Summary</div>
+              </div>
+            </div>
+
+            <div id="missed-concepts-wrap">
+              <div id="missed-concepts"></div>
+            </div>
+
+            <div class="action-row">
+              <button id="retry-button" class="primary-button" type="button">Retry Module</button>
+              <button id="results-mixed-button" class="secondary-button" type="button">Start Mixed Practice</button>
+              <button id="results-home-button" class="ghost-button" type="button">Return Home</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>For review only. Use your course materials for full detail.</footer>
+  </div>
+
+  <script>
+    // ================================
+    // Question bank
+    // Edit questions below this line.
+    // ================================
+
+    const caseStudy = "Analyze each finding on its own rather than assuming that one lesion explains the entire presentation. The patient presents with reduced vibration sense in the right lower extremity, diminished patellar reflex, facial sensory changes, pain from light touch after a recent injury, and difficulty with balance and coordination.";
+
+    const questions = [
+      // Pain Terms Questions
+      {
+        id: "pain-001",
+        module: "Pain Terms",
+        prompt: "A patient reports pain when a bedsheet lightly touches the skin near a healing incision. What term best describes this?",
+        choices: ["Allodynia", "Hyperalgesia", "Analgesia", "Hypoesthesia"],
+        correctAnswer: "Allodynia",
+        explanation: "Allodynia is pain caused by a normally non-painful stimulus, such as light touch. Hyperalgesia would fit an exaggerated response to a stimulus that is already painful.",
+        cue: "Light touch that hurts = allodynia.",
+        reviewTag: "Pain terminology"
+      },
+      {
+        id: "pain-002",
+        module: "Pain Terms",
+        prompt: "A pinprick around an inflamed toe feels much more painful than expected. Which term fits best?",
+        choices: ["Hyperalgesia", "Allodynia", "Paresthesia", "Nociception"],
+        correctAnswer: "Hyperalgesia",
+        explanation: "Hyperalgesia is increased pain from a stimulus that is already painful. Allodynia would involve pain from a stimulus that is usually not painful.",
+        cue: "Painful stimulus becomes extra painful = hyperalgesia.",
+        reviewTag: "Allodynia vs hyperalgesia"
+      },
+      {
+        id: "pain-003",
+        module: "Pain Terms",
+        prompt: "Which statement best defines nociception?",
+        choices: [
+          "The conscious and emotional experience of pain",
+          "The neural encoding of actual or potential tissue-damaging stimuli",
+          "The complete absence of sensation",
+          "A reflex contraction of skeletal muscle"
+        ],
+        correctAnswer: "The neural encoding of actual or potential tissue-damaging stimuli",
+        explanation: "Nociception refers to neural signaling about threatening stimuli. Pain is the broader conscious experience that can be influenced by context, attention, and prior experience.",
+        cue: "Nociception is signaling. Pain is the lived experience.",
+        reviewTag: "Pain vs nociception"
+      },
+      {
+        id: "pain-004",
+        module: "Pain Terms",
+        prompt: "A patient has localized ankle pain after an inversion sprain, and the pain increases with loading of the injured tissues. Which pain category best fits?",
+        choices: ["Nociceptive pain", "Neuropathic pain", "Nociplastic pain", "Referred pain"],
+        correctAnswer: "Nociceptive pain",
+        explanation: "Nociceptive pain is linked to actual or threatened tissue damage that activates nociceptors, such as a painful ankle sprain.",
+        cue: "Clear tissue injury with protective pain = nociceptive pain.",
+        reviewTag: "Pain categories"
+      },
+      {
+        id: "pain-005",
+        module: "Pain Terms",
+        prompt: "A patient describes burning, electric pain radiating down the leg after nerve compression. Which pain category best fits?",
+        choices: ["Neuropathic pain", "Nociceptive pain", "Nociplastic pain", "Visceral pain"],
+        correctAnswer: "Neuropathic pain",
+        explanation: "Neuropathic pain is caused by a lesion or disease affecting the somatosensory nervous system. Burning or electric descriptors after nerve injury are common clues.",
+        cue: "Burning or electric pain after nerve damage = neuropathic pain.",
+        reviewTag: "Pain categories"
+      },
+      {
+        id: "pain-006",
+        module: "Pain Terms",
+        prompt: "A patient has widespread pain, fatigue, and sensory amplification without a clear ongoing tissue injury or identifiable nerve lesion. Which pain category best fits?",
+        choices: ["Nociplastic pain", "Neuropathic pain", "Nociceptive pain", "Acute inflammatory pain"],
+        correctAnswer: "Nociplastic pain",
+        explanation: "Nociplastic pain reflects altered nociceptive processing without clear evidence of ongoing tissue damage or a definable lesion in the somatosensory system.",
+        cue: "Altered processing without clear tissue or nerve damage = nociplastic pain.",
+        reviewTag: "Pain categories"
+      },
+      {
+        id: "pain-007",
+        module: "Pain Terms",
+        prompt: "Inflammatory chemicals at an injured wrist lower the activation threshold of nociceptors at the injury site. What process is this?",
+        choices: ["Peripheral sensitization", "Central sensitization", "Descending inhibition", "Habituation"],
+        correctAnswer: "Peripheral sensitization",
+        explanation: "Peripheral sensitization occurs when nociceptors in damaged tissue become easier to activate. Central sensitization instead reflects increased responsiveness within the central nervous system.",
+        cue: "Sensitivity at the injured tissue itself = peripheral sensitization.",
+        reviewTag: "Peripheral vs central sensitization"
+      },
+      {
+        id: "pain-008",
+        module: "Pain Terms",
+        prompt: "Pain sensitivity spreads beyond the original injury area, and even light touch in nearby regions becomes painful. What process is most likely involved?",
+        choices: ["Central sensitization", "Peripheral sensitization", "Analgesia", "Conduction block"],
+        correctAnswer: "Central sensitization",
+        explanation: "Central sensitization involves amplified processing within the central nervous system and can expand pain sensitivity beyond the original injury site.",
+        cue: "Pain spreads and the system gets more excitable = central sensitization.",
+        reviewTag: "Peripheral vs central sensitization"
+      },
+      {
+        id: "pain-009",
+        module: "Pain Terms",
+        prompt: "Which fibers usually carry light touch information and may contribute to pain when touch is interpreted abnormally?",
+        choices: ["A-beta fibers", "A-delta fibers", "C fibers", "Gamma motor fibers"],
+        correctAnswer: "A-beta fibers",
+        explanation: "A-beta fibers normally transmit light touch and pressure. In allodynia, input that is usually non-painful can be processed as painful.",
+        cue: "A-beta = big, fast touch fibers.",
+        reviewTag: "Fiber types"
+      },
+      {
+        id: "pain-010",
+        module: "Pain Terms",
+        prompt: "Which fibers are most associated with the fast, sharp first pain after stepping on a tack?",
+        choices: ["A-delta fibers", "C fibers", "A-beta fibers", "Alpha motor fibers"],
+        correctAnswer: "A-delta fibers",
+        explanation: "A-delta fibers conduct the quick, sharp pain that arrives first after an acute noxious stimulus. C fibers are slower and more aching or burning.",
+        cue: "Fast first pain = A-delta.",
+        reviewTag: "Fiber types"
+      },
+      {
+        id: "pain-011",
+        module: "Pain Terms",
+        prompt: "Which fibers are most associated with slow, dull, aching pain that lingers after the initial injury?",
+        choices: ["C fibers", "A-delta fibers", "A-beta fibers", "Ia afferents"],
+        correctAnswer: "C fibers",
+        explanation: "C fibers are slow-conducting and are associated with dull, aching, burning, or lingering pain qualities.",
+        cue: "C fibers = slow, aching, lingering pain.",
+        reviewTag: "Fiber types"
+      },
+
+      // Somatosensory Pathways Questions
+      {
+        id: "sensory-001",
+        module: "Somatosensory Pathways",
+        prompt: "Which pathway carries vibration sense from the lower extremity?",
+        choices: ["DCML", "Spinothalamic tract", "Corticospinal tract", "Vestibulospinal tract"],
+        correctAnswer: "DCML",
+        explanation: "Vibration, proprioception, fine touch, and two-point discrimination travel in the dorsal column medial lemniscus pathway.",
+        cue: "Vibration and proprioception = DCML.",
+        reviewTag: "DCML vs spinothalamic"
+      },
+      {
+        id: "sensory-002",
+        module: "Somatosensory Pathways",
+        prompt: "Which pathway primarily carries pain and temperature from the body?",
+        choices: ["Spinothalamic tract", "DCML", "Reticulospinal tract", "Vestibulocerebellar pathway"],
+        correctAnswer: "Spinothalamic tract",
+        explanation: "Pain and temperature ascend in the anterolateral system, commonly referred to as the spinothalamic tract.",
+        cue: "Pain and temperature = spinothalamic.",
+        reviewTag: "DCML vs spinothalamic"
+      },
+      {
+        id: "sensory-003",
+        module: "Somatosensory Pathways",
+        prompt: "Where do lower-extremity DCML fibers decussate?",
+        choices: ["In the medulla", "Immediately at the dorsal root ganglion", "Within 1 to 2 spinal segments", "In the internal capsule"],
+        correctAnswer: "In the medulla",
+        explanation: "Lower-extremity DCML fibers ascend ipsilaterally in the spinal cord and cross in the medulla after synapsing in the gracile nucleus.",
+        cue: "DCML stays ipsilateral in the cord and crosses in the medulla.",
+        reviewTag: "Sensory decussation"
+      },
+      {
+        id: "sensory-004",
+        module: "Somatosensory Pathways",
+        prompt: "When do spinothalamic fibers typically cross after entering the spinal cord?",
+        choices: ["Within 1 to 2 spinal segments", "In the medulla", "At the thalamus", "Only after reaching the cortex"],
+        correctAnswer: "Within 1 to 2 spinal segments",
+        explanation: "Spinothalamic fibers usually synapse quickly and cross in the anterior white commissure within a few spinal levels of entry.",
+        cue: "Spinothalamic crosses early in the spinal cord.",
+        reviewTag: "Sensory decussation"
+      },
+      {
+        id: "sensory-005",
+        module: "Somatosensory Pathways",
+        prompt: "Which structure is the major relay for ascending somatosensory information before it reaches cortex?",
+        choices: ["Thalamus", "Cerebellum", "Basal ganglia", "Amygdala"],
+        correctAnswer: "Thalamus",
+        explanation: "The thalamus is the key relay station for most sensory information on the way to cerebral cortex.",
+        cue: "Most sensory roads pass through the thalamus.",
+        reviewTag: "Sensory relay"
+      },
+      {
+        id: "sensory-006",
+        module: "Somatosensory Pathways",
+        prompt: "After the thalamus, conscious body sensation is sent most directly to which cortical region?",
+        choices: ["Postcentral gyrus (S1)", "Precentral gyrus", "Occipital cortex", "Cerebellar cortex"],
+        correctAnswer: "Postcentral gyrus (S1)",
+        explanation: "Primary somatosensory cortex sits in the postcentral gyrus and receives thalamic sensory relay input for conscious body sensation.",
+        cue: "Thalamus to S1 means postcentral gyrus.",
+        reviewTag: "Sensory relay"
+      },
+      {
+        id: "sensory-007",
+        module: "Somatosensory Pathways",
+        prompt: "A therapist tests fine touch and joint position sense in the hand. Which pathway is being emphasized?",
+        choices: ["DCML", "Spinothalamic tract", "Lateral corticospinal tract", "Tectospinal tract"],
+        correctAnswer: "DCML",
+        explanation: "Fine touch and proprioception both travel through the DCML system, not the spinothalamic tract.",
+        cue: "Position sense and fine touch travel together in DCML.",
+        reviewTag: "DCML modalities"
+      },
+      {
+        id: "sensory-008",
+        module: "Somatosensory Pathways",
+        prompt: "Which pathway is most closely associated with crude touch from the body?",
+        choices: ["Spinothalamic tract", "DCML", "Vestibulospinal tract", "Corticobulbar tract"],
+        correctAnswer: "Spinothalamic tract",
+        explanation: "Crude touch is part of the anterolateral system and is most often grouped with spinothalamic tract functions in introductory review.",
+        cue: "Crude touch tracks with the anterolateral or spinothalamic system.",
+        reviewTag: "Spinothalamic modalities"
+      },
+      {
+        id: "sensory-009",
+        module: "Somatosensory Pathways",
+        prompt: "A patient has preserved vibration sense but reduced pain and temperature. Which pathway is more likely affected?",
+        choices: ["Spinothalamic tract", "DCML", "Corticospinal tract", "Vestibulospinal tract"],
+        correctAnswer: "Spinothalamic tract",
+        explanation: "Pain and temperature loss with preserved vibration points away from DCML and toward spinothalamic involvement.",
+        cue: "Pain and temperature loss with vibration spared = spinothalamic.",
+        reviewTag: "DCML vs spinothalamic"
+      },
+      {
+        id: "sensory-010",
+        module: "Somatosensory Pathways",
+        prompt: "A patient struggles to identify toe position with eyes closed. Which pathway is most directly involved?",
+        choices: ["DCML", "Spinothalamic tract", "Rubrospinal tract", "Corticobulbar tract"],
+        correctAnswer: "DCML",
+        explanation: "Joint position sense is a proprioceptive function carried through the DCML pathway.",
+        cue: "Proprioception and joint position sense = DCML.",
+        reviewTag: "DCML modalities"
+      },
+
+      // Cranial Nerves Questions
+      {
+        id: "cn-001",
+        module: "Cranial Nerves",
+        prompt: "Loss of smell after head trauma most directly suggests involvement of which cranial nerve?",
+        choices: ["CN I Olfactory", "CN II Optic", "CN V Trigeminal", "CN VII Facial"],
+        correctAnswer: "CN I Olfactory",
+        explanation: "CN I carries smell sensation from the olfactory epithelium to the brain.",
+        cue: "CN I = smell.",
+        reviewTag: "CN I-II"
+      },
+      {
+        id: "cn-002",
+        module: "Cranial Nerves",
+        prompt: "A patient reports loss of visual input from one eye. Which cranial nerve is most directly involved?",
+        choices: ["CN II Optic", "CN III Oculomotor", "CN IV Trochlear", "CN VI Abducens"],
+        correctAnswer: "CN II Optic",
+        explanation: "CN II carries visual sensory information from the retina to the brain.",
+        cue: "CN II = vision.",
+        reviewTag: "CN I-II"
+      },
+      {
+        id: "cn-003",
+        module: "Cranial Nerves",
+        prompt: "Ptosis, a dilated pupil, and difficulty moving the eye in most directions would most strongly suggest which cranial nerve?",
+        choices: ["CN III Oculomotor", "CN IV Trochlear", "CN VI Abducens", "CN XII Hypoglossal"],
+        correctAnswer: "CN III Oculomotor",
+        explanation: "CN III controls most extraocular muscles, eyelid elevation, and parasympathetic constriction of the pupil. This is the 'all the rest 3' part of LR6 SO4, all the rest 3.",
+        cue: "Most eye movements, lid lift, and pupil constriction = CN III.",
+        reviewTag: "Eye movement nerves"
+      },
+      {
+        id: "cn-004",
+        module: "Cranial Nerves",
+        prompt: "A patient has difficulty depressing the eye when looking medially, especially while walking downstairs. Which cranial nerve is most involved?",
+        choices: ["CN IV Trochlear", "CN III Oculomotor", "CN VI Abducens", "CN XI Accessory"],
+        correctAnswer: "CN IV Trochlear",
+        explanation: "CN IV innervates the superior oblique muscle. The memory aid is LR6 SO4, all the rest 3.",
+        cue: "Superior oblique = CN IV.",
+        reviewTag: "Eye movement nerves"
+      },
+      {
+        id: "cn-005",
+        module: "Cranial Nerves",
+        prompt: "A patient has facial sensory loss and difficulty chewing. Which cranial nerve is most directly involved?",
+        choices: ["CN V Trigeminal", "CN VII Facial", "CN VIII Vestibulocochlear", "CN XII Hypoglossal"],
+        correctAnswer: "CN V Trigeminal",
+        explanation: "CN V carries facial sensation and supplies the muscles of mastication. CN VII is facial expression, not primary facial sensation.",
+        cue: "CN V = facial sensation and chewing.",
+        reviewTag: "CN V vs CN VII"
+      },
+      {
+        id: "cn-006",
+        module: "Cranial Nerves",
+        prompt: "An eye cannot abduct laterally. Which cranial nerve is most likely impaired?",
+        choices: ["CN VI Abducens", "CN III Oculomotor", "CN IV Trochlear", "CN II Optic"],
+        correctAnswer: "CN VI Abducens",
+        explanation: "CN VI innervates the lateral rectus muscle. This is the LR6 part of LR6 SO4, all the rest 3.",
+        cue: "Lateral rectus = CN VI.",
+        reviewTag: "Eye movement nerves"
+      },
+      {
+        id: "cn-007",
+        module: "Cranial Nerves",
+        prompt: "Weakness of facial expression with loss of taste from the anterior two-thirds of the tongue points most strongly to which nerve?",
+        choices: ["CN VII Facial", "CN V Trigeminal", "CN IX Glossopharyngeal", "CN X Vagus"],
+        correctAnswer: "CN VII Facial",
+        explanation: "CN VII controls muscles of facial expression and carries taste from the anterior two-thirds of the tongue.",
+        cue: "CN VII = facial expression and anterior two-thirds taste.",
+        reviewTag: "CN V vs CN VII"
+      },
+      {
+        id: "cn-008",
+        module: "Cranial Nerves",
+        prompt: "Hearing loss with dizziness and balance complaints most directly suggests which cranial nerve?",
+        choices: ["CN VIII Vestibulocochlear", "CN VII Facial", "CN V Trigeminal", "CN XI Accessory"],
+        correctAnswer: "CN VIII Vestibulocochlear",
+        explanation: "CN VIII carries auditory and vestibular information, so hearing and balance symptoms often travel together here.",
+        cue: "CN VIII = hearing and balance.",
+        reviewTag: "CN VIII"
+      },
+      {
+        id: "cn-009",
+        module: "Cranial Nerves",
+        prompt: "Loss of sensation for the gag reflex and impaired taste from the posterior one-third of the tongue point most strongly to which nerve?",
+        choices: ["CN IX Glossopharyngeal", "CN X Vagus", "CN XI Accessory", "CN XII Hypoglossal"],
+        correctAnswer: "CN IX Glossopharyngeal",
+        explanation: "CN IX contributes sensory input for the gag reflex and carries taste from the posterior one-third of the tongue.",
+        cue: "Posterior tongue taste and gag sensory limb = CN IX.",
+        reviewTag: "CN IX-X"
+      },
+      {
+        id: "cn-010",
+        module: "Cranial Nerves",
+        prompt: "Hoarseness, impaired palate elevation, and swallowing difficulty would most strongly suggest which cranial nerve?",
+        choices: ["CN X Vagus", "CN IX Glossopharyngeal", "CN XI Accessory", "CN III Oculomotor"],
+        correctAnswer: "CN X Vagus",
+        explanation: "CN X is heavily involved in palate, pharyngeal, and laryngeal function, making it important for voice and swallowing.",
+        cue: "Voice, palate, and swallowing often point to CN X.",
+        reviewTag: "CN IX-X"
+      },
+      {
+        id: "cn-011",
+        module: "Cranial Nerves",
+        prompt: "Difficulty turning the head against resistance and shrugging the shoulder points to which cranial nerve?",
+        choices: ["CN XI Accessory", "CN X Vagus", "CN V Trigeminal", "CN XII Hypoglossal"],
+        correctAnswer: "CN XI Accessory",
+        explanation: "CN XI innervates sternocleidomastoid and trapezius, making it key for head turn and shoulder shrug.",
+        cue: "Shoulder shrug and head turn = CN XI.",
+        reviewTag: "CN XI-XII"
+      },
+      {
+        id: "cn-012",
+        module: "Cranial Nerves",
+        prompt: "A tongue deviates on protrusion because of weakness in tongue movement. Which cranial nerve is most directly involved?",
+        choices: ["CN XII Hypoglossal", "CN XI Accessory", "CN VII Facial", "CN VI Abducens"],
+        correctAnswer: "CN XII Hypoglossal",
+        explanation: "CN XII controls tongue movement and is tested during protrusion of the tongue.",
+        cue: "Tongue movement = CN XII.",
+        reviewTag: "CN XI-XII"
+      },
+
+      // Brain Anatomy Questions
+      {
+        id: "brain-001",
+        module: "Brain Anatomy",
+        prompt: "Which structure contains the primary somatosensory cortex?",
+        choices: ["Postcentral gyrus", "Precentral gyrus", "Occipital lobe", "Cerebellum"],
+        correctAnswer: "Postcentral gyrus",
+        explanation: "The postcentral gyrus lies just posterior to the central sulcus and contains primary somatosensory cortex.",
+        cue: "Postcentral = sensory.",
+        reviewTag: "Precentral vs postcentral"
+      },
+      {
+        id: "brain-002",
+        module: "Brain Anatomy",
+        prompt: "Which structure contains the primary motor cortex?",
+        choices: ["Precentral gyrus", "Postcentral gyrus", "Temporal lobe", "Thalamus"],
+        correctAnswer: "Precentral gyrus",
+        explanation: "Primary motor cortex sits in the precentral gyrus, immediately anterior to the central sulcus.",
+        cue: "Precentral = motor.",
+        reviewTag: "Precentral vs postcentral"
+      },
+      {
+        id: "brain-003",
+        module: "Brain Anatomy",
+        prompt: "The central sulcus separates which two major cortical regions?",
+        choices: [
+          "Frontal lobe motor cortex from parietal lobe somatosensory cortex",
+          "Temporal lobe from occipital lobe",
+          "Brainstem from cerebellum",
+          "Thalamus from hypothalamus"
+        ],
+        correctAnswer: "Frontal lobe motor cortex from parietal lobe somatosensory cortex",
+        explanation: "The central sulcus is the landmark between precentral gyrus in frontal lobe and postcentral gyrus in parietal lobe.",
+        cue: "Central sulcus sits between motor and sensory cortex.",
+        reviewTag: "Cortical landmarks"
+      },
+      {
+        id: "brain-004",
+        module: "Brain Anatomy",
+        prompt: "Which lobe is most associated with executive function and voluntary motor planning?",
+        choices: ["Frontal lobe", "Parietal lobe", "Temporal lobe", "Occipital lobe"],
+        correctAnswer: "Frontal lobe",
+        explanation: "The frontal lobe supports executive control and voluntary movement planning, including motor cortex regions.",
+        cue: "Frontal lobe = planning and voluntary action.",
+        reviewTag: "Lobes and function"
+      },
+      {
+        id: "brain-005",
+        module: "Brain Anatomy",
+        prompt: "Which lobe is most associated with integrating body sensory information?",
+        choices: ["Parietal lobe", "Frontal lobe", "Temporal lobe", "Occipital lobe"],
+        correctAnswer: "Parietal lobe",
+        explanation: "The parietal lobe contains primary somatosensory cortex and plays an important role in body sensation and spatial processing.",
+        cue: "Parietal lobe = body sensation and spatial awareness.",
+        reviewTag: "Lobes and function"
+      },
+      {
+        id: "brain-006",
+        module: "Brain Anatomy",
+        prompt: "Which lobe is most associated with auditory processing and aspects of language comprehension?",
+        choices: ["Temporal lobe", "Occipital lobe", "Frontal lobe", "Parietal lobe"],
+        correctAnswer: "Temporal lobe",
+        explanation: "The temporal lobe supports auditory processing and contributes to memory and language-related functions.",
+        cue: "Temporal lobe = sound, memory, and language connections.",
+        reviewTag: "Lobes and function"
+      },
+      {
+        id: "brain-007",
+        module: "Brain Anatomy",
+        prompt: "Which lobe is most associated with primary visual processing?",
+        choices: ["Occipital lobe", "Temporal lobe", "Parietal lobe", "Frontal lobe"],
+        correctAnswer: "Occipital lobe",
+        explanation: "Visual cortex is located in the occipital lobe at the posterior part of the cerebrum.",
+        cue: "Occipital lobe = vision.",
+        reviewTag: "Lobes and function"
+      },
+      {
+        id: "brain-008",
+        module: "Brain Anatomy",
+        prompt: "Which deep brain structure is best known as a major sensory relay station to cortex?",
+        choices: ["Thalamus", "Cerebellum", "Hippocampus", "Basal ganglia"],
+        correctAnswer: "Thalamus",
+        explanation: "The thalamus relays most sensory information to the cerebral cortex and is a key orientation landmark in neuroanatomy.",
+        cue: "Thalamus = relay hub for sensory traffic.",
+        reviewTag: "Deep structures"
+      },
+      {
+        id: "brain-009",
+        module: "Brain Anatomy",
+        prompt: "Which structure is strongly associated with balance, coordination, and movement accuracy?",
+        choices: ["Cerebellum", "Occipital lobe", "Postcentral gyrus", "Thalamus"],
+        correctAnswer: "Cerebellum",
+        explanation: "The cerebellum fine-tunes movement and contributes heavily to coordination and balance.",
+        cue: "Cerebellum = coordination and balance.",
+        reviewTag: "Deep structures"
+      },
+      {
+        id: "brain-010",
+        module: "Brain Anatomy",
+        prompt: "Which structure connects the brain with the spinal cord and contains many cranial nerve nuclei plus key autonomic centers?",
+        choices: ["Brainstem", "Cerebellum", "Parietal lobe", "Corpus callosum"],
+        correctAnswer: "Brainstem",
+        explanation: "The brainstem links brain and spinal cord and houses important pathways, cranial nerve nuclei, and life-support centers.",
+        cue: "Brainstem = conduit plus cranial nerve and autonomic control centers.",
+        reviewTag: "Deep structures"
+      },
+
+      // Reflex Arc / Spinal Cord Questions
+      {
+        id: "reflex-001",
+        module: "Reflex Arc / Spinal Cord",
+        prompt: "Which structure contains sensory neuron cell bodies outside the spinal cord?",
+        choices: ["Dorsal root ganglion", "Ventral root", "Ventral horn", "Lateral horn"],
+        correctAnswer: "Dorsal root ganglion",
+        explanation: "The dorsal root ganglion contains sensory neuron cell bodies. Sensory information enters the spinal cord through the dorsal root.",
+        cue: "DRG = sensory neuron cell bodies.",
+        reviewTag: "Dorsal root ganglion"
+      },
+      {
+        id: "reflex-002",
+        module: "Reflex Arc / Spinal Cord",
+        prompt: "Which structure carries sensory afferent fibers into the spinal cord?",
+        choices: ["Dorsal root", "Ventral root", "Ventral horn", "Anterior funiculus"],
+        correctAnswer: "Dorsal root",
+        explanation: "Sensory input enters through the dorsal root, while motor output leaves through the ventral root.",
+        cue: "Dorsal root brings sensory input in.",
+        reviewTag: "Roots and horns"
+      },
+      {
+        id: "reflex-003",
+        module: "Reflex Arc / Spinal Cord",
+        prompt: "Which structure carries motor efferent fibers out to the periphery?",
+        choices: ["Ventral root", "Dorsal root", "Dorsal horn", "Dorsal root ganglion"],
+        correctAnswer: "Ventral root",
+        explanation: "Motor commands leave the spinal cord through the ventral root. This is the outgoing limb compared with sensory entry through the dorsal root.",
+        cue: "Ventral root sends motor output out.",
+        reviewTag: "Roots and horns"
+      },
+      {
+        id: "reflex-004",
+        module: "Reflex Arc / Spinal Cord",
+        prompt: "Which spinal cord horn is most associated with incoming sensory processing?",
+        choices: ["Dorsal horn", "Ventral horn", "Lateral horn", "Anterior median fissure"],
+        correctAnswer: "Dorsal horn",
+        explanation: "The dorsal horn is where incoming sensory afferents synapse within the spinal cord.",
+        cue: "Dorsal horn = sensory processing zone.",
+        reviewTag: "Roots and horns"
+      },
+      {
+        id: "reflex-005",
+        module: "Reflex Arc / Spinal Cord",
+        prompt: "Which spinal cord horn contains lower motor neuron cell bodies for skeletal muscle output?",
+        choices: ["Ventral horn", "Dorsal horn", "Lateral horn", "Dorsal root ganglion"],
+        correctAnswer: "Ventral horn",
+        explanation: "Lower motor neurons that project to skeletal muscle are located in the ventral horn.",
+        cue: "Ventral horn = motor neuron cell bodies.",
+        reviewTag: "Roots and horns"
+      },
+      {
+        id: "reflex-006",
+        module: "Reflex Arc / Spinal Cord",
+        prompt: "The lateral horn is most associated with which function?",
+        choices: ["Autonomic output", "Primary visual processing", "Conscious proprioception", "Cerebellar coordination"],
+        correctAnswer: "Autonomic output",
+        explanation: "The lateral horn contains autonomic preganglionic neurons in relevant spinal cord levels.",
+        cue: "Lateral horn = autonomic neurons.",
+        reviewTag: "Roots and horns"
+      },
+      {
+        id: "reflex-007",
+        module: "Reflex Arc / Spinal Cord",
+        prompt: "Which description best matches spinal cord gray matter?",
+        choices: [
+          "Contains neuron cell bodies, interneurons, and synapses",
+          "Contains only long ascending sensory tracts",
+          "Contains only lower motor axons",
+          "Contains only autonomic ganglia outside the cord"
+        ],
+        correctAnswer: "Contains neuron cell bodies, interneurons, and synapses",
+        explanation: "Gray matter is the processing region with neuron cell bodies and synaptic connections. White matter contains ascending and descending tracts.",
+        cue: "Gray matter = local processing and cell bodies.",
+        reviewTag: "Gray vs white matter"
+      },
+      {
+        id: "reflex-008",
+        module: "Reflex Arc / Spinal Cord",
+        prompt: "Which sequence best represents a basic reflex arc?",
+        choices: [
+          "Receptor -> afferent neuron -> spinal integration -> efferent neuron -> effector",
+          "Effector -> receptor -> ventral root -> cortex -> cerebellum",
+          "Cortex -> cerebellum -> receptor -> dorsal root ganglion -> muscle",
+          "White matter -> gray matter -> receptor -> effector -> thalamus"
+        ],
+        correctAnswer: "Receptor -> afferent neuron -> spinal integration -> efferent neuron -> effector",
+        explanation: "A reflex begins with a receptor, enters through sensory afferent pathways, is processed in the spinal cord, and exits through motor efferents to the effector.",
+        cue: "Sense in, process, motor out.",
+        reviewTag: "Reflex arc sequence"
+      },
+      {
+        id: "reflex-009",
+        module: "Reflex Arc / Spinal Cord",
+        prompt: "In neuro terminology, afferent means which direction of information flow?",
+        choices: ["Toward the CNS", "Away from the CNS", "Across the corpus callosum", "Only within the cerebellum"],
+        correctAnswer: "Toward the CNS",
+        explanation: "Afferent information travels toward the central nervous system. Efferent information travels away from the CNS to effectors.",
+        cue: "Afferent arrives at the CNS.",
+        reviewTag: "Afferent vs efferent"
+      },
+      {
+        id: "reflex-010",
+        module: "Reflex Arc / Spinal Cord",
+        prompt: "Which statement correctly compares ascending and descending tracts?",
+        choices: [
+          "Ascending tracts carry sensory information toward the brain, while descending tracts carry motor commands toward the spinal cord",
+          "Ascending tracts carry motor information, while descending tracts carry sensory information",
+          "Both ascending and descending tracts only carry autonomic fibers",
+          "Both ascending and descending tracts terminate in the dorsal root ganglion"
+        ],
+        correctAnswer: "Ascending tracts carry sensory information toward the brain, while descending tracts carry motor commands toward the spinal cord",
+        explanation: "Ascending tracts relay sensory information up toward the brain, while descending tracts bring motor commands down from higher centers.",
+        cue: "Ascending = sensory up. Descending = motor down.",
+        reviewTag: "Ascending vs descending tracts"
+      },
+
+      // Beginning Lesion Reasoning Questions
+      {
+        id: "lesion-001",
+        module: "Beginning Lesion Reasoning",
+        prompt: "A patient has reduced reflexes and sensory changes in a dermatomal pattern. Which location is most likely?",
+        choices: ["Nerve root / PNS", "Primary visual cortex", "Cerebellum", "Basal ganglia"],
+        correctAnswer: "Nerve root / PNS",
+        explanation: "A dermatomal pattern with reduced reflexes often points to a nerve root or peripheral nervous system problem rather than a cortical lesion.",
+        cue: "Dermatome plus hyporeflexia = think root or PNS.",
+        reviewTag: "CNS vs PNS localization"
+      },
+      {
+        id: "lesion-002",
+        module: "Beginning Lesion Reasoning",
+        prompt: "Hyperreflexia with increased tone most strongly suggests which general pattern?",
+        choices: ["CNS / UMN pattern", "Peripheral nerve / LMN pattern", "Primary muscle strain", "Vestibular-only disorder"],
+        correctAnswer: "CNS / UMN pattern",
+        explanation: "Hyperreflexia and increased tone are classic upper motor neuron clues and point toward a central nervous system lesion pattern.",
+        cue: "Hyperreflexia and spasticity push you toward CNS or UMN.",
+        reviewTag: "UMN vs LMN"
+      },
+      {
+        id: "lesion-003",
+        module: "Beginning Lesion Reasoning",
+        prompt: "Sensory loss follows the median nerve distribution in the hand rather than a dermatome. Which pattern is most likely?",
+        choices: ["Peripheral nerve pattern", "Spinal cord tract pattern", "Diffuse cortical pattern", "Cerebellar pattern"],
+        correctAnswer: "Peripheral nerve pattern",
+        explanation: "When symptoms fit a named peripheral nerve rather than a dermatome, think peripheral nerve lesion before root or cortical causes.",
+        cue: "Named nerve pattern is not the same thing as a dermatome.",
+        reviewTag: "Dermatome vs peripheral nerve"
+      },
+      {
+        id: "lesion-004",
+        module: "Beginning Lesion Reasoning",
+        prompt: "A patient cannot smile symmetrically, has weakness closing one eye, and reports altered taste on the anterior two-thirds of the tongue. What localization is most likely?",
+        choices: ["CN VII deficit", "CN V deficit", "Thalamic lesion", "Dorsal column lesion"],
+        correctAnswer: "CN VII deficit",
+        explanation: "Facial expression weakness with taste changes on the anterior tongue strongly suggests a facial nerve problem rather than trigeminal sensory loss.",
+        cue: "Expression plus anterior tongue taste = CN VII.",
+        reviewTag: "Cranial nerve localization"
+      },
+      {
+        id: "lesion-005",
+        module: "Beginning Lesion Reasoning",
+        prompt: "A patient loses vibration and position sense but still detects pinprick reasonably well. Which pathway is most likely involved?",
+        choices: ["DCML", "Spinothalamic tract", "Vestibulospinal tract", "Corticobulbar tract"],
+        correctAnswer: "DCML",
+        explanation: "Loss of vibration and proprioception with relative preservation of pain suggests dorsal column medial lemniscus involvement.",
+        cue: "Vibration and joint position loss = DCML problem.",
+        reviewTag: "Tract-specific sensory loss"
+      },
+      {
+        id: "lesion-006",
+        module: "Beginning Lesion Reasoning",
+        prompt: "A patient has reduced pain and temperature sensation but preserved vibration sense. Which pathway is most likely involved?",
+        choices: ["Spinothalamic tract", "DCML", "Lateral corticospinal tract", "Vestibular nuclei"],
+        correctAnswer: "Spinothalamic tract",
+        explanation: "Pain and temperature loss with preserved vibration points to the spinothalamic tract rather than the DCML pathway.",
+        cue: "Pain and temperature loss with vibration spared = spinothalamic.",
+        reviewTag: "Tract-specific sensory loss"
+      },
+      {
+        id: "lesion-007",
+        module: "Beginning Lesion Reasoning",
+        prompt: "Diminished patellar reflex with focal quadriceps weakness most strongly suggests which general pattern?",
+        choices: ["LMN / root or peripheral involvement", "UMN / cortical involvement", "Occipital lobe lesion", "Cerebellar lesion only"],
+        correctAnswer: "LMN / root or peripheral involvement",
+        explanation: "Reduced reflexes and focal weakness around one reflex loop are lower motor neuron or peripheral clues rather than upper motor neuron signs.",
+        cue: "Hyporeflexia near a weak muscle group suggests LMN or peripheral involvement.",
+        reviewTag: "UMN vs LMN"
+      },
+      {
+        id: "lesion-008",
+        module: "Beginning Lesion Reasoning",
+        prompt: "An isolated inability to abduct one eye points most directly to which localization?",
+        choices: ["CN VI deficit", "Primary somatosensory cortex", "Cerebellar hemisphere", "Dorsal root ganglion"],
+        correctAnswer: "CN VI deficit",
+        explanation: "Failure to abduct the eye is a specific cranial nerve finding, making CN VI the most direct localization.",
+        cue: "Isolated lateral rectus weakness = CN VI.",
+        reviewTag: "Cranial nerve localization"
+      },
+
+      // Integrated Patient Case Questions
+      {
+        id: "case-001",
+        module: "Integrated Patient Case",
+        prompt: "In the patient case, which finding most directly points toward the DCML pathway?",
+        choices: [
+          "Reduced vibration sense in the right lower extremity",
+          "Pain from light touch",
+          "Facial sensory changes",
+          "Diminished patellar reflex"
+        ],
+        correctAnswer: "Reduced vibration sense in the right lower extremity",
+        explanation: "Vibration sense travels through the DCML pathway. Pain from light touch relates more directly to allodynia and altered pain processing.",
+        cue: "Vibration = DCML.",
+        reviewTag: "Integrated case reasoning"
+      },
+      {
+        id: "case-002",
+        module: "Integrated Patient Case",
+        prompt: "Which case finding most directly relates to reflex arc testing?",
+        choices: [
+          "Diminished patellar reflex",
+          "Reduced vibration sense in the right lower extremity",
+          "Pain from light touch after injury",
+          "Difficulty with balance and coordination"
+        ],
+        correctAnswer: "Diminished patellar reflex",
+        explanation: "The patellar reflex is a classic reflex arc assessment involving sensory input, spinal integration, and motor output.",
+        cue: "Reflex finding = patellar reflex change.",
+        reviewTag: "Integrated case reasoning"
+      },
+      {
+        id: "case-003",
+        module: "Integrated Patient Case",
+        prompt: "Which cranial nerve is most likely involved in the facial sensory changes described in the case?",
+        choices: ["CN V Trigeminal", "CN VII Facial", "CN VIII Vestibulocochlear", "CN XII Hypoglossal"],
+        correctAnswer: "CN V Trigeminal",
+        explanation: "CN V is the main cranial nerve for facial sensation. CN VII is mainly facial expression and anterior tongue taste.",
+        cue: "Facial sensation = CN V.",
+        reviewTag: "Integrated case reasoning"
+      },
+      {
+        id: "case-004",
+        module: "Integrated Patient Case",
+        prompt: "What term best describes pain from light touch after the recent injury?",
+        choices: ["Allodynia", "Hyperalgesia", "Analgesia", "Hypoalgesia"],
+        correctAnswer: "Allodynia",
+        explanation: "Allodynia is pain in response to a stimulus that is normally non-painful, such as light touch.",
+        cue: "Light touch becomes painful = allodynia.",
+        reviewTag: "Integrated case reasoning"
+      },
+      {
+        id: "case-005",
+        module: "Integrated Patient Case",
+        prompt: "Which structure is most strongly associated with the balance and coordination difficulty in this case?",
+        choices: ["Cerebellum", "Occipital lobe", "Postcentral gyrus", "CN II Optic"],
+        correctAnswer: "Cerebellum",
+        explanation: "Balance and coordination are closely associated with cerebellar function.",
+        cue: "Balance and coordination often lead you to the cerebellum.",
+        reviewTag: "Integrated case reasoning"
+      },
+      {
+        id: "case-006",
+        module: "Integrated Patient Case",
+        prompt: "Which finding most strongly suggests a sensory pathway problem rather than a pure motor problem?",
+        choices: [
+          "Reduced vibration sense in the right lower extremity",
+          "Diminished patellar reflex",
+          "Difficulty with balance and coordination",
+          "None of the findings involve sensation"
+        ],
+        correctAnswer: "Reduced vibration sense in the right lower extremity",
+        explanation: "Reduced vibration sense is a direct sensory pathway clue. The reflex change is also informative, but vibration loss is the clearest tract-related sensory sign here.",
+        cue: "A lost sensory modality points straight to a sensory pathway issue.",
+        reviewTag: "Integrated case reasoning"
+      },
+      {
+        id: "case-007",
+        module: "Integrated Patient Case",
+        prompt: "Which finding most strongly suggests altered pain processing?",
+        choices: [
+          "Pain from light touch after a recent injury",
+          "Reduced vibration sense in the right lower extremity",
+          "Facial sensory changes",
+          "Diminished patellar reflex"
+        ],
+        correctAnswer: "Pain from light touch after a recent injury",
+        explanation: "Pain from a normally non-painful touch stimulus reflects altered pain processing and is described clinically as allodynia.",
+        cue: "When non-painful touch hurts, think altered pain processing.",
+        reviewTag: "Integrated case reasoning"
+      }
+    ];
+
+    // ================================
+    // App state
+    // ================================
+
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let missedQuestions = [];
+    let selectedAnswer = null;
+    let currentMode = "";
+
+    const moduleCatalog = [
+      {
+        name: "Pain Terms",
+        description: "Distinguish pain vocabulary, fiber types, and sensitization patterns."
+      },
+      {
+        name: "Somatosensory Pathways",
+        description: "Compare DCML and spinothalamic flow from receptor to cortex."
+      },
+      {
+        name: "Cranial Nerves",
+        description: "Review CN I-XII with emphasis on V vs VII and the eye movement nerves."
+      },
+      {
+        name: "Brain Anatomy",
+        description: "Match major cortical landmarks and deep structures to function."
+      },
+      {
+        name: "Reflex Arc / Spinal Cord",
+        description: "Trace roots, horns, reflex loops, and ascending versus descending logic."
+      },
+      {
+        name: "Beginning Lesion Reasoning",
+        description: "Practice early CNS versus PNS localization and tract reasoning."
+      },
+      {
+        name: "Integrated Patient Case",
+        description: "Use one connected clinical vignette to apply multiple neuroscience concepts."
+      },
+      {
+        name: "Mixed Practice",
+        description: "Take a randomized 15-question review set drawn from the non-case modules."
+      }
+    ];
+
+    // ================================
+    // Utility functions
+    // ================================
+
+    function shuffleArray(array) {
+      for (let index = array.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [array[index], array[swapIndex]] = [array[swapIndex], array[index]];
+      }
+      return array;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function getQuestionCount(moduleName) {
+      if (moduleName === "Mixed Practice") {
+        return 15;
+      }
+
+      return questions.filter((question) => question.module === moduleName).length;
+    }
+
+    function switchScreen(screenId) {
+      document.getElementById("home-screen").classList.add("hidden");
+      document.getElementById("quiz-screen").classList.add("hidden");
+      document.getElementById("results-screen").classList.add("hidden");
+      document.getElementById(screenId).classList.remove("hidden");
+      document.body.dataset.screen = screenId;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function resetQuizState() {
+      currentQuestions = [];
+      currentQuestionIndex = 0;
+      score = 0;
+      missedQuestions = [];
+      selectedAnswer = null;
+
+      document.getElementById("submit-button").disabled = true;
+      document.getElementById("submit-button").classList.remove("hidden");
+      document.getElementById("next-button").classList.add("hidden");
+      document.getElementById("feedback-box").className = "feedback-box hidden";
+      document.getElementById("feedback-box").innerHTML = "";
+    }
+
+    // ================================
+    // Quiz functions
+    // ================================
+
+    function startModule(moduleName) {
+      resetQuizState();
+      currentMode = moduleName;
+      currentQuestions = questions.filter((question) => question.module === moduleName);
+
+      switchScreen("quiz-screen");
+      loadQuestion();
+    }
+
+    function startMixedPractice() {
+      resetQuizState();
+      currentMode = "Mixed Practice";
+      currentQuestions = shuffleArray(
+        questions.filter((question) => question.module !== "Integrated Patient Case").slice()
+      ).slice(0, 15);
+
+      switchScreen("quiz-screen");
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const question = currentQuestions[currentQuestionIndex];
+      const answerChoices = document.getElementById("answer-choices");
+      const feedbackBox = document.getElementById("feedback-box");
+      const submitButton = document.getElementById("submit-button");
+      const nextButton = document.getElementById("next-button");
+      const quizKicker = document.getElementById("quiz-kicker");
+      const quizProgress = document.getElementById("quiz-progress");
+      const questionModule = document.getElementById("question-module");
+      const questionText = document.getElementById("question-text");
+      const casePanel = document.getElementById("case-panel");
+      const caseText = document.getElementById("case-text");
+
+      selectedAnswer = null;
+      answerChoices.innerHTML = "";
+      submitButton.disabled = true;
+      submitButton.classList.remove("hidden");
+      nextButton.classList.add("hidden");
+      feedbackBox.className = "feedback-box hidden";
+      feedbackBox.innerHTML = "";
+
+      quizKicker.textContent = currentMode === "Mixed Practice" ? "Mixed Practice" : currentMode;
+      quizProgress.textContent = "Question " + (currentQuestionIndex + 1) + " of " + currentQuestions.length;
+      questionModule.textContent = currentMode === "Mixed Practice" ? "Mixed Practice • " + question.module : question.module;
+      questionText.textContent = question.prompt;
+
+      if (currentMode === "Integrated Patient Case") {
+        casePanel.classList.remove("hidden");
+        caseText.textContent = caseStudy;
+      } else {
+        casePanel.classList.add("hidden");
+      }
+
+      const displayedChoices = shuffleArray(question.choices.slice());
+
+      displayedChoices.forEach((choice, index) => {
+        const listItem = document.createElement("li");
+        const choiceButton = document.createElement("button");
+        const labelSpan = document.createElement("span");
+
+        choiceButton.type = "button";
+        choiceButton.className = "choice-button";
+        choiceButton.dataset.answer = choice;
+        choiceButton.setAttribute("role", "radio");
+        choiceButton.setAttribute("aria-checked", "false");
+        choiceButton.tabIndex = index === 0 ? 0 : -1;
+        choiceButton.addEventListener("click", () => selectAnswer(choice));
+        choiceButton.addEventListener("keydown", (event) => handleChoiceArrowNavigation(event, index));
+
+        labelSpan.className = "choice-label";
+        labelSpan.textContent = choice;
+        choiceButton.appendChild(labelSpan);
+
+        listItem.appendChild(choiceButton);
+        answerChoices.appendChild(listItem);
+      });
+
+      questionText.focus();
+    }
+
+    function selectAnswer(answerValue) {
+      selectedAnswer = answerValue;
+
+      document.querySelectorAll(".choice-button").forEach((button) => {
+        const isSelected = button.dataset.answer === answerValue;
+        button.classList.toggle("selected", isSelected);
+        button.setAttribute("aria-checked", isSelected ? "true" : "false");
+        button.tabIndex = isSelected ? 0 : -1;
+      });
+
+      document.getElementById("submit-button").disabled = false;
+    }
+
+    function submitAnswer() {
+      if (!selectedAnswer) {
+        return;
+      }
+
+      const question = currentQuestions[currentQuestionIndex];
+      const isCorrect = selectedAnswer === question.correctAnswer;
+      const feedbackBox = document.getElementById("feedback-box");
+      const submitButton = document.getElementById("submit-button");
+      const nextButton = document.getElementById("next-button");
+
+      if (isCorrect) {
+        score += 1;
+      } else {
+        missedQuestions.push({
+          id: question.id,
+          prompt: question.prompt,
+          reviewTag: question.reviewTag,
+          correctAnswer: question.correctAnswer
+        });
+      }
+
+      document.querySelectorAll(".choice-button").forEach((button) => {
+        button.disabled = true;
+        button.setAttribute("aria-disabled", "true");
+
+        const answerValue = button.dataset.answer;
+        const existingNote = button.querySelector(".choice-note");
+
+        if (existingNote) {
+          existingNote.remove();
+        }
+
+        if (answerValue === question.correctAnswer) {
+          button.classList.add("correct-answer");
+          appendChoiceNote(button, selectedAnswer === question.correctAnswer ? "Your choice • Correct" : "Correct answer");
+        } else if (answerValue === selectedAnswer) {
+          button.classList.add("incorrect-answer");
+          appendChoiceNote(button, "Your choice");
+        }
+      });
+
+      feedbackBox.className = "feedback-box " + (isCorrect ? "correct" : "incorrect");
+      feedbackBox.innerHTML = `
+        <h3>${isCorrect ? "Correct" : "Incorrect"}</h3>
+        <p><strong>Correct answer:</strong> ${escapeHtml(question.correctAnswer)}</p>
+        <p>${escapeHtml(question.explanation)}</p>
+        <p><strong>Remember this cue:</strong> ${escapeHtml(question.cue)}</p>
+      `;
+
+      submitButton.classList.add("hidden");
+      nextButton.classList.remove("hidden");
+      feedbackBox.focus();
+    }
+
+    function nextQuestion() {
+      currentQuestionIndex += 1;
+
+      if (currentQuestionIndex >= currentQuestions.length) {
+        showResults();
+        return;
+      }
+
+      loadQuestion();
+    }
+
+    function showResults() {
+      const totalQuestions = currentQuestions.length;
+      const percentScore = Math.round((score / totalQuestions) * 100);
+      const scoreValue = document.getElementById("score-value");
+      const scoreDetail = document.getElementById("score-detail");
+      const resultsTitle = document.getElementById("results-title");
+      const resultsSummary = document.getElementById("results-summary");
+      const performancePill = document.getElementById("performance-pill");
+      const retryButton = document.getElementById("retry-button");
+      const resultsMixedButton = document.getElementById("results-mixed-button");
+      const missedConcepts = document.getElementById("missed-concepts");
+
+      let performanceMessage = "";
+      if (percentScore >= 90) {
+        performanceMessage = "Strong review performance";
+      } else if (percentScore >= 75) {
+        performanceMessage = "Good progress; review missed concepts";
+      } else {
+        performanceMessage = "Review the missed concepts and try again";
+      }
+
+      resultsTitle.textContent = currentMode + " Complete";
+      resultsSummary.textContent = performanceMessage + ". Use the missed concept list below to target your next review block.";
+      scoreValue.textContent = percentScore + "%";
+      scoreDetail.textContent = score + " / " + totalQuestions + " correct";
+      performancePill.textContent = performanceMessage;
+      retryButton.textContent = currentMode === "Mixed Practice" ? "New Mixed Practice Set" : "Retry Module";
+      resultsMixedButton.textContent = currentMode === "Mixed Practice" ? "Another Mixed Practice Set" : "Start Mixed Practice";
+
+      renderMissedConcepts(missedConcepts);
+
+      try {
+        localStorage.setItem(
+          "lastModuleScore",
+          JSON.stringify({
+            mode: currentMode,
+            score: score,
+            total: totalQuestions,
+            percent: percentScore
+          })
+        );
+      } catch (error) {
+        // Local storage is optional for this activity.
+      }
+
+      renderLastScore();
+      switchScreen("results-screen");
+    }
+
+    function returnHome() {
+      resetQuizState();
+      switchScreen("home-screen");
+    }
+
+    // ================================
+    // Screen rendering helpers
+    // ================================
+
+    function appendChoiceNote(button, noteText) {
+      const note = document.createElement("span");
+      note.className = "choice-note";
+      note.textContent = noteText;
+      button.appendChild(note);
+    }
+
+    function handleChoiceArrowNavigation(event, index) {
+      const navigationKeys = ["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft", "Home", "End"];
+      if (!navigationKeys.includes(event.key)) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const buttons = Array.from(document.querySelectorAll(".choice-button"));
+      if (!buttons.length) {
+        return;
+      }
+
+      let nextIndex = index;
+
+      if (event.key === "Home") {
+        nextIndex = 0;
+      } else if (event.key === "End") {
+        nextIndex = buttons.length - 1;
+      } else {
+        const direction = event.key === "ArrowDown" || event.key === "ArrowRight" ? 1 : -1;
+        nextIndex = (index + direction + buttons.length) % buttons.length;
+      }
+
+      selectAnswer(buttons[nextIndex].dataset.answer);
+      buttons[nextIndex].focus();
+    }
+
+    function renderModuleCards() {
+      const moduleGrid = document.getElementById("module-grid");
+      moduleGrid.innerHTML = "";
+
+      moduleCatalog.forEach((moduleEntry) => {
+        const card = document.createElement("article");
+        const title = document.createElement("h3");
+        const description = document.createElement("p");
+        const meta = document.createElement("div");
+        const count = document.createElement("span");
+        const button = document.createElement("button");
+
+        card.className = "module-card";
+        title.textContent = moduleEntry.name;
+        description.textContent = moduleEntry.description;
+        meta.className = "module-meta";
+        count.className = "module-count";
+        count.textContent = getQuestionCount(moduleEntry.name) + " questions";
+
+        button.type = "button";
+        button.className = "primary-button";
+        button.textContent = moduleEntry.name === "Mixed Practice" ? "Start Mixed Practice" : "Start Module";
+        button.addEventListener("click", () => {
+          if (moduleEntry.name === "Mixed Practice") {
+            startMixedPractice();
+          } else {
+            startModule(moduleEntry.name);
+          }
+        });
+
+        meta.appendChild(count);
+        meta.appendChild(button);
+        card.appendChild(title);
+        card.appendChild(description);
+        card.appendChild(meta);
+        moduleGrid.appendChild(card);
+      });
+    }
+
+    function renderMissedConcepts(container) {
+      container.innerHTML = "";
+
+      if (missedQuestions.length === 0) {
+        const emptyReview = document.createElement("div");
+        emptyReview.className = "empty-review";
+        emptyReview.innerHTML = "<strong>Missed concepts:</strong> None this round. Keep the cues fresh and try mixed practice for more variety.";
+        container.appendChild(emptyReview);
+        return;
+      }
+
+      const heading = document.createElement("h3");
+      const intro = document.createElement("p");
+      const tagGrid = document.createElement("div");
+      const groupedMisses = {};
+
+      missedQuestions.forEach((question) => {
+        if (!groupedMisses[question.reviewTag]) {
+          groupedMisses[question.reviewTag] = [];
+        }
+        groupedMisses[question.reviewTag].push(question);
+      });
+
+      heading.textContent = "Missed concepts";
+      intro.textContent = "Suggested review focus based on the tags tied to your missed questions:";
+      tagGrid.className = "tag-grid";
+
+      Object.entries(groupedMisses)
+        .sort((left, right) => right[1].length - left[1].length)
+        .forEach(([tag, items]) => {
+          const tagCard = document.createElement("article");
+          const tagTitle = document.createElement("h3");
+          const countText = document.createElement("p");
+          const questionText = document.createElement("p");
+
+          tagCard.className = "tag-card";
+          tagTitle.textContent = tag;
+          countText.textContent = "Missed questions: " + items.length;
+          questionText.textContent = "Sample prompt: " + items[0].prompt;
+
+          tagCard.appendChild(tagTitle);
+          tagCard.appendChild(countText);
+          tagCard.appendChild(questionText);
+          tagGrid.appendChild(tagCard);
+        });
+
+      container.appendChild(heading);
+      container.appendChild(intro);
+      container.appendChild(tagGrid);
+    }
+
+    function renderLastScore() {
+      const lastScoreCard = document.getElementById("last-score-card");
+
+      try {
+        const rawValue = localStorage.getItem("lastModuleScore");
+        if (!rawValue) {
+          lastScoreCard.innerHTML = "<strong>Last activity</strong><p>No prior score saved on this device yet.</p>";
+          return;
+        }
+
+        const savedScore = JSON.parse(rawValue);
+        lastScoreCard.innerHTML =
+          "<strong>Last activity</strong>" +
+          "<p>" +
+          escapeHtml(savedScore.mode) +
+          ": " +
+          escapeHtml(String(savedScore.score)) +
+          " / " +
+          escapeHtml(String(savedScore.total)) +
+          " correct (" +
+          escapeHtml(String(savedScore.percent)) +
+          "%).</p>";
+      } catch (error) {
+        lastScoreCard.innerHTML = "<strong>Last activity</strong><p>Last activity unavailable on this device right now.</p>";
+      }
+    }
+
+    function attachEventListeners() {
+      document.getElementById("submit-button").addEventListener("click", submitAnswer);
+      document.getElementById("next-button").addEventListener("click", nextQuestion);
+      document.getElementById("quiz-home-button").addEventListener("click", returnHome);
+      document.getElementById("results-home-button").addEventListener("click", returnHome);
+      document.getElementById("results-mixed-button").addEventListener("click", startMixedPractice);
+      document.getElementById("retry-button").addEventListener("click", () => {
+        if (currentMode === "Mixed Practice") {
+          startMixedPractice();
+        } else {
+          startModule(currentMode);
+        }
+      });
+    }
+
+    function initializeApp() {
+      renderModuleCards();
+      renderLastScore();
+      document.getElementById("case-text").textContent = caseStudy;
+      attachEventListeners();
+    }
+
+    initializeApp();
+  </script>
+</body>
+</html>
