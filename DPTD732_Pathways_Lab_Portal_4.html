@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>DPTD 732 — Neural Pathways: 3D Lab Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red:#C8102E; --navy:#0F1928; --navy2:#162334; --body:#f2f3f5;
+      --card:#fff; --border:#dde0e6; --text:#1a1f2e; --muted:#64748b;
+      --green:#16a34a; --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+      --header-h:68px; --tab-h:52px;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--sans); background:var(--body); color:var(--text); min-height:100vh; -webkit-text-size-adjust:100%; }
+
+    header { background:var(--navy); height:var(--header-h); display:flex; align-items:center; padding:0 18px; gap:12px; position:sticky; top:0; z-index:100; border-bottom:2px solid var(--red); }
+    .logo { width:36px;height:36px;background:var(--red);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .logo svg { width:18px;height:18px;fill:white; }
+    .htext { flex:1;min-width:0; }
+    .htitle { font-family:var(--mono);font-size:12px;font-weight:600;color:white;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .hsub { font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+
+    nav { background:var(--navy2);height:var(--tab-h);display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:var(--header-h);z-index:99; }
+    nav::-webkit-scrollbar { display:none; }
+    .tab { flex:1;min-width:130px;height:100%;border:none;background:transparent;color:rgba(255,255,255,.45);font-family:var(--sans);font-size:11.5px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-bottom:3px solid transparent;transition:color .15s,border-color .15s,background .15s;-webkit-tap-highlight-color:transparent;position:relative;top:1px;padding:0 12px; }
+    .tab .dir { font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);transition:color .15s; }
+    .tab.active { color:white;border-bottom-color:var(--red);background:rgba(255,255,255,.04); }
+    .tab.active .dir.d { color:#f8a0b0; }
+    .tab.active .dir.a { color:#93c5fd; }
+    .tab.active .dir.s { color:#86efac; }
+    .tab:hover:not(.active) { color:rgba(255,255,255,.75); }
+
+    main { max-width:860px;margin:0 auto;padding:20px 16px 80px; }
+    .panel { display:none; }
+    .panel.active { display:block; }
+
+    .stn-head { background:var(--navy);border-radius:10px;padding:16px 18px;margin-bottom:16px; }
+    .stn-head h2 { font-size:17px;font-weight:600;color:white;margin-bottom:4px; }
+    .stn-head p { font-size:12px;color:rgba(255,255,255,.5);line-height:1.55; }
+    .chips { display:flex;gap:6px;margin-top:8px;flex-wrap:wrap; }
+    .chip { font-family:var(--mono);font-size:9.5px;font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:.05em;text-transform:uppercase; }
+    .chip-r { background:rgba(200,16,46,.25);color:#f8a0b0; }
+    .chip-b { background:rgba(59,130,246,.25);color:#93c5fd; }
+    .chip-g { background:rgba(16,185,129,.2);color:#6ee7b7; }
+    .chip-n { background:rgba(255,255,255,.1);color:rgba(255,255,255,.6); }
+
+    .chain-bar { border-radius:9px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.55; }
+    .chain-bar.down { background:#fff1f2;border:1px solid #fecdd3;color:#9f1239; }
+    .chain-bar.up   { background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a; }
+    .chain-bar.spin { background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d; }
+    .chain-bar strong { font-weight:600;display:block;margin-bottom:6px;font-size:13px; }
+    .chain { display:flex;flex-wrap:wrap;align-items:center;gap:4px; }
+    .cn { font-family:var(--mono);font-size:10.5px;font-weight:600;padding:4px 9px;border-radius:5px;white-space:nowrap; }
+    .cn.down  { background:#fecdd3;color:#9f1239; }
+    .cn.up    { background:#bfdbfe;color:#1e3a8a; }
+    .cn.spin  { background:#bbf7d0;color:#14532d; }
+    .cn.cross { background:#fef08a;color:#713f12; }
+    .arr { font-size:13px;opacity:.45;flex-shrink:0; }
+
+    .model-block { background:white;border-radius:10px;overflow:hidden;margin-bottom:14px;border:1px solid var(--border); }
+    .model-top { background:#f8f9fa;border-bottom:1px solid var(--border);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px; }
+    .mt { font-size:13px;font-weight:600;color:var(--text); }
+    .ms { font-size:11px;color:var(--muted);margin-top:1px; }
+    .open-btn { background:var(--red);color:white;text-decoration:none;font-family:var(--mono);font-size:10px;font-weight:600;padding:5px 11px;border-radius:5px;white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:4px;-webkit-tap-highlight-color:transparent;letter-spacing:.03em; }
+    .model-frame { position:relative;width:100%;padding-bottom:56.25%;background:var(--navy); }
+    .model-frame iframe { position:absolute;top:0;left:0;width:100%;height:100%;border:none; }
+    .model-hint { background:#fffbeb;border-top:1px solid #fde68a;padding:7px 14px;font-size:11px;color:#92400e; }
+
+    .activity { background:white;border-radius:10px;border:1px solid var(--border);margin-bottom:14px;overflow:hidden; }
+    .activity-head { padding:10px 14px;border-bottom:1px solid #f0f2f5;display:flex;align-items:center;gap:9px; }
+    .act-icon { width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0; }
+    .act-icon.seq { background:#dbeafe; }
+    .act-icon.mat { background:#dcfce7; }
+    .act-icon.fib { background:#fef3c7; }
+    .act-icon.mcq { background:#ede9fe; }
+    .act-icon.tf  { background:#fce7f3; }
+    .act-title { font-size:13px;font-weight:600;color:var(--text); }
+    .act-sub   { font-size:11px;color:var(--muted);margin-top:1px; }
+    .activity-body { padding:14px; }
+
+    .seq-instructions { font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5; }
+    .seq-pool { display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:36px; }
+    .seq-item { background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:7px;padding:7px 11px;font-size:12px;font-weight:500;cursor:pointer;transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;user-select:none; }
+    .seq-item:hover { background:#e2e8f0; }
+    .seq-item.placed { background:#f8fafc;border-style:dashed;color:#94a3b8;cursor:default;pointer-events:none; }
+    .seq-order { display:flex;flex-direction:column;gap:4px;margin-bottom:12px; }
+    .seq-slot { display:flex;align-items:center;gap:8px; }
+    .seq-slot-num { font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);width:20px;flex-shrink:0; }
+    .seq-slot-box { flex:1;min-height:36px;border:1.5px dashed #cbd5e1;border-radius:7px;background:#f8fafc;display:flex;align-items:center;padding:0 10px;font-size:12px;color:#94a3b8;cursor:pointer;transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent; }
+    .seq-slot-box.filled { background:white;border-color:#94a3b8;color:var(--text);font-weight:500; }
+    .seq-slot-box.filled:hover { background:#fef2f2;border-color:#f87171; }
+    .seq-slot-box.correct { background:#f0fdf4;border-color:#4ade80;color:#166534; }
+    .seq-slot-box.incorrect { background:#fef2f2;border-color:#f87171;color:#991b1b; }
+
+    .act-feedback { font-size:12px;line-height:1.55;padding:9px 12px;border-radius:7px;margin-bottom:10px;display:none; }
+    .act-feedback.show { display:block; }
+    .act-feedback.good { background:#f0fdf4;color:#166534;border:1px solid #bbf7d0; }
+    .act-feedback.bad  { background:#fef2f2;color:#991b1b;border:1px solid #fecaca; }
+    .act-buttons { display:flex;gap:8px;flex-wrap:wrap; }
+    .btn-check,.btn-reset { font-family:var(--sans);font-size:12px;font-weight:600;padding:7px 14px;border-radius:6px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity .12s; }
+    .btn-check { background:var(--navy);color:white; }
+    .btn-check:hover { opacity:.85; }
+    .btn-check:disabled { opacity:.4;cursor:default; }
+    .btn-reset { background:#f1f5f9;color:var(--text); }
+    .btn-reset:hover { background:#e2e8f0; }
+
+    .match-wrap { display:flex;gap:10px;margin-bottom:12px; }
+    .match-col { flex:1;display:flex;flex-direction:column;gap:6px; }
+    .match-col-label { font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px; }
+    .match-item { padding:8px 11px;border-radius:7px;border:1.5px solid #cbd5e1;background:#f8fafc;font-size:12px;font-weight:500;cursor:pointer;transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;user-select:none;line-height:1.4; }
+    .match-item:hover { background:#f1f5f9; }
+    .match-item.active { background:#dbeafe;border-color:#3b82f6; }
+    .match-item.matched { background:#f0fdf4;border-color:#4ade80;cursor:default; }
+    .match-item.matched.incorrect { background:#fef2f2;border-color:#f87171; }
+    .match-item.right-matched { background:#f0fdf4;border-color:#4ade80;cursor:default; }
+    .match-item.right-matched.incorrect { background:#fef2f2;border-color:#f87171; }
+
+    .fib-wrap { display:flex;flex-direction:column;gap:10px;margin-bottom:12px; }
+    .fib-item { display:flex;flex-direction:column;gap:4px; }
+    .fib-q { font-size:13px;color:var(--text);line-height:1.6; }
+    .fib-select { width:100%;font-family:var(--sans);font-size:13px;padding:8px 10px;border-radius:6px;border:1.5px solid #cbd5e1;background:white;outline:none;transition:border-color .12s;cursor:pointer;color:var(--text); }
+    .fib-select:focus { border-color:#3b82f6; }
+    .fib-select.correct { border-color:#4ade80;background:#f0fdf4;color:#166534; }
+    .fib-select.incorrect { border-color:#f87171;background:#fef2f2;color:#991b1b; }
+    .fib-hint { font-size:11px;color:var(--green);display:none;margin-top:2px; }
+    .fib-hint.show { display:block; }
+
+    .mcq-list { display:flex;flex-direction:column;gap:10px;margin-bottom:12px; }
+    .mcq-item { border-radius:9px;border:1px solid var(--border);overflow:hidden; }
+    .mcq-stem { padding:10px 12px;font-size:13px;color:var(--text);line-height:1.55;border-bottom:1px solid var(--border);background:#f8f9fa; }
+    .mcq-options { display:flex;flex-direction:column; }
+    .mcq-opt { padding:9px 12px;font-size:12.5px;cursor:pointer;border-bottom:1px solid #f0f2f5;display:flex;align-items:center;gap:8px;transition:background .1s;-webkit-tap-highlight-color:transparent;user-select:none; }
+    .mcq-opt:last-child { border-bottom:none; }
+    .mcq-opt:hover:not(.answered) { background:#f8f9fa; }
+    .opt-marker { width:18px;height:18px;border-radius:50%;border:1.5px solid #cbd5e1;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;transition:background .1s,border-color .1s; }
+    .mcq-opt.correct-pick { background:#f0fdf4; }
+    .mcq-opt.correct-pick .opt-marker { background:#4ade80;border-color:#4ade80;color:white; }
+    .mcq-opt.wrong-pick { background:#fef2f2; }
+    .mcq-opt.wrong-pick .opt-marker { background:#f87171;border-color:#f87171;color:white; }
+    .mcq-opt.show-correct { background:#f0fdf4;opacity:.7; }
+    .mcq-opt.show-correct .opt-marker { background:#4ade80;border-color:#4ade80;color:white; }
+    .mcq-explanation { font-size:11.5px;line-height:1.55;padding:8px 12px;background:#eff6ff;border-top:1px solid #bfdbfe;color:#1e40af;display:none; }
+    .mcq-explanation.show { display:block; }
+
+    .tf-list { display:flex;flex-direction:column;gap:8px;margin-bottom:12px; }
+    .tf-item { border:1.5px solid var(--border);border-radius:8px;overflow:hidden; }
+    .tf-stem { padding:9px 12px;font-size:12.5px;line-height:1.55;color:var(--text); }
+    .tf-buttons { display:flex;border-top:1px solid var(--border); }
+    .tf-btn { flex:1;padding:8px;border:none;background:#f8f9fa;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.05em;cursor:pointer;transition:background .1s;-webkit-tap-highlight-color:transparent; }
+    .tf-btn:first-child { border-right:1px solid var(--border); }
+    .tf-btn:hover:not(:disabled) { background:#f1f5f9; }
+    .tf-btn:disabled { cursor:default; }
+    .tf-btn.correct-ans { background:#f0fdf4;color:#166534; }
+    .tf-btn.wrong-ans   { background:#fef2f2;color:#991b1b; }
+    .tf-btn.show-ans    { background:#f0fdf4;color:#166534;opacity:.6; }
+    .tf-explanation { font-size:11px;padding:7px 12px;line-height:1.5;display:none;border-top:1px solid var(--border); }
+    .tf-explanation.show { display:block; }
+    .tf-explanation.good { background:#f0fdf4;color:#166534; }
+    .tf-explanation.bad  { background:#fef2f2;color:#991b1b; }
+
+    .attribution { background:white;border-radius:9px;border:1px solid var(--border);padding:12px 14px;margin-bottom:14px; }
+    .attribution h3 { font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px; }
+    .attr-item { font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:5px; }
+    .attr-item strong { color:var(--text); }
+    @media(min-width:600px){ main{padding:22px 22px 80px;} .tab{font-size:12.5px;} }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/></svg></div>
+  <div class="htext">
+    <div class="htitle">ASCENDING &amp; DESCENDING PATHWAYS — 3D LAB PORTAL</div>
+    <div class="hsub">DPTD 732 · Foundational Movement Science · NCC DPT</div>
+  </div>
+</header>
+
+<nav role="tablist">
+  <button class="tab active" onclick="show(1,this)"><span class="dir d">Descending</span>Corticospinal</button>
+  <button class="tab" onclick="show(2,this)"><span class="dir a">Ascending</span>DCML &amp; Anterolateral</button>
+  <button class="tab" onclick="show(3,this)"><span class="dir a">Ascending</span>Spinocerebellar</button>
+  <button class="tab" onclick="show(4,this)"><span class="dir s">Synthesis</span>All Three</button>
+</nav>
+
+<main>
+
+<!-- PANEL 1 -->
+<section class="panel active" id="panel-1">
+  <div class="stn-head">
+    <h2>Corticospinal Pathway</h2>
+    <p>The primary descending motor pathway — trace it from motor cortex to anterior horn, including the pyramidal decussation</p>
+    <div class="chips"><span class="chip chip-r">Descending</span><span class="chip chip-n">Upper motor neuron</span></div>
+  </div>
+  <div class="chain-bar down">
+    <strong>Pathway at a glance</strong>
+    <div class="chain">
+      <span class="cn down">Motor Cortex (M1)</span><span class="arr">→</span>
+      <span class="cn down">Internal Capsule</span><span class="arr">→</span>
+      <span class="cn down">Brainstem Pyramids</span><span class="arr">→</span>
+      <span class="cn cross">Decussation (medulla)</span><span class="arr">→</span>
+      <span class="cn down">Lateral CST</span><span class="arr">→</span>
+      <span class="cn down">Anterior Horn (LMN)</span><span class="arr">→</span>
+      <span class="cn down">Skeletal Muscle</span>
+    </div>
+  </div>
+  <div class="model-block">
+    <div class="model-top">
+      <div><div class="mt">Corticospinal Pathway</div><div class="ms">Full pathway from cortex to spinal cord · anajd</div></div>
+      <a class="open-btn" href="https://sketchfab.com/3d-models/corticospinal-pathway-ab008dad830f496abe25a4cf7b84ee0d" target="_blank" rel="noopener">Open ↗</a>
+    </div>
+    <div class="model-frame">
+      <iframe title="Corticospinal Pathway" src="https://sketchfab.com/models/ab008dad830f496abe25a4cf7b84ee0d/embed?autostart=1&ui_hint=0&ui_annotations=1" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen loading="lazy"></iframe>
+    </div>
+    <div class="model-hint">💡 Drag to rotate · Pinch to zoom · Locate the pyramidal decussation at the medulla–spinal cord junction</div>
+  </div>
+  <div class="activity" id="seq1">
+    <div class="activity-head">
+      <div class="act-icon seq">↕</div>
+      <div><div class="act-title">Activity 1 — Order the Pathway</div><div class="act-sub">Tap each step in the correct descending order. Tap a placed step to remove it.</div></div>
+    </div>
+    <div class="activity-body">
+      <div class="seq-pool" id="seq1-pool"></div>
+      <div class="seq-order" id="seq1-order"></div>
+      <div class="act-feedback" id="seq1-fb"></div>
+      <div class="act-buttons">
+        <button class="btn-check" id="seq1-check" onclick="checkSeq('seq1')" disabled>Check order</button>
+        <button class="btn-reset" onclick="resetSeq('seq1')">Reset</button>
+      </div>
+    </div>
+  </div>
+  <div class="activity" id="match1">
+    <div class="activity-head">
+      <div class="act-icon mat">⇄</div>
+      <div><div class="act-title">Activity 2 — UMN vs. LMN Signs</div><div class="act-sub">Tap a sign on the left, then tap which lesion type it belongs to on the right</div></div>
+    </div>
+    <div class="activity-body">
+      <div class="match-wrap">
+        <div class="match-col"><div class="match-col-label">Clinical sign</div><div id="match1-left"></div></div>
+        <div class="match-col"><div class="match-col-label">Lesion type</div><div id="match1-right"></div></div>
+      </div>
+      <div class="act-feedback" id="match1-fb"></div>
+      <div class="act-buttons">
+        <button class="btn-check" id="match1-check" onclick="checkMatch('match1')" disabled>Check matches</button>
+        <button class="btn-reset" onclick="resetMatch('match1')">Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL 2 -->
+<section class="panel" id="panel-2">
+  <div class="stn-head">
+    <h2>Ascending Tracts: DCML &amp; Anterolateral System</h2>
+    <p>Two pathways that cross at different levels and carry different sensory modalities</p>
+    <div class="chips"><span class="chip chip-b">Ascending</span><span class="chip chip-n">Sensory</span></div>
+  </div>
+  <div class="chain-bar up">
+    <strong>Two pathways — different crossing levels</strong>
+    <div class="chain" style="margin-bottom:6px;">
+      <span style="font-size:10.5px;font-weight:600;color:#1e3a8a;width:90px;flex-shrink:0;">DCML:</span>
+      <span class="cn up">Receptor</span><span class="arr">→</span><span class="cn up">Dorsal Column</span><span class="arr">→</span><span class="cn up">Dorsal Column Nuclei</span><span class="arr">→</span><span class="cn cross">Decussates (medulla)</span><span class="arr">→</span><span class="cn up">Medial Lemniscus</span><span class="arr">→</span><span class="cn up">Thalamus</span><span class="arr">→</span><span class="cn up">Somatosensory Cortex</span>
+    </div>
+    <div class="chain">
+      <span style="font-size:10.5px;font-weight:600;color:#1e3a8a;width:90px;flex-shrink:0;">Anterolateral:</span>
+      <span class="cn up">Receptor</span><span class="arr">→</span><span class="cn up">Dorsal Horn</span><span class="arr">→</span><span class="cn cross">Decussates (spinal, 1–2 segments)</span><span class="arr">→</span><span class="cn up">Anterolateral Funiculus</span><span class="arr">→</span><span class="cn up">Thalamus</span><span class="arr">→</span><span class="cn up">Somatosensory Cortex</span>
+    </div>
+  </div>
+  <div class="model-block">
+    <div class="model-top">
+      <div><div class="mt">Ascending Tracts — DCML &amp; Anterolateral</div><div class="ms">Both pathways visible · anajd</div></div>
+      <a class="open-btn" href="https://sketchfab.com/3d-models/ascending-tracts-3d7e233edbb94cd8b9e1b4047bead951" target="_blank" rel="noopener">Open ↗</a>
+    </div>
+    <div class="model-frame">
+      <iframe title="Ascending Tracts" src="https://sketchfab.com/models/3d7e233edbb94cd8b9e1b4047bead951/embed?autostart=1&ui_hint=0&ui_annotations=1" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen loading="lazy"></iframe>
+    </div>
+    <div class="model-hint">💡 Two distinct tract structures — one in the dorsal column, one anterolateral. Notice where each crosses the midline.</div>
+  </div>
+  <div class="model-block">
+    <div class="model-top">
+      <div><div class="mt">Spinal Cord Tracts — Color-coded Overview</div><div class="ms">All major ascending &amp; descending pathways color-coded · Soma3D</div></div>
+      <a class="open-btn" href="https://sketchfab.com/3d-models/spinal-cord-tracts-neuroanatomy-e7777f84941a4323b2ff1dad3cf9dd6a" target="_blank" rel="noopener">Open ↗</a>
+    </div>
+    <div class="model-frame">
+      <iframe title="Spinal Cord Tracts Color-coded" src="https://sketchfab.com/models/e7777f84941a4323b2ff1dad3cf9dd6a/embed?autostart=1&ui_hint=0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen loading="lazy"></iframe>
+    </div>
+    <div class="model-hint">💡 Use this alongside the pathway model above — identify the DCML (dorsal) and anterolateral tracts in cross-section and note their positions relative to each other.</div>
+  </div>
+  <div class="activity" id="match2">
+    <div class="activity-head">
+      <div class="act-icon mat">⇄</div>
+      <div><div class="act-title">Activity 1 — Match Modalities to Pathways</div><div class="act-sub">Tap a sensory modality, then tap the pathway it travels in</div></div>
+    </div>
+    <div class="activity-body">
+      <div class="match-wrap">
+        <div class="match-col"><div class="match-col-label">Sensory modality</div><div id="match2-left"></div></div>
+        <div class="match-col"><div class="match-col-label">Pathway</div><div id="match2-right"></div></div>
+      </div>
+      <div class="act-feedback" id="match2-fb"></div>
+      <div class="act-buttons">
+        <button class="btn-check" id="match2-check" onclick="checkMatch('match2')" disabled>Check matches</button>
+        <button class="btn-reset" onclick="resetMatch('match2')">Reset</button>
+      </div>
+    </div>
+  </div>
+  <div class="activity" id="fib1">
+    <div class="activity-head">
+      <div class="act-icon fib">✎</div>
+      <div><div class="act-title">Activity 2 — Fill in the Blanks</div><div class="act-sub">Complete each statement about decussation levels and cord locations</div></div>
+    </div>
+    <div class="activity-body">
+      <div class="fib-wrap" id="fib1-items"></div>
+      <div class="act-feedback" id="fib1-fb"></div>
+      <div class="act-buttons">
+        <button class="btn-check" onclick="checkFib('fib1')">Check answers</button>
+        <button class="btn-reset" onclick="resetFib('fib1')">Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL 3 -->
+<section class="panel" id="panel-3">
+  <div class="stn-head">
+    <h2>Spinocerebellar Pathways</h2>
+    <p>Two major 2-neuron ascending pathways carry unconscious proprioceptive and spinal feedback to the cerebellum: the dorsal (posterior) tract stays ipsilateral, while the anterior (ventral) tract decussates twice and still ends functionally ipsilateral overall.</p>
+    <div class="chips"><span class="chip chip-g">Ascending</span><span class="chip chip-n">Unconscious</span><span class="chip chip-n">Dorsal = ipsilateral</span><span class="chip chip-n">Anterior = double decussation</span></div>
+  </div>
+  <div class="chain-bar spin">
+    <strong>Pathways at a glance — both are 2-neuron cerebellar relay chains</strong>
+    <div class="chain">
+      <span class="cn spin">Peripheral receptors / spinal input</span><span class="arr">→</span>
+      <span class="cn spin">Spinal cord relay nuclei</span><span class="arr">→</span>
+      <span class="cn spin">Spinocerebellar tract</span><span class="arr">→</span>
+      <span class="cn spin">Cerebellar peduncle</span><span class="arr">→</span>
+      <span class="cn spin">Cerebellum</span>
+    </div>
+    <div style="margin-top:8px;font-size:11px;opacity:.85;">
+      <strong>Dorsal/posterior spinocerebellar tract:</strong> typically relays through Clarke's column, stays ipsilateral, and enters through the inferior cerebellar peduncle.<br>
+      <strong>Anterior/ventral spinocerebellar tract:</strong> arises mainly from spinal border/intermediate zone neurons, crosses in the spinal cord, ascends, then crosses again as it enters through the superior cerebellar peduncle, so cerebellar input still represents the ipsilateral body overall.<br>
+      ⚠ Neither tract reaches conscious awareness.
+    </div>
+  </div>
+  <div class="model-block">
+    <div class="model-top">
+      <div><div class="mt">Spinocerebellar Pathway</div><div class="ms">Model emphasizes the dorsal/posterior tract · University of Edinburgh ATLAS</div></div>
+      <a class="open-btn" href="https://sketchfab.com/3d-models/spinocerebellar-pathway-8419308141f548fb8ad7e2b057df9b23" target="_blank" rel="noopener">Open ↗</a>
+    </div>
+    <div class="model-frame">
+      <iframe title="Spinocerebellar Pathway" src="https://sketchfab.com/models/8419308141f548fb8ad7e2b057df9b23/embed?autostart=1&ui_hint=0&ui_annotations=1" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen loading="lazy"></iframe>
+    </div>
+    <div class="model-hint">💡 This model highlights the dorsal/posterior tract, which stays on the same side all the way to the cerebellum. Contrast that with the anterior/ventral tract, which double-crosses before ending functionally ipsilateral.</div>
+  </div>
+  <div class="activity" id="mcq1">
+    <div class="activity-head">
+      <div class="act-icon mcq">?</div>
+      <div><div class="act-title">Activity 1 — Pathway Features</div><div class="act-sub">Tap the correct answer — feedback appears immediately</div></div>
+    </div>
+    <div class="activity-body">
+      <div class="mcq-list" id="mcq1-list"></div>
+    </div>
+  </div>
+  <div class="activity" id="fib2">
+    <div class="activity-head">
+      <div class="act-icon fib">✎</div>
+      <div><div class="act-title">Activity 2 — Spinocerebellar vs. DCML</div><div class="act-sub">Complete each comparison between the two pathways</div></div>
+    </div>
+    <div class="activity-body">
+      <div class="fib-wrap" id="fib2-items"></div>
+      <div class="act-feedback" id="fib2-fb"></div>
+      <div class="act-buttons">
+        <button class="btn-check" onclick="checkFib('fib2')">Check answers</button>
+        <button class="btn-reset" onclick="resetFib('fib2')">Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL 4 -->
+<section class="panel" id="panel-4">
+  <div class="stn-head">
+    <h2>Synthesis — Comparing All Three Pathways</h2>
+    <p>Use the models and your work from the previous panels to complete these integration activities</p>
+    <div class="chips"><span class="chip chip-r">Descending</span><span class="chip chip-b">Ascending</span><span class="chip chip-g">Ascending</span></div>
+  </div>
+  <div class="activity" id="match3">
+    <div class="activity-head">
+      <div class="act-icon mat">⇄</div>
+      <div><div class="act-title">Activity 1 — Match Pathways to Crossing Pattern</div><div class="act-sub">Tap a pathway, then tap how or where it crosses the midline</div></div>
+    </div>
+    <div class="activity-body">
+      <div class="match-wrap">
+        <div class="match-col"><div class="match-col-label">Pathway</div><div id="match3-left"></div></div>
+        <div class="match-col"><div class="match-col-label">Crossing pattern</div><div id="match3-right"></div></div>
+      </div>
+      <div class="act-feedback" id="match3-fb"></div>
+      <div class="act-buttons">
+        <button class="btn-check" id="match3-check" onclick="checkMatch('match3')" disabled>Check matches</button>
+        <button class="btn-reset" onclick="resetMatch('match3')">Reset</button>
+      </div>
+    </div>
+  </div>
+  <div class="activity" id="tf1">
+    <div class="activity-head">
+      <div class="act-icon tf">T/F</div>
+      <div><div class="act-title">Activity 2 — True or False</div><div class="act-sub">Tap TRUE or FALSE for each statement — explanation appears after you answer</div></div>
+    </div>
+    <div class="activity-body">
+      <div class="tf-list" id="tf1-list"></div>
+    </div>
+  </div>
+  <div class="attribution">
+    <h3>Model credits</h3>
+    <div class="attr-item"><strong>Corticospinal Pathway</strong> — anajd via Sketchfab</div>
+    <div class="attr-item"><strong>Ascending Tracts (DCML &amp; Anterolateral)</strong> — anajd via Sketchfab · Based on Zygote brain model</div>
+    <div class="attr-item"><strong>Spinocerebellar Pathway</strong> — UoEATLAS (University of Edinburgh) · Melissa Hendry, 2023 · Supervised by Dr Stephen J. Maclean</div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function show(n,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+n).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+const SEQ_DATA={
+  seq1:{
+    steps:['Motor Cortex (M1)','Internal Capsule','Brainstem Pyramids','Pyramidal Decussation (medulla)','Lateral Corticospinal Tract','Anterior Horn (LMN)','Skeletal Muscle'],
+    good:'Correct. The pathway runs: cortex → internal capsule (where fibers are tightly packed) → brainstem pyramids → decussation at the medulla → lateral CST on the contralateral side → synapse on the anterior horn LMN → muscle.',
+    bad:'Not quite. The internal capsule comes before the brainstem pyramids. The decussation occurs at the lower medulla, after which fibers descend as the lateral CST.'
+  }
+};
+
+const MATCH_DATA={
+  match1:{
+    left:['Spasticity','Hyperreflexia','Positive Babinski sign','Flaccidity','Muscle atrophy','Fasciculations'],
+    right:['UMN lesion','LMN lesion'],
+    answers:{'Spasticity':'UMN lesion','Hyperreflexia':'UMN lesion','Positive Babinski sign':'UMN lesion','Flaccidity':'LMN lesion','Muscle atrophy':'LMN lesion','Fasciculations':'LMN lesion'},
+    good:'Correct. UMN lesions remove inhibitory descending input, increasing tone and reflexes. LMN lesions cut the final common pathway to the muscle, causing flaccidity, wasting, and visible fasciculations.',
+    bad:'Check again. UMN lesions increase tone (spasticity, hyperreflexia, Babinski). LMN lesions eliminate motor drive to the muscle, producing flaccidity, atrophy, and fasciculations.'
+  },
+  match2:{
+    left:['Fine touch','Vibration','Proprioception (conscious)','Pain','Temperature','Crude touch'],
+    right:['DCML','Anterolateral system'],
+    answers:{'Fine touch':'DCML','Vibration':'DCML','Proprioception (conscious)':'DCML','Pain':'Anterolateral system','Temperature':'Anterolateral system','Crude touch':'Anterolateral system'},
+    good:'Correct. The DCML carries discriminative modalities (fine touch, vibration, conscious proprioception). The anterolateral system carries protective and crude modalities (pain, temperature, crude touch).',
+    bad:'Remember: DCML = discriminative sensations (fine touch, vibration, joint position sense). Anterolateral = pain and temperature. Both carry crude touch but it is predominantly anterolateral.'
+  },
+  match3:{
+    left:['Corticospinal tract','DCML','Anterolateral system','Dorsal spinocerebellar tract','Anterior spinocerebellar tract'],
+    right:['Medullary pyramids','Medulla (internal arcuate fibers)','Spinal cord (within 1–2 segments)','Does not decussate','Double decussation'],
+    answers:{'Corticospinal tract':'Medullary pyramids','DCML':'Medulla (internal arcuate fibers)','Anterolateral system':'Spinal cord (within 1–2 segments)','Dorsal spinocerebellar tract':'Does not decussate','Anterior spinocerebellar tract':'Double decussation'},
+    good:'Correct. CST crosses at the pyramids, DCML crosses in the medulla as internal arcuate fibers, and the anterolateral system crosses in the spinal cord within 1–2 segments of entry. The dorsal spinocerebellar tract stays ipsilateral, while the anterior spinocerebellar tract crosses twice before ending ipsilateral overall.',
+    bad:'Check again. CST and DCML both cross in the medulla at different levels. The anterolateral system crosses in the spinal cord within 1–2 segments of entry. For spinocerebellar pathways, dorsal/posterior stays ipsilateral, while anterior/ventral double-crosses.'
+  }
+};
+
+const FIB_DATA={
+  fib1:[
+    {q:'The DCML decussates at the ___, forming the medial lemniscus.',
+     options:['— select —','Spinal cord (level of entry)','Medulla','Thalamus','Midbrain'],
+     correct:2,
+     hint:'Correct — second-order DCML neurons cross as internal arcuate fibers at the nucleus gracilis and nucleus cuneatus in the medulla, then ascend as the medial lemniscus.'},
+    {q:'The anterolateral system decussates at the ___, within 1–2 segments of entry.',
+     options:['— select —','Medulla','Midbrain','Spinal cord (within 1–2 segments)','Thalamus'],
+     correct:3,
+     hint:'Correct — second-order neurons cross immediately in the anterior commissure of the spinal cord within 1–2 segments of where first-order neurons entered the dorsal horn.'},
+    {q:'The DCML travels in the ___ funiculus (column) ipsilaterally before crossing.',
+     options:['— select —','Lateral','Anterior','Anterolateral','Dorsal (posterior)'],
+     correct:4,
+     hint:'Correct — first-order DCML fibers ascend in the dorsal columns (fasciculus gracilis = lower limb, fasciculus cuneatus = upper limb) without crossing until the medulla.'},
+    {q:'After decussating, DCML second-order fibers ascend as the ___ to the thalamus.',
+     options:['— select —','Spinothalamic tract','Corticospinal tract','Medial lemniscus','Rubrospinal tract'],
+     correct:3,
+     hint:'Correct — the medial lemniscus is the crossed second-order tract that ascends through the brainstem to the VPL nucleus of the thalamus.'}
+  ],
+  fib2:[
+    {q:'The spinocerebellar pathway has ___ neuron(s) in its chain; the DCML has ___ neurons.',
+     options:['— select —','1, 2','2, 3','3, 2','3, 3'],
+     correct:2,
+     hint:'Correct — spinocerebellar pathways are typically summarized as 2 neurons (first-order afferent to a spinal relay neuron, then second-order neuron to the cerebellum). DCML has 3 neurons (receptor → dorsal column nuclei → thalamus → somatosensory cortex).'},
+    {q:'The spinocerebellar pathway carries ___ proprioception; the DCML carries ___ proprioception.',
+     options:['— select —','Conscious, unconscious','Unconscious, unconscious','Unconscious, conscious','Conscious, conscious'],
+     correct:3,
+     hint:'Correct — spinocerebellar input feeds the cerebellum below conscious awareness. DCML proprioception is what you consciously detect when identifying joint position with eyes closed.'},
+    {q:'The dorsal spinocerebellar tract stays ___, while the anterior spinocerebellar tract crosses ___ before ending ipsilateral overall.',
+     options:['— select —','contralateral, once','ipsilateral, twice','ipsilateral, once','contralateral, twice'],
+     correct:2,
+     hint:'Correct — the dorsal/posterior spinocerebellar tract remains ipsilateral throughout, while the anterior/ventral tract decussates twice before reaching the cerebellum.'},
+    {q:'Both spinocerebellar tracts ultimately terminate in the ___; the DCML ultimately reaches the ___.',
+     options:['— select —','Thalamus, cerebellum','Cerebellum, somatosensory cortex','Somatosensory cortex, cerebellum','Cerebellum, thalamus'],
+     correct:2,
+     hint:'Correct — both spinocerebellar tracts end in the cerebellum, although the dorsal tract typically enters via the inferior peduncle and the anterior tract via the superior peduncle. DCML information relays through the VPL thalamus and then reaches the somatosensory cortex.'}
+  ]
+};
+
+const MCQ_DATA={
+  mcq1:[
+    {stem:'How many neurons are in the dorsal and anterior spinocerebellar pathway chains?',options:['One','Two','Three','Four'],correct:1,explanation:'Two neurons. Both spinocerebellar tracts are commonly summarized as 2-neuron pathways: a first-order dorsal root ganglion afferent synapses on a spinal relay neuron, and a second-order neuron ascends to the cerebellum.'},
+    {stem:'Which statement correctly compares the dorsal and anterior spinocerebellar tracts?',options:['Both stay ipsilateral throughout','Dorsal stays ipsilateral; anterior decussates twice and still ends ipsilateral overall','Dorsal decussates twice; anterior stays ipsilateral','Both cross once in the medulla'],correct:1,explanation:'Correct. The dorsal/posterior spinocerebellar tract stays ipsilateral, while the anterior/ventral spinocerebellar tract crosses twice before terminating in the cerebellum, so the cerebellum still receives information representing the ipsilateral body.'},
+    {stem:'Which peduncle does the dorsal/posterior spinocerebellar tract use to enter the cerebellum?<br><span style="font-size:11px;color:#64748b;font-style:italic;">Hint: the model in this panel emphasizes the dorsal/posterior tract.</span>',options:['Superior cerebellar peduncle','Middle cerebellar peduncle','Inferior cerebellar peduncle','It enters directly without a peduncle'],correct:2,explanation:'The inferior cerebellar peduncle. By contrast, the anterior/ventral spinocerebellar tract is classically associated with the superior cerebellar peduncle.'},
+    {stem:'Spinocerebellar information reaches conscious awareness.',options:['True','False'],correct:1,explanation:'False — this pathway feeds the cerebellum constantly updated information about limb position and muscle tension so that movement can be corrected in real time, without requiring any conscious attention or perception.'}
+  ]
+};
+
+const TF_DATA={
+  tf1:[
+    {stem:'The DCML carries pain and temperature sensation.',answer:false,explanation:'False — pain and temperature travel in the anterolateral system. The DCML carries fine touch, vibration, and conscious proprioception.'},
+    {stem:'The corticospinal tract decussates in the medullary pyramids.',answer:true,explanation:'True — approximately 85–90% of corticospinal fibers cross at the pyramidal decussation and descend as the lateral CST. This is why a left cortical lesion causes right-sided weakness.'},
+    {stem:'The anterior spinocerebellar tract decussates twice before terminating in the cerebellum.',answer:true,explanation:'True — it crosses in the spinal cord and then crosses again as it enters the cerebellum, so the cerebellar representation is still functionally ipsilateral overall.'},
+    {stem:'Damage to the corticospinal tract above the decussation causes ipsilateral weakness.',answer:false,explanation:'False — because the CST decussates, a lesion above the crossing point (motor cortex, internal capsule) causes contralateral weakness. Below the decussation, deficits are ipsilateral.'},
+    {stem:'Both the DCML and the anterolateral system synapse in the thalamus before reaching the cortex.',answer:true,explanation:'True — both pathways relay in the VPL (ventral posterolateral) nucleus of the thalamus. Third-order neurons then project to the somatosensory cortex.'},
+    {stem:'The DCML and the anterolateral system cross at the same spinal cord level.',answer:false,explanation:'False — the anterolateral system crosses within 1–2 segments of spinal cord entry. The DCML travels ipsilaterally all the way to the medulla before crossing as internal arcuate fibers. This difference is the basis of dissociated sensory loss patterns.'},
+    {stem:'The dorsal spinocerebellar tract stays ipsilateral from spinal cord to cerebellum.',answer:true,explanation:'True — the dorsal/posterior spinocerebellar tract does not decussate, which contrasts with the anterior/ventral tract\'s double decussation.'}
+  ]
+};
+
+// SEQUENCER
+const seqState={};
+function initSeq(id){
+  const d=SEQ_DATA[id];
+  const shuffled=[...d.steps].sort(()=>Math.random()-.5);
+  seqState[id]={answers:d.steps,placed:[],total:d.steps.length};
+  const pool=document.getElementById(id+'-pool');
+  const order=document.getElementById(id+'-order');
+  pool.innerHTML='';order.innerHTML='';
+  document.getElementById(id+'-fb').className='act-feedback';
+  document.getElementById(id+'-check').disabled=true;
+  shuffled.forEach(step=>{
+    const btn=document.createElement('button');
+    btn.className='seq-item';btn.textContent=step;btn.dataset.step=step;
+    btn.onclick=()=>placeStep(id,step,btn);
+    pool.appendChild(btn);
+  });
+  for(let i=0;i<d.steps.length;i++){
+    const slot=document.createElement('div');slot.className='seq-slot';
+    slot.innerHTML=`<span class="seq-slot-num">${i+1}.</span><div class="seq-slot-box" id="${id}-slot-${i}">tap to place</div>`;
+    order.appendChild(slot);
+  }
+}
+function placeStep(id,step,btn){
+  const s=seqState[id];
+  if(s.placed.includes(step))return;
+  const next=s.placed.length;
+  if(next>=s.total)return;
+  s.placed.push(step);btn.classList.add('placed');
+  const box=document.getElementById(id+'-slot-'+next);
+  box.textContent=step;box.classList.add('filled');
+  box.onclick=()=>removeStep(id,step,box,next,btn);
+  if(s.placed.length===s.total)document.getElementById(id+'-check').disabled=false;
+}
+function removeStep(id,step,box,index,btn){
+  const s=seqState[id];
+  const pos=s.placed.indexOf(step);
+  if(pos!==s.placed.length-1)return;
+  s.placed.splice(pos,1);
+  box.textContent='tap to place';box.classList.remove('filled','correct','incorrect');box.onclick=null;
+  btn.classList.remove('placed');
+  document.getElementById(id+'-check').disabled=true;
+}
+function checkSeq(id){
+  const s=seqState[id];const d=SEQ_DATA[id];let ok=true;
+  s.placed.forEach((step,i)=>{
+    const box=document.getElementById(id+'-slot-'+i);
+    box.classList.add(step===d.steps[i]?'correct':'incorrect');
+    if(step!==d.steps[i])ok=false;
+  });
+  const fb=document.getElementById(id+'-fb');
+  fb.textContent=ok?d.good:d.bad;
+  fb.className='act-feedback show '+(ok?'good':'bad');
+  document.getElementById(id+'-check').disabled=true;
+}
+function resetSeq(id){seqState[id]=null;initSeq(id);}
+
+// MATCHING
+const matchState={};
+function initMatch(id){
+  const d=MATCH_DATA[id];
+  matchState[id]={selected:null,matched:{},total:d.left.length};
+  const leftEl=document.getElementById(id+'-left');
+  const rightEl=document.getElementById(id+'-right');
+  leftEl.innerHTML='';rightEl.innerHTML='';
+  const cb=document.getElementById(id+'-check');if(cb)cb.disabled=true;
+  document.getElementById(id+'-fb').className='act-feedback';
+  const shuffled=[...d.right].sort(()=>Math.random()-.5);
+  d.left.forEach(item=>{
+    const btn=document.createElement('div');btn.className='match-item';
+    btn.textContent=item;btn.dataset.item=item;
+    btn.onclick=()=>selectLeft(id,item,btn);leftEl.appendChild(btn);
+  });
+  shuffled.forEach(item=>{
+    const btn=document.createElement('div');btn.className='match-item';
+    btn.textContent=item;btn.dataset.item=item;
+    btn.onclick=()=>selectRight(id,item,btn);rightEl.appendChild(btn);
+  });
+}
+function selectLeft(id,item,btn){
+  const s=matchState[id];
+  if(s.matched.hasOwnProperty(item))return;
+  document.querySelectorAll('#'+id+'-left .match-item').forEach(el=>{if(!s.matched.hasOwnProperty(el.dataset.item))el.classList.remove('active');});
+  if(s.selected===item){s.selected=null;return;}
+  s.selected=item;btn.classList.add('active');
+}
+function selectRight(id,item,btn){
+  const s=matchState[id];
+  if(!s.selected)return;
+  const left=s.selected;
+  s.matched[left]=item;
+  document.querySelectorAll('#'+id+'-left .match-item').forEach(el=>{if(el.dataset.item===left){el.classList.remove('active');el.classList.add('matched');}});
+  btn.classList.add('right-matched');
+  s.selected=null;
+  if(Object.keys(s.matched).length===s.total){const cb=document.getElementById(id+'-check');if(cb)cb.disabled=false;}
+}
+function checkMatch(id){
+  const d=MATCH_DATA[id];const s=matchState[id];let ok=true;
+  Object.entries(s.matched).forEach(([left,right])=>{
+    const correct=d.answers[left]===right;if(!correct)ok=false;
+    document.querySelectorAll('#'+id+'-left .match-item').forEach(el=>{if(el.dataset.item===left&&!correct)el.classList.add('incorrect');});
+    document.querySelectorAll('#'+id+'-right .match-item').forEach(el=>{if(el.dataset.item===right&&!correct)el.classList.add('incorrect');});
+  });
+  const fb=document.getElementById(id+'-fb');
+  fb.textContent=ok?d.good:d.bad;
+  fb.className='act-feedback show '+(ok?'good':'bad');
+  const cb=document.getElementById(id+'-check');if(cb)cb.disabled=true;
+}
+function resetMatch(id){initMatch(id);}
+
+// DROPDOWNS (formerly fill-in-blank)
+function initFib(id){
+  const d=FIB_DATA[id];
+  const c=document.getElementById(id+'-items');c.innerHTML='';
+  document.getElementById(id+'-fb').className='act-feedback';
+  d.forEach((item,i)=>{
+    const opts=item.options.map((o,oi)=>`<option value="${oi}" ${oi===0?'disabled selected':''}>${o}</option>`).join('');
+    const div=document.createElement('div');div.className='fib-item';
+    div.innerHTML=`<div class="fib-q">${item.q}</div><select class="fib-select" id="${id}-sel-${i}">${opts}</select><div class="fib-hint" id="${id}-hint-${i}"></div>`;
+    c.appendChild(div);
+  });
+}
+function checkFib(id){
+  const d=FIB_DATA[id];let all=true;
+  d.forEach((item,i)=>{
+    const sel=document.getElementById(id+'-sel-'+i);
+    const hint=document.getElementById(id+'-hint-'+i);
+    const chosen=parseInt(sel.value);
+    const ok=chosen===item.correct;
+    sel.className='fib-select '+(ok?'correct':'incorrect');
+    if(ok){
+      hint.textContent='✓ '+item.hint;
+      hint.className='fib-hint show';hint.style.color='';
+    } else {
+      hint.textContent='Answer: '+item.options[item.correct];
+      hint.className='fib-hint show';hint.style.color='#dc2626';all=false;
+    }
+    sel.disabled=true;
+  });
+  const fb=document.getElementById(id+'-fb');
+  fb.textContent=all?'All correct!':'Some answers need a second look — correct answers shown in red.';
+  fb.className='act-feedback show '+(all?'good':'bad');
+}
+function resetFib(id){
+  const d=FIB_DATA[id];
+  d.forEach((_,i)=>{
+    const sel=document.getElementById(id+'-sel-'+i);
+    const hint=document.getElementById(id+'-hint-'+i);
+    sel.value='0';sel.className='fib-select';sel.disabled=false;
+    hint.className='fib-hint';hint.style.color='';
+  });
+  document.getElementById(id+'-fb').className='act-feedback';
+}
+
+// MCQ
+function initMcq(id){
+  const d=MCQ_DATA[id];
+  const c=document.getElementById(id+'-list');c.innerHTML='';
+  d.forEach((q,qi)=>{
+    const div=document.createElement('div');div.className='mcq-item';
+    const opts=q.options.map((o,oi)=>`<div class="mcq-opt" id="${id}-q${qi}o${oi}" onclick="answerMcq('${id}',${qi},${oi},${q.correct})"><span class="opt-marker"></span>${o}</div>`).join('');
+    div.innerHTML=`<div class="mcq-stem">${q.stem}</div><div class="mcq-options">${opts}</div><div class="mcq-explanation" id="${id}-exp-${qi}">${q.explanation}</div>`;
+    c.appendChild(div);
+  });
+}
+function answerMcq(id,qi,oi,correct){
+  const picked=document.getElementById(`${id}-q${qi}o${oi}`);
+  if(picked.classList.contains('correct-pick')||picked.classList.contains('wrong-pick'))return;
+  const isCorrect=oi===correct;
+  picked.classList.add(isCorrect?'correct-pick':'wrong-pick');
+  picked.querySelector('.opt-marker').textContent=isCorrect?'✓':'✗';
+  if(!isCorrect){
+    const c=document.getElementById(`${id}-q${qi}o${correct}`);
+    c.classList.add('show-correct');c.querySelector('.opt-marker').textContent='✓';
+  }
+  document.querySelectorAll(`[id^="${id}-q${qi}o"]`).forEach(el=>{el.classList.add('answered');el.style.pointerEvents='none';});
+  document.getElementById(`${id}-exp-${qi}`).classList.add('show');
+}
+
+// TRUE FALSE
+function initTf(id){
+  const d=TF_DATA[id];
+  const c=document.getElementById(id+'-list');c.innerHTML='';
+  d.forEach((q,i)=>{
+    const div=document.createElement('div');div.className='tf-item';
+    div.innerHTML=`<div class="tf-stem">${q.stem}</div><div class="tf-buttons"><button class="tf-btn" id="${id}-t${i}" onclick="answerTf('${id}',${i},true,${q.answer})">TRUE</button><button class="tf-btn" id="${id}-f${i}" onclick="answerTf('${id}',${i},false,${q.answer})">FALSE</button></div><div class="tf-explanation" id="${id}-exp${i}">${q.explanation}</div>`;
+    c.appendChild(div);
+  });
+}
+function answerTf(id,i,answer,correct){
+  const t=document.getElementById(`${id}-t${i}`);const f=document.getElementById(`${id}-f${i}`);
+  if(t.disabled)return;
+  const ok=answer===correct;
+  const picked=answer?t:f;const other=answer?f:t;
+  picked.classList.add(ok?'correct-ans':'wrong-ans');
+  if(!ok)other.classList.add('show-ans');
+  t.disabled=f.disabled=true;
+  const exp=document.getElementById(`${id}-exp${i}`);
+  exp.classList.add('show',ok?'good':'bad');
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  initSeq('seq1');
+  initMatch('match1');initMatch('match2');initMatch('match3');
+  initFib('fib1');initFib('fib2');
+  initMcq('mcq1');
+  initTf('tf1');
+});
+</script>
+</body>
+</html>
