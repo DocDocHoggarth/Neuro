@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neural Lockdown · DPTD 732 Motor Development</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+
+:root {
+  /* NCC Primary & Grays/White (Brighter Light Mode) */
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --surface2: #f8fafc;
+  --border: #cbd5e1;
+  --text: #1e293b;
+  --muted: #64748b;
+  
+  /* System States */
+  --success: #15803d;
+  --success-bg: #f0fdf4;
+  --success-border: #bbf7d0;
+  --error: #b91c1c;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+
+  /* NCC Specific Palette */
+  --ncc-cardinal: #ba0c2f;     /* Pantone 200 C */
+  --ncc-cardinal-bg: rgba(186,12,47,0.06);
+  --ncc-cardinal-border: rgba(186,12,47,0.25);
+  
+  --ncc-bright-red: #ef3340;   /* Pantone Red 32 C */
+  --ncc-soft-blue: #98cbdc;    /* Pantone 635 C */
+  --ncc-accent-blue: #1d70b8;  /* Pantone 7689 C */
+  
+  --accent: var(--ncc-cardinal);
+  --accent-bg: var(--ncc-cardinal-bg);
+  --accent-border: var(--ncc-cardinal-border);
+}
+
+body {
+  background: var(--bg);
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* Room specific header indicators matching NCC accents secondary to Cardinal */
+#app.r0 { --room-accent: var(--ncc-cardinal); }
+#app.r1 { --room-accent: var(--ncc-accent-blue); }
+#app.r2 { --room-accent: var(--ncc-bright-red); }
+
+.header {
+  background: var(--surface); border-bottom: 2px solid var(--ncc-cardinal);
+  padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+.h-brand { display: flex; flex-direction: column; gap: 2px }
+.h-course { font-size: 11px; color: var(--ncc-cardinal); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+.h-title  { font-size: 16px; font-weight: 800; color: var(--text); }
+
+.h-progress { display: flex; align-items: center; gap: 6px }
+.h-dot  { width: 12px; height: 12px; border-radius: 50%; background: var(--border); transition: all 0.3s }
+.h-line { width: 22px; height: 2px; background: var(--border); transition: background 0.3s }
+.h-label { font-size: 12px; color: var(--muted); margin-left: 8px; font-weight: 500; }
+
+.ref-btn {
+  background: transparent; border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 14px; color: var(--muted); font-size: 13px; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap; font-weight: 600;
+}
+.ref-btn:hover, .ref-btn.on { border-color: var(--ncc-accent-blue); color: var(--ncc-accent-blue); background: rgba(29,112,184,0.05); }
+
+.layout { display: flex; gap: 20px; max-width: 1120px; margin: 0 auto; padding: 24px 20px; align-items: flex-start }
+.main   { flex: 1; min-width: 0 }
+
+.room-hdr {
+  background: var(--surface); border: 1px solid var(--border); border-left: 5px solid var(--ncc-cardinal);
+  border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+.room-lo   { font-size: 11px; color: var(--ncc-cardinal); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; margin-bottom: 4px }
+.room-title{ font-size: 22px; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+.room-desc { font-size: 14px; color: var(--muted); line-height: 1.6 }
+.room-prog { display: flex; gap: 6px; margin-top: 16px }
+.rp-seg    { flex: 1; height: 4px; border-radius: 2px; background: var(--border); transition: background 0.4s }
+.rp-seg.done   { background: var(--ncc-cardinal) }
+.rp-seg.active { background: var(--ncc-cardinal); opacity: 0.35 }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: border-color 0.3s }
+.card.done { border-color: var(--success-border); background: var(--success-bg); }
+
+.card-hdr { display: flex; align-items: center; gap: 12px; margin-bottom: 16px }
+.card-num {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--bg);
+  color: var(--muted); font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s;
+}
+.card-num.done { background: var(--success); color: #ffffff }
+.card-type { font-size: 10px; color: var(--ncc-cardinal); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700 }
+.card-name { font-size: 15px; font-weight: 700; color: var(--text); }
+
+.seq-hint { font-size: 13px; color: var(--muted); margin-bottom: 12px }
+.seq-list { display: flex; flex-direction: column; gap: 8px }
+
+.seq-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+  cursor: pointer; transition: all 0.15s; font-size: 14px; color: var(--text); text-align: left; width: 100%;
+  font-weight: 500;
+}
+.seq-item:hover:not([disabled]) { border-color: var(--ncc-accent-blue); background: rgba(29,112,184,0.02); }
+.seq-item.sel { border-color: var(--ncc-cardinal); background: var(--ncc-cardinal-bg); }
+.seq-item.ok  { border-color: var(--success-border); background: var(--success-bg); }
+.seq-item.bad { border-color: var(--error-border);   background: var(--error-bg); }
+.seq-item[disabled] { cursor: default }
+
+.seq-badge {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--border);
+  font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.15s; color: var(--muted);
+}
+.seq-item.sel .seq-badge { background: var(--ncc-cardinal); color: #fff; }
+.seq-item.ok  .seq-badge { background: var(--success); color: #fff; }
+.seq-item.bad .seq-badge { background: var(--error);   color: #fff; }
+.seq-corr { margin-left: auto; font-size: 11px; color: var(--error); font-weight: 600; white-space: nowrap; flex-shrink: 0 }
+
+.scenario     { background: #f0f7f9; border: 1px solid var(--ncc-soft-blue); border-radius: 8px; padding: 14px; margin-bottom: 14px; color: #1e3a8a; }
+.scenario-lbl { font-size: 10px; color: var(--ncc-accent-blue); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; margin-bottom: 4px }
+.scenario-txt { font-size: 14px; line-height: 1.65; font-weight: 500; }
+
+.q-text { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+.opts   { display: flex; flex-direction: column; gap: 8px }
+
+.opt {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px;
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+  cursor: pointer; transition: all 0.15s; font-size: 13px; color: var(--text); line-height: 1.55; text-align: left; width: 100%;
+}
+.opt:hover:not([disabled]) { border-color: var(--ncc-accent-blue); background: rgba(29,112,184,0.02); }
+.opt.sel { border-color: var(--ncc-cardinal); background: var(--ncc-cardinal-bg); }
+.opt.ok  { border-color: var(--success-border); background: var(--success-bg); color: #0f5132; }
+.opt.bad { border-color: var(--error-border);   background: var(--error-bg); color: #842029; }
+.opt[disabled] { cursor: default }
+
+.opt-ltr {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--border);
+  font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px; transition: all 0.15s; color: var(--muted);
+}
+.opt.sel .opt-ltr { background: var(--ncc-cardinal); color: #fff }
+.opt.ok  .opt-ltr { background: var(--success); color: #fff }
+.opt.bad .opt-ltr { background: var(--error);   color: #fff }
+
+.fbk      { margin-top: 12px; padding: 12px 14px; border-radius: 8px; font-size: 13px; line-height: 1.6; border: 1px solid transparent; }
+.fbk.ok   { background: var(--success-bg);  border-color: var(--success-border); color: #0f5132; }
+.fbk.bad  { background: var(--error-bg); border-color: var(--error-border); color: #842029; }
+.fbk-hd   { font-weight: 700; margin-bottom: 4px }
+.fbk.ok  .fbk-hd { color: var(--success) }
+.fbk.bad .fbk-hd { color: var(--error) }
+.fbk-body { color: var(--text); font-size: 13px; margin-top: 4px; opacity: 0.9; }
+
+.btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 12px }
+.btn:disabled { opacity: 0.4; cursor: default }
+.btn-p     { background: var(--ncc-cardinal); color: #ffffff }
+.btn-p:hover:not(:disabled) { background: #960a26; }
+.btn-ghost { background: transparent; border: 1px solid var(--ncc-bright-red); color: var(--ncc-bright-red); }
+.btn-ghost:hover:not(:disabled) { background: rgba(239,51,64,0.05); }
+
+.unlock-banner { background: var(--ncc-cardinal-bg); border: 2px solid var(--ncc-cardinal); border-radius: 8px; padding: 22px; text-align: center; margin-top: 4px; animation: fadeIn 0.4s ease }
+.unlock-title  { font-size: 16px; font-weight: 700; color: var(--ncc-cardinal); margin-bottom: 14px }
+.btn-unlock    { padding: 13px 34px; background: var(--ncc-cardinal); color: #ffffff; border: none; border-radius: 8px; font-size: 15px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px }
+.btn-unlock:hover { background: #960a26; }
+
+.ref-panel { width: 340px; flex-shrink: 0; background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--ncc-accent-blue); border-radius: 8px; overflow: hidden; position: sticky; top: 86px; max-height: calc(100vh - 110px); overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.ref-tabs  { display: flex; border-bottom: 1px solid var(--border); background: var(--surface2); }
+.ref-tab   { flex: 1; padding: 12px 6px; background: transparent; border: none; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; text-align: center }
+.ref-tab.on { color: var(--ncc-cardinal); border-bottom-color: var(--ncc-cardinal); background: var(--surface); }
+.ref-body   { padding: 14px }
+.ref-sec    { margin-bottom: 18px }
+.ref-sec-ttl { font-size: 11px; font-weight: 700; color: var(--ncc-cardinal); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; padding-bottom: 2px; border-bottom: 1px solid var(--bg); }
+.ref-tbl    { width: 100%; border-collapse: collapse; font-size: 11px }
+.ref-tbl th { text-align: left; padding: 7px; background: var(--surface2); color: var(--text); font-weight: 700; border-bottom: 2px solid var(--border); font-size: 10px; text-transform: uppercase; }
+.ref-tbl td { padding: 7px; border-bottom: 1px solid var(--bg); line-height: 1.4; color: var(--text) }
+.ref-tbl tr:nth-child(even) td { background: rgba(244,246,248,0.5) }
+.ref-tbl td:first-child { color: var(--ncc-cardinal); font-weight: 600 }
+.ref-steps  { display: flex; flex-direction: column; gap: 6px }
+.ref-step   { display: flex; gap: 8px; align-items: flex-start; background: var(--surface2); border-radius: 6px; padding: 8px 10px; border: 1px solid var(--bg); }
+.ref-step-n { width: 20px; height: 20px; border-radius: 50%; background: var(--ncc-cardinal-bg); border: 1px solid var(--ncc-cardinal-border); color: var(--ncc-cardinal); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0 }
+.ref-step-t { font-size: 12px; line-height: 1.5; color: var(--text) }
+
+/* Welcome & Escape Wrappers */
+.briefing-wrap { max-width: 680px; margin: 40px auto; background: var(--surface); border: 1px solid var(--border); border-top: 6px solid var(--ncc-cardinal); border-radius: 12px; padding: 36px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+.briefing-logo { font-size: 12px; font-weight: 800; color: var(--ncc-cardinal); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; text-align: center; }
+.briefing-title { font-size: 28px; font-weight: 900; text-align: center; margin-bottom: 16px; color: var(--text); }
+.briefing-intro { font-size: 15px; color: var(--muted); text-align: center; line-height: 1.6; margin-bottom: 28px; }
+.briefing-sec { margin-bottom: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+.briefing-sec h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--ncc-cardinal); margin-bottom: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.briefing-sec p, .briefing-sec li { font-size: 13.5px; color: var(--text); line-height: 1.6; margin-bottom: 8px; }
+.briefing-sec ul { padding-left: 20px; margin-top: 6px; }
+.briefing-sec li:last-child, .briefing-sec p:last-child { margin-bottom: 0; }
+
+.escape-wrap { min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 32px; text-align: center }
+.esc-icon    { font-size: 64px; margin-bottom: 4px }
+.esc-title   { font-size: 34px; font-weight: 900; color: var(--ncc-cardinal) }
+.esc-sub     { font-size: 16px; color: var(--muted); max-width: 460px; line-height: 1.65 }
+.esc-list    { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; max-width: 460px; width: 100%; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.esc-item    { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; font-size: 14px; color: var(--text); font-weight: 500; }
+.esc-item:last-child { margin-bottom: 0 }
+.esc-chk     { color: var(--success); font-size: 16px; font-weight: 700; }
+
+.overlay      { position: fixed; inset: 0; background: rgba(244,246,248,0.92); display: flex; align-items: center; justify-content: center; z-index: 200; animation: fadeIn 0.2s ease }
+.overlay-icon { font-size: 80px; animation: popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) }
+
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes popIn  { from { transform: scale(0.2); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+
+::-webkit-scrollbar { width: 6px }
+::-webkit-scrollbar-track { background: var(--bg) }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────
+
+const ROOM_META = [
+  { lo:'LO 1 · Neurological Principles', title:'The Myelination Chamber',
+    desc:'Demonstrate your understanding of myelination, the cephalocaudal and proximodistal progressions, and the neurological mechanisms that drive gross motor milestone acquisition.' },
+  { lo:'LO 2 · Primitive Reflex Integration', title:'The Reflex Integration Vault',
+    desc:'Trace the neural origin and survival function of primitive subcortical reflexes, then sequence the cortical maturation mechanism that drives their integration.' },
+  { lo:'LO 3 · Postural Reactions', title:'The Postural Reactions Lab',
+    desc:'Distinguish primitive reflexes from postural reactions at the level of neural substrate, and explain how postural reactions enable voluntary somatic motor control.' },
+];
+
+const MILESTONES = [
+  { id:'m0', text:'Lifts head briefly in prone', order:0 },
+  { id:'m1', text:'Sits independently; palmar grasp', order:1 },
+  { id:'m2', text:'Pulls to stand; cruises furniture', order:2 },
+  { id:'m3', text:'Independent walking (wide base, high guard arms)', order:3 },
+  { id:'m4', text:'Runs; pincer grip refined', order:4 },
+];
+const M_DISP = [2,0,4,1,3];
+
+const REFLEX_STEPS = [
+  { id:'rs0', text:'CST myelinates (birth → age 2) — conduction velocity and signal precision increase dramatically', order:0 },
+  { id:'rs1', text:'Descending inhibitory pathways develop — the cortex forms stronger synaptic connections to subcortical circuits', order:1 },
+  { id:'rs2', text:'Cortex overrides the subcortical reflex arc — "integration" occurs; the reflex circuitry is not destroyed, only suppressed', order:2 },
+  { id:'rs3', text:'Voluntary motor programs replace stereotyped reflex patterns; postural reactions emerge as the next layer of control', order:3 },
+];
+const RS_DISP = [2,0,3,1];
+
+// Room 0 ──────────────────────────────────────────────────────────────
+
+const R0Q2 = {
+  q: 'An infant achieves trunk stability before lower extremity control, and develops a palmar grasp before a pincer grip. Which statement best explains the neurological mechanism underlying BOTH of these patterns?',
+  opts: [
+    'Both patterns reflect cephalocaudal progression — myelination proceeds head-to-tail, which accounts for trunk-before-LE control and proximal-before-distal limb development.',
+    'Cephalocaudal progression explains trunk before lower extremity control (cervical/thoracic spinal segments myelinate before lumbar/sacral). Proximodistal progression explains palmar before pincer (medial motor pathways mature before lateral pathways controlling distal muscles). Each pattern requires a different mechanism.',
+    'Both patterns reflect proximodistal progression — core musculature matures before limb musculature, and proximal limb control precedes distal finger dexterity.',
+    'The corticospinal tract myelinates uniformly from birth; both patterns simply reflect the overall quantity of CST myelin available at any given age.',
+  ],
+  ans: 1,
+  expl: 'These two patterns are explained by two distinct neurological mechanisms. Trunk before lower extremity = cephalocaudal progression: cervical and thoracic spinal cord segments myelinate before lumbar/sacral segments. Palmar before pincer = proximodistal progression: medial motor pathways (axial and proximal muscles) mature before lateral pathways (distal hand muscles). Options that conflate the two are structurally incorrect.'
+};
+
+const R0Q3 = {
+  scenario: 'Priya is 14 months old. She walks independently but with a noticeably wide base of support and holds both arms elevated. Her mother asks whether this is normal or a sign of developmental delay.',
+  q: 'Which statement best explains Priya\'s gait pattern at this age?',
+  opts: [
+    'Her CST is not yet myelinated — voluntary walking should not be possible at 14 months.',
+    'Her CST is still maturing; wide base and elevated arms are normal features of early independent walking as the cephalocaudal progression completes.',
+    'Retained primitive subcortical reflexes are blocking the development of a mature gait pattern and warrant immediate referral.',
+    'Proximodistal progression is incomplete, preventing lower extremity control from developing sufficiently for walking.',
+  ],
+  ans: 1,
+  expl: 'Independent walking emerges around 12 months as cephalocaudal myelination reaches the lumbar/sacral segments. Wide base and high guard arms are normal at this stage — an immature but functional pattern as the CST continues maturing through early childhood, not pathology.'
+};
+
+// Room 1 ──────────────────────────────────────────────────────────────
+
+const R1Q1 = {
+  q: 'Primitive infant reflexes are generated at the subcortical level (brainstem and spinal cord) — not the cortex. What does this subcortical origin explain about their survival function and early developmental role?',
+  opts: [
+    'Subcortical origin means primitive reflexes require practice to develop — the infant refines them through repeated use before they become fully automatic.',
+    'Because they are generated below the cortex, primitive reflexes operate from birth before CST myelination is complete, enabling survival-critical functions such as feeding, startle, and alarm responses without requiring voluntary cortical input.',
+    'Subcortical origin makes primitive reflexes permanent — since they are not cortically generated, the cortex cannot develop the connections needed to suppress them.',
+    'Primitive reflexes are subcortical so that the infant can consciously suppress them once they are no longer needed.',
+  ],
+  ans: 1,
+  expl: 'Survival function depends on subcortical origin. Reflexes like protective feeding patterns or automated startle responses must be available from birth — before the CST is myelinated and before voluntary cortical control is possible. Subcortical generation means they do not require cortical input to execute.'
+};
+
+const R1Q3 = {
+  scenario: 'Marcus, 28, suffered a left-hemisphere ischemic stroke 4 days ago. During your evaluation, when his head is passively turned to the right, his right arm extends and his left arm flexes automatically into a fenced posture.',
+  q: 'Which statement BEST explains the neurological mechanism behind this finding?',
+  opts: [
+    'This specific reflex pattern was never fully integrated during infancy and has been subclinical until the stroke revealed it.',
+    'The stroke damaged spinal cord circuits that generate this automated limb pattern, causing them to fire spontaneously.',
+    'Loss of cortical inhibition has disinhibited intact, primitive brainstem/spinal cord reflex circuits — the subcortical reflex circuitry was never destroyed, only suppressed by descending inhibitory pathways.',
+    'Ischemia has reversed CST myelination in the affected hemisphere, recreating the neonatal neurological state.',
+  ],
+  ans: 2,
+  expl: 'The key principle: reflex circuitry is never destroyed — only the cortex\'s ability to override it changes. Cortical injury disrupts descending inhibitory pathways, disinhibiting intact subcortical circuits that generate stereotypic primitive patterns. This is why primitive behaviors re-emerge after cortical lesions.'
+};
+
+// Room 2 ──────────────────────────────────────────────────────────────
+
+const R2Q1 = {
+  q: 'Which postural reaction must emerge FIRST and serves as the developmental prerequisite for equilibrium reactions?',
+  opts: [
+    'Lateral protective extension',
+    'Labyrinthine head-righting reaction',
+    'Sitting equilibrium reactions',
+    'Standing equilibrium reactions',
+  ],
+  ans: 1,
+  expl: 'Righting reactions (top of gravity tracking) develop before equilibrium reactions and are their explicit prerequisite. The labyrinthine righting reaction — orienting the head upright relative to gravity via vestibular input — establishes the foundational head and trunk control that equilibrium reactions build upon.'
+};
+
+const R2Q2 = {
+  q: 'A cortical injury is sustained after both a primitive subcortical reflex loop and lateral protective extension have been well-established. Which prediction is most consistent with the neural basis of each response?',
+  opts: [
+    'Both responses disappear — all automatic motor responses require ongoing cortical oversight to execute.',
+    'Both responses are preserved — since neither requires conscious cortical input, both survive cortical injury.',
+    'Lateral protective extension is lost or impaired; the primitive subcortical reflex may re-emerge — cortical injury removes the integration substrate for complex postural reactions while disinhibiting intact lower subcortical reflex circuits.',
+    'The subcortical reflex disappears while lateral protective extension is preserved — postural reactions are more automatic and therefore more resistant to cortical injury.',
+  ],
+  ans: 2,
+  expl: 'The neural substrate distinction predicts opposite effects of cortical injury. Postural reactions (lateral protective extension) require cortical, cerebellar, and basal ganglia integration — cortical injury disrupts this substrate, impairing or eliminating them. Primitive reflexes are generated at the lower brainstem/spinal cord level and are only suppressed by descending cortical inhibition — cortical injury removes that inhibition and may cause re-emergence.'
+};
+
+const R2Q3 = {
+  scenario: 'Zara is 11 months old. She can pull to stand and cruise furniture independently. When she loses her balance sideways while standing, however, she falls without extending her arms to catch herself.',
+  q: 'Which reaction is most likely delayed, and what is the primary clinical significance?',
+  opts: [
+    'Labyrinthine righting — she cannot maintain her head upright relative to gravity.',
+    'Lateral protective extension — her automatic last-resort fall prevention response is absent, increasing head and face injury risk.',
+    'Sitting equilibrium — she cannot automatically adjust her trunk during perturbations while seated.',
+    'Retained infant reflex loops — a lower tracking system conflict is actively blocking voluntary arm extension during sideways falls.',
+  ],
+  ans: 1,
+  expl: 'Lateral protective extension (onset ~8 months) should be well-established by 11 months. Its absence means Zara has no automatic fall-arrest mechanism for sideways losses of balance — significant because falls carry high head/face injury risk without it.'
+};
+
+// ── REFERENCE CONTENT ────────────────────────────────────────────────
+
+const REF = [
+  { title:'Milestones & Myelination', secs:[
+    { h:'Myelination timeline', type:'tbl',
+      cols:['Stage','Region','Function enabled'],
+      rows:[
+        ['Prenatal – birth','Brainstem & spinal cord','Stereotypic primitive tracking: protective startle, feeding posturing'],
+        ['Birth – age 2','Corticospinal tract (CST)','Voluntary control; primitive subcortical reflex integration'],
+        ['Childhood +','Corticocerebellar & frontal lobe','Refined, goal-directed, coordinated movement'],
+      ]},
+    { h:'Gross motor milestones', type:'tbl',
+      cols:['Age','Milestone','Progression'],
+      rows:[
+        ['1–2 mo','Lifts head briefly in prone','Cephalocaudal'],
+        ['3–4 mo','Head control in supported sit','Cephalocaudal'],
+        ['4–6 mo','Sits with support; whole-arm reach','Cephalocaudal + proximodistal'],
+        ['6–8 mo','Sits independently; palmar grasp','Cephalocaudal + proximodistal'],
+        ['9–10 mo','Pulls to stand; cruises','Cephalocaudal (LE)'],
+        ['12 mo','Independent walking (wide base)','Cephalocaudal complete'],
+        ['18–24 mo','Runs; pincer grip refined','Proximodistal (distal hands)'],
+      ]},
+  ]},
+  { title:'Primitive Reflexes', secs:[
+    { h:'Integration mechanism (in order)', type:'steps',
+      items:[
+        'CST myelinates (birth → age 2), increasing conduction velocity and signal precision',
+        'Descending inhibitory pathways develop; cortex forms stronger connections to subcortical circuits',
+        'Cortex overrides the subcortical reflex arc — "integration." Lower reflex circuitry is NOT destroyed.',
+        'Voluntary motor programs replace stereotyped reflex patterns; postural reactions emerge',
+      ]},
+    { h:'Key Reflex Behaviors', type:'tbl',
+      cols:['Trigger','Response Pattern','Clinical Impact if Retained into Voluntary Stages'],
+      rows:[
+        ['Head turned to one side','Arm/leg on jaw side extend; limbs on occipital side flex','Blocks midline reaching, bilateral hand play, and symmetric tracking'],
+        ['Neck flexed or extended','Neck flex: arms flex/legs extend. Neck extend: arms extend/legs flex','Prevents reciprocal quadruped crawling and independent girdle sequencing'],
+        ['Sudden head drop/startle','Symmetric arm extension/abduction followed by defensive flexion','Disrupts balance equilibrium, triggers sensory hypersensitivity'],
+        ['Plantar stroke','Big toe dorsiflexes; outer toes fan out','Normal infant sign; adult re-emergence indicates structural CST lesion'],
+      ]},
+  ]},
+  { title:'Postural Reactions', secs:[
+    { h:'Primitive reflexes vs. postural reactions', type:'tbl',
+      cols:['Feature','Primitive subcortical reflexes','Postural reactions'],
+      rows:[
+        ['Neural level','Brainstem & spinal cord','Cortex, cerebellum, basal ganglia'],
+        ['Present at birth?','Yes','No — emerge as primitive configurations integrate'],
+        ['Response type','Stereotyped, fixed, unchanging','Automatic but flexible, context-sensitive'],
+        ['Lifespan','Integrated ~12 months','Persist and refine throughout life'],
+      ]},
+    { h:'Developmental sequence', type:'tbl',
+      cols:['Reaction','Onset','Function'],
+      rows:[
+        ['Righting (labyrinthine)','~4–6 mo','Head upright relative to gravity — PREREQUISITE for equilibrium'],
+        ['Forward protective ext.','~6 mo','Arms forward to arrest fall — first protective direction'],
+        ['Sitting equilibrium','~6–8 mo','Trunk adjustments to perturbation in sitting'],
+        ['Lateral protective ext.','~8 mo','Arms extend sideways to prevent fall'],
+        ['Quadruped equilibrium','~8–10 mo','Balance responses in quadruped'],
+        ['Posterior protective ext.','~9–10 mo','Arms extend backward — last protective direction'],
+        ['Standing equilibrium','~12–18 mo','Full-body balance responses in standing'],
+      ]},
+  ]},
+];
+
+// ── CHALLENGE METADATA ───────────────────────────────────────────────
+
+const CHAL_META = [
+  [ {type:'Retrieval',   name:'Milestone sequencing'},
+    {type:'Analysis',    name:'Mechanism analysis'},
+    {type:'Application', name:'Clinical reasoning'} ],
+  [ {type:'Retrieval',   name:'Neural origin & function'},
+    {type:'Retrieval',   name:'Integration sequencing'},
+    {type:'Analysis',    name:'Mechanism prediction'} ],
+  [ {type:'Retrieval',   name:'Prerequisite identification'},
+    {type:'Analysis',    name:'Neural substrate distinction'},
+    {type:'Application', name:'Clinical reasoning'} ],
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────
+
+const S = {
+  briefed: false, 
+  room:0, done:[false,false,false],
+  escaped:false, unlocking:false, refOpen:false, refTab:0,
+  failedAttempts: 0, hintsUsed: 0,
+  ch:[
+    { q1:{type:'seq',items:MILESTONES,disp:M_DISP,sel:[],submitted:false,result:null,clueRevealed:false,clue:"Review the structural sequencing roadmap: head stability in prone maps out first, followed cleanly by trunk control for sitting, lower extremity bracing for standing, wide independent steps, and localized running acceleration."},
+      q2:{type:'mc',data:R0Q2,sel:null,submitted:false,clueRevealed:false,clue:"Differentiate anatomical metrics: cephalocaudal relates specifically to axis sequence tracking (spinal column directionality), while proximodistal regulates motor recruitment from central girdles outward to peripheral extremities."},
+      q3:{type:'mc',data:R0Q3,sel:null,submitted:false,clueRevealed:false,clue:"Independent walking emerges as baseline myelination clears lumbar fields, but precision tracks down pathways over standard progression windows. High guard indexing isolates core stability support configurations."} },
+    { q1:{type:'mc',data:R1Q1,sel:null,submitted:false,clueRevealed:false,clue:"Subcortical pathways are evolutionary baseline protection architectures. Consider what pathways must immediately drive feeding and early alerting mechanisms prior to central pathway insulation myelination completion."},
+      q2:{type:'seq',items:REFLEX_STEPS,disp:RS_DISP,sel:[],submitted:false,result:null,clueRevealed:false,clue:"Integration maps linearly: physical baseline construction (CST structural insulation) must clear pathways first, enabling upper motor tracks to link down and down-regulate lower autonomous configurations loop systems."},
+      q3:{type:'mc',data:R1Q3,sel:null,submitted:false,clueRevealed:false,clue:"Subcortical primitive loop structures remain permanently hardwired inside spinal segments across the entire human lifecycle. Consider what occurs structurally to these intact lower lines when upper central inhibition networks fail."} },
+    { q1:{type:'mc',data:R2Q1,sel:null,submitted:false,clueRevealed:false,clue:"Isolate structural prerequisites: spatial position feedback overrides core stability adjustments. True equilibrium adjustments require a stabilized head framework coordinate oriented securely against gravitational forces."},
+      q2:{type:'mc',data:R2Q2,sel:null,submitted:false,clueRevealed:false,clue:"Isolate tracking levels: Primitive subcortical loops reside inside lower spinal/brainstem fields and yield to upper central down-regulation. Postural adjustments rely explicitly on integrated processing across high-level cortical, cerebellar, and deep basal ganglia structures."},
+      q3:{type:'mc',data:R2Q3,sel:null,submitted:false,clueRevealed:false,clue:"Analyze directional tracking mechanics: the infant displays appropriate forward structural cruising but drops sideways. Evaluate the onset schedules of protection tracks configured specifically for lateral fall disruption contexts."} },
+  ]
+};
+
+function getQ(r,n){ return n===1?S.ch[r].q1:n===2?S.ch[r].q2:S.ch[r].q3 }
+function qOk(r,n){
+  const q=getQ(r,n);
+  return q.type==='seq'?q.result==='correct':q.submitted&&q.sel===q.data.ans;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────
+
+function render(){
+  const app=document.getElementById('app');
+  
+  if(!S.briefed){ app.innerHTML=renderBriefing(); return; }
+  if(S.escaped){ app.innerHTML=renderEscape(); return; }
+  
+  app.className='r'+S.room;
+  const r=S.room, ok1=qOk(r,1), ok2=qOk(r,2), ok3=qOk(r,3);
+  app.innerHTML=`
+    ${hdr()}
+    <div class="layout">
+      <div class="main">
+        ${roomHdr(r,ok1,ok2,ok3)}
+        ${chal(r,1,ok1)}
+        ${ok1?chal(r,2,ok2):''}
+        ${ok1&&ok2?chal(r,3,ok3):''}
+        ${ok1&&ok2&&ok3?unlockBanner(r):''}
+      </div>
+      ${S.refOpen?refPanel():''}
+    </div>
+    ${S.unlocking?'<div class="overlay"><div class="overlay-icon">🔓</div></div>':''}
+  `;
+}
+
+function renderBriefing(){
+  return `
+    <div class="briefing-wrap">
+      <div class="briefing-logo">North Central College</div>
+      <h1 class="briefing-title">⚡ Neural Lockdown: Mission Briefing</h1>
+      <p class="briefing-intro">Welcome to the interactive escape lab simulation for <strong>DPTD 732 Motor Learning & Development</strong>. Your cohort has encountered a core network override. To unlock the facility, you must systematically isolate and confirm your understanding of neuro-developmental mechanics.</p>
+      
+      <div class="briefing-sec">
+        <h3>👥 Collaborative Protocol</h3>
+        <p><strong>This activity is designed for small group debate.</strong> Do not attempt to complete this simulation isolated as a single unit.</p>
+        <p>Before executing any answer submissions inside the system interface:</p>
+        <ul>
+          <li>Analyze each case scenario and question together as a medical team.</li>
+          <li>Cross-reference facts utilizing your structural lecture notes and the built-in <strong>📋 Reference Panel</strong>.</li>
+          <li>Argue the clinical rationale behind *why* specific distractors are inaccurate before confirming your answer.</li>
+        </ul>
+      </div>
+
+      <div class="briefing-sec">
+        <h3>🛠️ System Parameters & Scoring</h3>
+        <p>Your performance tracking metrics will actively calculate a final <strong>Somatic Efficiency Score</strong> upon system override clearance based on the following weights:</p>
+        <ul>
+          <li><strong>Growth Mindset Pathing:</strong> Incorrect tracking inputs are non-fatal. You may adjust selections via the "Try Again" loop to bypass roadblocks.</li>
+          <li><strong>Hidden Correct Answers:</strong> System overrides will *not* show you the true path if you select incorrectly. It will only flag your mistake, forcing your team to reassess its framework.</li>
+          <li><strong>Accountability Penalties:</strong> Blind guesswork degrades telemetry. Each incorrect run execution penalizes your final efficiency rating by <strong>-5%</strong>.</li>
+          <li><strong>Metacognitive Aids:</strong> Optional strategy clues are embedded into each card. Accessing an active clue provides cognitive guidance but impacts efficiency by <strong>-2%</strong>.</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin-top: 32px;">
+        <button class="btn btn-p" style="padding: 14px 40px; font-size: 15px; font-weight: 800; border-radius: 8px; width:100%; max-width:320px;" onclick="_startSimulation()">BEGIN SIMULATION →</button>
+      </div>
+    </div>
+  `;
+}
+
+function hdr(){
+  return `<header class="header">
+    <div class="h-brand">
+      <div class="h-course">DPTD 732 · Motor Learning &amp; Development</div>
+      <div class="h-title">⚡ Neural Lockdown — Escape Room</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <div style="font-size: 12px; color: var(--muted); background: var(--surface2); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); font-weight: 600;">
+        ❌ Misses: <span style="color: var(--error); font-weight:800; margin-right:12px;">${S.failedAttempts}</span>
+        💡 Clues: <span style="color: var(--ncc-accent-blue); font-weight:800;">${S.hintsUsed}</span>
+      </div>
+      <div class="h-progress">
+        <div class="h-dot" style="${S.done[0]?'background:var(--ncc-cardinal)':S.room===0?'background:var(--ncc-cardinal); outline:2px solid rgba(186,12,47,0.25); outline-offset:2px':''}"></div>
+        <div class="h-line" style="${S.done[0]?'background:var(--ncc-cardinal)':''}"></div>
+        <div class="h-dot" style="${S.done[1]?'background:var(--ncc-accent-blue)':S.room===1?'background:var(--ncc-accent-blue); outline:2px solid rgba(29,112,184,0.25); outline-offset:2px':''}"></div>
+        <div class="h-line" style="${S.done[1]?'background:var(--ncc-accent-blue)':''}"></div>
+        <div class="h-dot" style="${S.done[2]?'background:var(--ncc-bright-red)':S.room===2?'background:var(--ncc-bright-red); outline:2px solid rgba(239,51,64,0.25); outline-offset:2px':''}"></div>
+        <span class="h-label">Room ${S.room+1} of 3</span>
+      </div>
+    </div>
+    <button class="ref-btn${S.refOpen?' on':''}" onclick="_tRef()">📋 Reference Panel</button>
+  </header>`;
+}
+
+function roomHdr(r,ok1,ok2,ok3){
+  const m=ROOM_META[r];
+  const segs=[ok1,ok2,ok3].map((ok,i)=>{
+    const act=!ok&&((i===0)||(i===1&&ok1)||(i===2&&ok1&&ok2));
+    return `<div class="rp-seg${ok?' done':act?' active':''}"></div>`;
+  }).join('');
+  return `<div class="room-hdr">
+    <div class="room-lo">${m.lo}</div>
+    <h1 class="room-title">${m.title}</h1>
+    <p class="room-desc">${m.desc}</p>
+    <div class="room-prog">${segs}</div>
+  </div>`;
+}
+
+function chal(r,n,done){
+  const q=getQ(r,n), m=CHAL_META[r][n-1];
+  const body=q.type==='seq'?rSeq(r,n,q):rMC(r,n,q);
+  return `<div class="card${done?' done':''}">
+    <div class="card-hdr">
+      <div class="card-num${done?' done':''}">${done?'✓':n}</div>
+      <div><div class="card-type">${m.type}</div><div class="card-name">${m.name}</div></div>
+    </div>
+    ${body}
+  </div>`;
+}
+
+function rSeq(r,n,q){
+  const{items,disp,sel,submitted,result,clueRevealed,clue}=q;
+  let h='<p class="seq-hint">Click each item in order — first click = #1. Click again to deselect.</p><div class="seq-list">';
+  disp.forEach(idx=>{
+    const item=items[idx], pos=sel.indexOf(idx), isSel=pos!==-1;
+    const wrong=submitted&&isSel&&item.order!==pos, right=submitted&&isSel&&!wrong;
+    const cls='seq-item'+(submitted?(right?' ok':wrong?' bad':' sel'):(isSel?' sel':''));
+    const corr=wrong?`<span class="seq-corr">correct: #${item.order+1}</span>`:'';
+    h+=`<button class="${cls}"${submitted?' disabled':''} onclick="_sC(${r},${n},${idx})">
+      <div class="seq-badge">${isSel?pos+1:''}</div>${item.text}${corr}</button>`;
+  });
+  h+='</div>';
+  
+  if(clueRevealed) {
+    h+=`<div class="fbk" style="background: rgba(29,112,184,0.03); border: 1px solid rgba(29,112,184,0.2);">
+      <div class="fbk-hd" style="color: var(--ncc-accent-blue)">💡 Strategy Clue</div>
+      <div class="fbk-body" style="color: var(--text)">${clue}</div>
+    </div>`;
+  }
+
+  if(!submitted){
+    h+=`<div style="display:flex; gap:10px; margin-top:12px;">`;
+    h+=`<button class="btn btn-p" style="margin-top:0;" onclick="_sS(${r},${n})"${sel.length!==items.length?' disabled':''}>Check sequence (${sel.length}/${items.length} placed)</button>`;
+    if(!clueRevealed) {
+      h+=`<button class="btn btn-ghost" style="margin-top:0; border-color: var(--ncc-accent-blue); color: var(--ncc-accent-blue);" onclick="_revealHint(${r},${n})">💡 Request Clue</button>`;
+    }
+    h+=`</div>`;
+  } else if(result==='incorrect'){
+    h+=fbk(false,'Not quite — review the correct positions shown above.');
+    h+=`<button class="btn btn-ghost" onclick="_sR(${r},${n})">Try again</button>`;
+  } else h+=fbk(true,'Correct sequence!');
+  return h;
+}
+
+function rMC(r,n,q){
+  const{data,sel,submitted,clueRevealed,clue}=q;
+  let h='';
+  if(data.scenario) h+=`<div class="scenario"><div class="scenario-lbl">Scenario</div><div class="scenario-txt">${data.scenario}</div></div>`;
+  h+=`<p class="q-text">${data.q}</p><div class="opts">`;
+  data.opts.forEach((opt,i)=>{
+    const isCorrectChoice = (i === data.ans);
+    const isSelectedChoice = (i === sel);
+    
+    let cls = 'opt';
+    if (submitted) {
+      if (isSelectedChoice) {
+        cls += isCorrectChoice ? ' ok' : ' bad';
+      }
+    } else {
+      if (isSelectedChoice) cls += ' sel';
+    }
+
+    h+=`<button class="${cls}"${submitted?' disabled':''} onclick="_mS(${r},${n},${i})">
+      <div class="opt-ltr">${String.fromCharCode(65+i)}</div>${opt}</button>`;
+  });
+  h+='</div>';
+
+  if(clueRevealed) {
+    h+=`<div class="fbk" style="background: rgba(29,112,184,0.03); border: 1px solid rgba(29,112,184,0.2);">
+      <div class="fbk-hd" style="color: var(--ncc-accent-blue)">💡 Strategy Clue</div>
+      <div class="fbk-body" style="color: var(--text)">${clue}</div>
+    </div>`;
+  }
+
+  if(!submitted) {
+    h+=`<div style="display:flex; gap:10px; margin-top:12px;">`;
+    h+=`<button class="btn btn-p" style="margin-top:0;" onclick="_mSub(${r},${n})"${sel===null?' disabled':''}>Submit answer</button>`;
+    if(!clueRevealed) {
+      h+=`<button class="btn btn-ghost" style="margin-top:0; border-color: var(--ncc-accent-blue); color: var(--ncc-accent-blue);" onclick="_revealHint(${r},${n})">💡 Request Clue</button>`;
+    }
+    h+=`</div>`;
+  } else {
+    const ok = (sel === data.ans);
+    h+=fbk(ok, ok ? 'Correct!' : 'Incorrect submission. Your choice does not align with safe motor development protocols.', ok ? data.expl : '');
+    if (!ok) {
+      h+=`<button class="btn btn-ghost" onclick="_mReset(${r},${n})">Try again</button>`;
+    }
+  }
+  return h;
+}
+
+function fbk(ok,title,body=''){
+  return `<div class="fbk ${ok?'ok':'bad'}">
+    <div class="fbk-hd">${ok?'✓':'✗'} ${title}</div>
+    ${body?`<div class="fbk-body">${body}</div>`:''}
+  </div>`;
+}
+
+function unlockBanner(r){
+  return `<div class="unlock-banner">
+    <div class="unlock-title">🔓 All three challenges complete!</div>
+    <button class="btn-unlock" onclick="_unlock()">${r===2?'ESCAPE THE LAB →':'UNLOCK NEXT ROOM →'}</button>
+  </div>`;
+}
+
+function refPanel(){
+  const tab=REF[S.refTab];
+  const tabs=REF.map((t,i)=>`<button class="ref-tab${i===S.refTab?' on':''}" onclick="_rT(${i})">${t.title}</button>`).join('');
+  let body='';
+  tab.secs.forEach(sec=>{
+    body+=`<div class="ref-sec"><div class="ref-sec-ttl">${sec.h}</div>`;
+    if(sec.type==='steps'){
+      body+='<div class="ref-steps">'+sec.items.map((it,i)=>`<div class="ref-step"><div class="ref-step-n">${i+1}</div><div class="ref-step-t">${it}</div></div>`).join('')+'</div>';
+    } else {
+      const ths=sec.cols.map(c=>`<th>${c}</th>`).join('');
+      const trs=sec.rows.map(row=>`<tr>${row.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+      body+=`<table class="ref-tbl"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+    }
+    body+='</div>';
+  });
+  return `<div class="ref-panel"><div class="ref-tabs">${tabs}</div><div class="ref-body">${body}</div></div>`;
+}
+
+function renderEscape(){
+  const efficiencyScore = Math.max(0, 100 - (S.failedAttempts * 5) - (S.hintsUsed * 2));
+  let rankText = "Master Neuro-Clinician";
+  let rankColor = "var(--ncc-cardinal)";
+  
+  if (efficiencyScore < 90) { rankText = "Senior Physical Therapist"; rankColor = "var(--ncc-accent-blue)"; }
+  if (efficiencyScore < 75) { rankText = "Resident Practitioner"; rankColor = "var(--ncc-bright-red)"; }
+  if (efficiencyScore < 50) { rankText = "Novice Student"; rankColor = "var(--muted)"; }
+
+  const los=[
+    'LO 1 — Myelination, cephalocaudal &amp; proximodistal progressions',
+    'LO 2 — Neural origin, survival function &amp; integration mechanism',
+    'LO 3 — Neural substrate distinction &amp; voluntary control dependency',
+  ].map(lo=>`<div class="esc-item"><span class="esc-chk">✓</span><span>${lo}</span></div>`).join('');
+  
+  return `<div class="escape-wrap">
+    <div class="esc-icon">🏆</div>
+    <h1 class="esc-title">Neural Lockdown: CLEARED</h1>
+    <p class="esc-sub">Your clinical reasoning pathways have successfully bypassed structural system lockdown protocols.</p>
+    
+    <div style="background: var(--surface); border: 1px solid var(--border); border-top: 5px solid var(--ncc-cardinal); border-radius: 8px; padding: 24px; max-width: 460px; width: 100%; margin: 12px 0; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 4px;">Somatic Efficiency Score</div>
+      <div style="font-size: 54px; font-weight: 900; color: ${rankColor}; margin-bottom: 2px;">${efficiencyScore}%</div>
+      <div style="font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 18px;">Rank: <span style="color: ${rankColor}">${rankText}</span></div>
+      
+      <div style="display: flex; justify-content: space-between; font-size: 12px; border-top: 1px solid var(--bg); padding-top: 14px; color: var(--muted); font-weight: 600;">
+        <div>Incorrect Runs: <strong style="color: var(--error); font-size:14px;">${S.failedAttempts}</strong></div>
+        <div>Clues Accessed: <strong style="color: var(--ncc-accent-blue); font-size:14px;">${S.hintsUsed}</strong></div>
+      </div>
+    </div>
+
+    <div class="esc-list">${los}</div>
+  </div>`;
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────────
+
+function _startSimulation() { S.briefed = true; render(); }
+function _tRef()     { S.refOpen=!S.refOpen; render() }
+function _rT(i)      { S.refTab=i; render() }
+
+function _sC(r,n,idx){
+  const q=getQ(r,n); if(q.submitted) return;
+  const p=q.sel.indexOf(idx);
+  q.sel=p!==-1?q.sel.filter(i=>i!==idx):[...q.sel,idx];
+  render();
+}
+function _sS(r,n){
+  const q=getQ(r,n); if(q.sel.length!==q.items.length) return;
+  q.submitted=true;
+  q.result=q.sel.every((idx,pos)=>q.items[idx].order===pos)?'correct':'incorrect';
+  if(q.result==='incorrect') { S.failedAttempts++; }
+  render();
+}
+function _sR(r,n){
+  const q=getQ(r,n); q.sel=[]; q.submitted=false; q.result=null; render();
+}
+function _mS(r,n,i){
+  const q=getQ(r,n); if(q.submitted) return; q.sel=i; render();
+}
+function _mSub(r,n){
+  const q=getQ(r,n); if(q.sel===null) return; q.submitted=true;
+  if(q.sel !== q.data.ans) { S.failedAttempts++; }
+  render();
+}
+function _mReset(r,n){
+  const q=getQ(r,n); q.sel=null; q.submitted=false; render();
+}
+function _revealHint(r,n){
+  const q=getQ(r,n);
+  if(!q.clueRevealed) {
+    q.clueRevealed = true;
+    S.hintsUsed++;
+    render();
+  }
+}
+function _unlock(){
+  S.unlocking=true; render();
+  setTimeout(()=>{
+    S.unlocking=false;
+    if(S.room===2){ S.escaped=true; }
+    else{ S.done[S.room]=true; S.room++; }
+    render();
+  },1100);
+}
+
+render();
+</script>
+</body>
+</html>
