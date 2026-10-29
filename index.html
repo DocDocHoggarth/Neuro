@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neuroscience Activities — DPTD 731 &amp; 732</title>
+<meta name="description" content="Interactive neuroscience and neuroanatomy activities for DPT students.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fcfcfb;
+    --card: #ffffff;
+    --ink: #1a2b33;
+    --muted: #55656e;
+    --line: #dde3e7;
+    --accent: #cb182f;
+    --shadow: 0 1px 2px rgba(26,43,51,.06), 0 4px 14px rgba(26,43,51,.06);
+    --t0: #1f7a78;
+    --t1: #a66f00;
+    --t2: #cb182f;
+    --t3: #4b5fa8;
+    --t4: #2d7d46;
+    --t5: #8a4f9e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12191d;
+      --card: #1a2429;
+      --ink: #e8eef1;
+      --muted: #9eadb5;
+      --line: #2c3a41;
+      --accent: #ff5a6e;
+      --shadow: 0 1px 2px rgba(0,0,0,.3);
+      --t0: #4fc1bd;
+      --t1: #e2a73a;
+      --t2: #ff5a6e;
+      --t3: #8fa2ec;
+      --t4: #5fc27d;
+      --t5: #c79ad8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+
+  header { border-top: 6px solid var(--accent); padding: 48px 0 28px; }
+  .eyebrow {
+    font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 8px;
+  }
+  h1 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: clamp(30px, 5vw, 44px); line-height: 1.12; margin: 0 0 12px;
+  }
+  .lede { color: var(--muted); max-width: 62ch; margin: 0; }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 24px; }
+  .filters button {
+    font: inherit; font-size: 15px; cursor: pointer;
+    padding: 6px 14px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  }
+  .filters button:hover { border-color: var(--muted); }
+  .filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; padding-bottom: 56px; }
+  .card {
+    display: flex; flex-direction: column;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px 20px 18px; box-shadow: var(--shadow);
+    color: inherit; text-decoration: none;
+    border-top: 4px solid var(--topic);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover, .card:focus-visible { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(26,43,51,.12); }
+  .card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .card[hidden] { display: none; }
+  .tag { font-size: 13px; font-weight: 600; color: var(--topic); margin: 0 0 6px; }
+  .card h2 { font-family: "Source Serif 4", Georgia, serif; font-size: 21px; line-height: 1.25; margin: 0 0 8px; }
+  .card p.desc { margin: 0 0 16px; color: var(--muted); font-size: 16px; flex: 1; }
+  .meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); }
+  .go { font-weight: 600; color: var(--accent); white-space: nowrap; }
+
+  [data-topic="foundations"] { --topic: var(--t0); }
+  [data-topic="spinal"] { --topic: var(--t1); }
+  [data-topic="pathways"] { --topic: var(--t2); }
+  [data-topic="sensory"] { --topic: var(--t3); }
+  [data-topic="motor"] { --topic: var(--t4); }
+  [data-topic="review"] { --topic: var(--t5); }
+
+  footer { border-top: 1px solid var(--line); padding: 20px 0 32px; font-size: 14px; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <p class="eyebrow">DPTD 731 &amp; 732 · Doctor of Physical Therapy</p>
+    <h1>Neuroscience Activities</h1>
+    <p class="lede">Interactive tools for building your understanding of the nervous system, from neurons and synapses to pathways, peripheral nerves, and motor development. Most are self-paced, so open one before lab or use it to review before a quiz.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="filters" aria-label="Filter activities by topic">
+    <button type="button" data-filter="all" aria-pressed="true">All</button>
+    <button type="button" data-filter="foundations" aria-pressed="false">Foundations</button>
+    <button type="button" data-filter="spinal" aria-pressed="false">Spinal cord &amp; nerves</button>
+    <button type="button" data-filter="pathways" aria-pressed="false">Pathways &amp; cranial nerves</button>
+    <button type="button" data-filter="sensory" aria-pressed="false">Vestibular &amp; pain</button>
+    <button type="button" data-filter="motor" aria-pressed="false">Motor development</button>
+    <button type="button" data-filter="review" aria-pressed="false">Review</button>
+  </nav>
+
+  <div class="grid">
+    <!--
+      TO ADD AN ACTIVITY: copy one <a class="card"> ... </a> block, paste it where you
+      want it, then change the href to the activity's full address:
+      https://docdochoggarth.github.io/Neuro/ followed by the file name,
+      spelled exactly as in the repo (capital letters matter). Also change
+      the data-topic (one of: foundations, spinal, pathways, sensory, motor, review), the tag,
+      the title, the description, and the meta line.
+    -->
+
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/Neuroanatomy-Intro.html" data-topic="foundations">
+      <p class="tag">Foundations</p>
+      <h2>Neuro Systems Lab</h2>
+      <p class="desc">A six-level review of introductory neuroanatomy: CNS and PNS organization, meninges, ventricles, and CSF circulation.</p>
+      <div class="meta"><span>Individual · 6 levels</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/build_a_neuron.html" data-topic="foundations">
+      <p class="tag">Foundations</p>
+      <h2>Build a Neuron</h2>
+      <p class="desc">Drag each label onto the correct structure of a neuron, then check your answers.</p>
+      <div class="meta"><span>Individual · Quick check</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/sequence_the_synapse.html" data-topic="foundations">
+      <p class="tag">Foundations</p>
+      <h2>Sequence the Synapse</h2>
+      <p class="desc">Put the four steps of neurotransmission in order, and watch the synapse come to life when you get it right.</p>
+      <div class="meta"><span>Individual · Quick check</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/spinal-cord-innervation-interactive-lab-manual.html" data-topic="spinal">
+      <p class="tag">Spinal cord &amp; nerves</p>
+      <h2>Spinal Cord &amp; Innervation Lab Manual</h2>
+      <p class="desc">Short stations on dorsal and ventral roots, the dorsal root ganglion, plexuses, dermatomes, and myotomes, building toward clinical localization.</p>
+      <div class="meta"><span>Pre-lab · 7 checkpoints</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/UE-nerves-study-tool.html" data-topic="spinal">
+      <p class="tag">Spinal cord &amp; nerves</p>
+      <h2>Upper Extremity Nerve Atlas</h2>
+      <p class="desc">Explore the brachial plexus and each upper extremity nerve's course, motor and sensory distribution, and clinical findings, then quiz yourself.</p>
+      <div class="meta"><span>DPTD 731 · Study tool</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/LE-nerve-study-tool.html" data-topic="spinal">
+      <p class="tag">Spinal cord &amp; nerves</p>
+      <h2>Lower Extremity Nerve Atlas</h2>
+      <p class="desc">Explore the lumbosacral plexus and each lower extremity nerve's course, motor and sensory distribution, and clinical findings, then quiz yourself.</p>
+      <div class="meta"><span>DPTD 731 · Study tool</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/DPTD732_Pathways_Lab.html" data-topic="pathways">
+      <p class="tag">Pathways &amp; cranial nerves</p>
+      <h2>Neural Pathways 3D Lab</h2>
+      <p class="desc">Trace the corticospinal, DCML, anterolateral, and spinocerebellar pathways with 3D models, then compare all three in a synthesis.</p>
+      <div class="meta"><span>DPTD 732 · Lab · 4 sections</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/cranial_nerve_activity.html" data-topic="pathways">
+      <p class="tag">Pathways &amp; cranial nerves</p>
+      <h2>Cranial Nerves &amp; Special Senses</h2>
+      <p class="desc">Work through all 12 cranial nerves: names and functions, origins and pathways, nerve types, clinical signs, and autonomic roles.</p>
+      <div class="meta"><span>DPTD 731 · Individual · 5 objectives</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/Vestibular_Lab.html" data-topic="sensory">
+      <p class="tag">Vestibular &amp; pain</p>
+      <h2>Vestibular Lab Studio</h2>
+      <p class="desc">Connect structures to their jobs, build the motion signal, sort stimuli, practice push-pull and sensory weighting, and relay the central pathway.</p>
+      <div class="meta"><span>Lab · 5 activities</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/pain_review.html" data-topic="sensory">
+      <p class="tag">Vestibular &amp; pain</p>
+      <h2>Neuroscience of Pain</h2>
+      <p class="desc">Flashcards and fill-in-the-blank for pain terminology, a peripheral vs. central sort, and neurotransmitters in nociception.</p>
+      <div class="meta"><span>DPTD 731 · Self-study · 3 activities</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/MotorDevelopmentEscapeRoom.html" data-topic="motor">
+      <p class="tag">Motor development</p>
+      <h2>Neural Lockdown</h2>
+      <p class="desc">A motor development escape room: myelination and milestones, primitive reflex integration, and postural reactions.</p>
+      <div class="meta"><span>DPTD 732 · Team game · 3 chambers</span><span class="go">Open →</span></div>
+    </a>
+    <a class="card" href="https://docdochoggarth.github.io/Neuro/731_Neuro_Review.html" data-topic="review">
+      <p class="tag">Review</p>
+      <h2>Neuro Pathways Review Lab</h2>
+      <p class="desc">Self-paced questions on pathways, anatomy, cranial nerves, and lesion localization, with explanations and a summary of what to revisit.</p>
+      <div class="meta"><span>Individual · Before a quiz or lab</span><span class="go">Open →</span></div>
+    </a>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">North Central College · Doctor of Physical Therapy</div>
+</footer>
+
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('.filters button');
+    var cards = document.querySelectorAll('.card');
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var f = btn.getAttribute('data-filter');
+        buttons.forEach(function (b) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+        cards.forEach(function (c) { c.hidden = !(f === 'all' || c.getAttribute('data-topic') === f); });
+      });
+    });
+  })();
+</script>
+</body>
+</html>
